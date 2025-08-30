@@ -37,7 +37,7 @@ class Engine:
     """Core engine class that manages the game loop, events, and instances."""
 
     delta: float = 0
-    fps: int = 60
+    fps: int = 144
     screen: pygame.Surface = pygame.display.set_mode((500, 500))
     clock: pygame.time.Clock = pygame.time.Clock()
     instances: dict[str, typing.Any] = {}
@@ -140,7 +140,9 @@ class Engine:
                 instance.afterdraw()
 
         # Render the console on top of everything
-        console.tick(self.screen)
+        console.tick(
+            self.screen, str(round(1.0 / self.delta if self.delta > 0 else 0, 2))
+        )
 
         pygame.display.flip()
         self.delta = self.clock.tick(self.fps) / 1000

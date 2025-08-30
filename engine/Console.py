@@ -24,7 +24,7 @@ class Console:
         [type_text, type_color] = type.value
         self.__history.insert(0, [type_text, type_color, text])
 
-    def tick(self, screen: pygame.Surface):
+    def tick(self, screen: pygame.Surface, actual_fps: str):
         screen_size = (screen.get_width(), screen.get_height())
         [_text_width, text_height] = self.__font.size("1")
         self.__max_history_size = int(screen_size[1] / text_height)
@@ -40,10 +40,15 @@ class Console:
 
         for index, (type, color, text) in enumerate(self.__history.copy()):
             if index >= self.__max_history_size:
-                return
+                break
 
             text_surface = self.__font.render(f"[{type}]: {text}", True, color)
             screen.blit(text_surface, (0, screen_size[1] - (text_height * (index + 1))))
+
+        # FPS counter
+        [text_width, text_height] = self.__font.size(actual_fps)
+        text_surface = self.__font.render(actual_fps, True, pygame.Color(255, 255, 255))
+        screen.blit(text_surface, (screen_size[0] - text_width, 0))
 
 
 console = Console()

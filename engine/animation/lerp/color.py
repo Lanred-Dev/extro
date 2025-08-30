@@ -20,9 +20,8 @@ def lerpColor(start: pygame.Color, end: pygame.Color, progress: float) -> pygame
 
     This function was adapted from https://github.com/Upbeat-Roblox/fluid/blob/main/src/modules/lerpers/color.lua
     """
-
     # Alpha is just treated as a normal number
-    alpha = int(lerpNumber(start.a, end.a, progress))
+    alpha = max(0, min(int(lerpNumber(start.a, end.a, progress)), 255))
 
     # Start color
     r0, g0, b0 = linearize(start.r), linearize(start.g), linearize(start.b)
@@ -88,5 +87,4 @@ def lerpColor(start: pygame.Color, end: pygame.Color, progress: float) -> pygame
     r = max(0, min(int(r * 255), 255))
     g = max(0, min(int(g * 255), 255))
     b = max(0, min(int(b * 255), 255))
-
     return pygame.Color(r, g, b, alpha)

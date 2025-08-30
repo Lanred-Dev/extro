@@ -15,6 +15,7 @@ class AdvancedInstance(Instance):
         engine.screen.blit(self.surface, self.actual_position)
 
     def update_render(self, type: RenderUpdateType):
+        """Update the render and surface if size changes."""
         super().update_render(type)
 
         # For advanced positions everything is drawn onto a surface, which does not use the instance position.
@@ -22,4 +23,5 @@ class AdvancedInstance(Instance):
             self.update_surface()
 
     def update_surface(self):
+        """Recreate the surface with the current size."""
         self.surface = pygame.Surface(self.size, pygame.SRCALPHA)

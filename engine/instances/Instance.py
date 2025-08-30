@@ -47,6 +47,7 @@ class Instance:
         self.janitor.add(self.on_destroy)
 
     def init(self):
+        """Register the instance with the engine."""
         engine.register_instance(self.id, self)
         self.janitor.add(engine.unregister_instance, self.id)
 
@@ -55,6 +56,7 @@ class Instance:
         self.janitor.destroy()
 
     def set_zindex(self, zindex: int):
+        """Set the rendering order of the instance."""
         self.zindex = zindex
         engine.update_instance_render_list()
 
@@ -112,11 +114,17 @@ class Instance:
         self.update_render(RenderUpdateType.POSITION)
 
     def set_global_size(self, x: float, y: float):
+        """Set the size in global coordinates."""
         self.size.x = x
         self.size.y = y
         self.update_render(RenderUpdateType.SIZE)
 
     def set_relative_size(self, x: RelativeCoord, y: RelativeCoord):
+        """
+        Set the size relative to the parent instance.
+
+        The size is calculated based on the parent's bounding box and the relative coordinates provided. No action is taken if the instance has no parent.
+        """
         if self.parent is None:
             console.log(
                 "The instance must have a parent for `set_relative_size` to work",
@@ -130,6 +138,7 @@ class Instance:
         self.update_render(RenderUpdateType.SIZE)
 
     def set_color(self, r: int = 0, g: int = 0, b: int = 0, a: int = 255):
+        """Set the instance's color."""
         self.color.r = r
         self.color.g = g
         self.color.b = b
@@ -153,10 +162,12 @@ class Instance:
         )
 
     def update_render(self, type: RenderUpdateType):
+        """Update the instance's rendering data."""
         self.update_size()
         self.update_position()
 
     def update_size(self):
+        """Update the instance's size."""
         pass
 
     def update_position(self):

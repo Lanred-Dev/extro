@@ -17,10 +17,12 @@ class CollisionInstance(AdvancedInstance):
         self.on_collision_end: Signal = Signal()
 
     def init(self):
+        """Initialize the instance and set it as collidable."""
         super().init()
         self.set_collidable(True)
 
     def set_collidable(self, is_collidable: bool):
+        """Enable or disable collision for this instance."""
         self.update_collision_mask()
         self.is_collidable: bool = is_collidable
         engine.update_collidable_instances_list()
@@ -60,5 +62,6 @@ class CollisionInstance(AdvancedInstance):
         self.colliding_with = new_colliding_with
 
     def update_collision_mask(self):
+        """Rebuild the collision mask from the surface."""
         self.collision_mask = pygame.mask.from_surface(self.surface)
         console.log(f"Updating `collision_mask` for instance {self.id}")

@@ -1,3 +1,4 @@
-from .Tween import Tween
+from .lerp import lerp
+from .Tween import TweenState, Tween
 
-__all__ = ["Tween"]
+__all__ = ["lerp", "TweenState", "Tween"]

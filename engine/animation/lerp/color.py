@@ -1,5 +1,5 @@
 import pygame
-from engine.animation.lerpers.number import lerpNumber
+from engine.animation.lerp.number import lerpNumber
 
 
 def linearize(c: float) -> float:
@@ -14,10 +14,14 @@ def gamma(c: float) -> float:
     return 12.92 * c if c < 0.0031306684425 else 1.055 * c ** (1 / 2.4) - 0.055
 
 
-# This function was adapted from https://github.com/Upbeat-Roblox/fluid/blob/main/src/modules/lerpers/color.lua using chatgpt
-def lerpColor(
-    start: pygame.Color, end: pygame.Color, progress: float
-) -> tuple[int, int, int, float]:
+def lerpColor(start: pygame.Color, end: pygame.Color, progress: float) -> pygame.Color:
+    """
+    Lerp between a start color and a end color at x.
+
+    This function was adapted from https://github.com/Upbeat-Roblox/fluid/blob/main/src/modules/lerpers/color.lua
+    """
+
+    # Alpha is just treated as a normal number
     alpha = int(lerpNumber(start.a, end.a, progress))
 
     # Start color
@@ -51,7 +55,7 @@ def lerpColor(
     # Interpolation
     l = (1 - progress) * l0 + progress * l1
     if l < 0.0197955:
-        return (0, 0, 0, alpha)
+        return pygame.Color(0, 0, 0, alpha)
 
     u = ((1 - progress) * u0 + progress * u1) / l + 0.19783
     v = ((1 - progress) * v0 + progress * v1) / l + 0.46832
@@ -85,4 +89,4 @@ def lerpColor(
     g = max(0, min(int(g * 255), 255))
     b = max(0, min(int(b * 255), 255))
 
-    return (r, g, b, alpha)
+    return pygame.Color(r, g, b, alpha)

@@ -18,8 +18,11 @@ class CollisionInstance(AdvancedInstance):
 
     def init(self):
         super().init()
+        self.set_collidable(True)
+
+    def set_collidable(self, is_collidable: bool):
         self.update_collision_mask()
-        self.is_collidable: bool = True
+        self.is_collidable: bool = is_collidable
         engine.update_collidable_instances_list()
 
     def afterdraw(self):

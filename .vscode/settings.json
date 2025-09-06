@@ -1,6 +1,9 @@
 {
   "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.black-formatter",
   "files.exclude": {
-    "**/__pycache__": true
+    "**/__pycache__": true,
+    "**/*.pyd": true,
+    "ext": true
   }
 }

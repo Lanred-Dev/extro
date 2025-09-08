@@ -1,13 +1,14 @@
 # python -m tests.square
 
-import src
+import src as extro
 
-scene1 = src.Instances.Scene("testing_scene")
+scene = extro.Instances.Scene()
 
+rec = extro.Instances.world.Rectangle()
+rec.color = extro.Color(255, 0, 0)
+rec.size = extro.Vector2(500, 500)
+rec.position = extro.Vector2(500, 500)
+rec.anchor = extro.Vector2(1, 1)
+scene.add_instance(rec)
 
-rec1 = src.Instances.world.Rectangle()
-rec1.set_color(src.Color(255, 0, 0))
-rec1.set_size(src.Vector2(800, 600))
-scene1.add_instance(rec1)
-
-src.start()
+extro.start()

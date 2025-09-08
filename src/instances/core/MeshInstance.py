@@ -1,79 +1,37 @@
+from abc import abstractmethod
 from typing import Any
-import pyglet
-from abc import ABCMeta, abstractmethod
 
-from src.values.Color import Color
 from src.instances.core.Instance import Instance
-from src.values.Vector2 import Vector2
-from src.internal.Console import Console, LogType
 
 
-class MeshInstance(Instance, metaclass=ABCMeta):
-    mesh: Any
-    rotation: int
+class MeshInstance(Instance):
+    __slots__ = ("_mesh",)
 
-    def __init__(self):
-        super().__init__()
-        self.rotation = 0
+    _mesh: Any
 
-    def set_color(self, color: Color):
-        super().set_color(color)
-        self.mark_dirty(self._apply_color)
+    def _apply_new_batch(self):
+        super()._apply_new_batch()
+        self.create_mesh()
 
-    def set_size(self, size: Vector2):
-        super().set_size(size)
-        self.mark_dirty(self._apply_size)
-        self.mark_dirty(self._apply_mesh_anchor)
+    def _recalculate_position(self):
+        self._position_offset = self._actual_size / 2
+        super()._recalculate_position()
 
-    def set_position(self, position: Vector2):
-        super().set_position(position)
-        self.mark_dirty(self._apply_position)
-
-    def set_rotation(self, rotation: int):
-        self.rotation = rotation
-        self.mark_dirty(self._apply_rotation)
-
-    def _apply_anchor_to_position(self):
-        super()._apply_anchor_to_position()
-        # All instances are calculated from their center when rendered from pyglet, so move them back
-        self.actual_position.x += self.size.x / 2
-        self.actual_position.y += self.size.y / 2
-
-    def _on_parent_update(self):
-        super()._on_parent_update()
-        self._apply_position()
+    def _recalculate_size(self):
+        super()._recalculate_size()
+        self._center_mesh_anchor()
 
     @abstractmethod
     def create_mesh(self):
-        self._apply_mesh_anchor()
-        self._apply_anchor_to_position()
-
-    def get_batch_for_mesh_or_error(self) -> pyglet.graphics.Batch | None:
-        if self.scene is None:
-            Console.log(
-                "Cannot call `get_batch_for_mesh_or_error` if instance is not apart of a scene.",
-                LogType.ERROR,
-            )
-            return None
-
-        return self.scene.batch
-
-    @abstractmethod
-    def _apply_color(self):
         pass
 
-    @abstractmethod
-    def _apply_size(self):
-        pass
+    def _create_mesh(self, component: Any, **kwargs: Any):
+        if self._scene is None:
+            return
 
-    @abstractmethod
-    def _apply_position(self):
-        pass
+        self._mesh = component(**kwargs, batch=self._scene._batch)
+        self._center_mesh_anchor()
 
-    @abstractmethod
-    def _apply_rotation(self):
-        pass
-
-    def _apply_mesh_anchor(self):
-        self.mesh.anchor_x = self.size.x / 2
-        self.mesh.anchor_y = self.size.y / 2
+    def _center_mesh_anchor(self):
+        self._mesh.anchor_x = self._actual_size.x / 2
+        self._mesh.anchor_y = self._actual_size.y / 2

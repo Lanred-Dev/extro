@@ -1,225 +1,302 @@
-from typing import TYPE_CHECKING
+from abc import abstractmethod, ABCMeta
+from typing import TYPE_CHECKING, Tuple, Dict
+from enum import Enum
 
-from src.internal.Console import Console, LogType
 from src.internal.InstanceHandler import InstanceHandler
+from src.internal.components.InvalidationManager import InvalidationManager
 from src.internal.components.Signal import Signal
 from src.internal.components.Janitor import Janitor
-from src.internal.components.DirtyUpdater import DirtyUpdater
+from src.shared_types import EmptyFunction
 from src.values.Vector2 import Vector2
 from src.values.Color import Color
-from src.shared_types import EmptyFunction
+from src.internal.Console import Console, LogType
 
 if TYPE_CHECKING:
-    from instances.Scene import Scene
+    from src.instances.Scene import Scene
 
 
-class Instance(DirtyUpdater):
-    """
-    Base class representing a renderable object in a scene.
+class InstanceUpdateType(Enum):
+    POSITION = 0
+    SIZE = 1
+    ROTATION = 2
 
-    Instances can be positioned, resized, colored, and parented
-    to other instances. They automatically handle cleanup when
-    destroyed.
-    """
+
+class Instance(InvalidationManager, metaclass=ABCMeta):
+    __slots__ = (
+        "id",
+        "_anchor",
+        "_position",
+        "_size",
+        "_color",
+        "_rotation",
+        "_scale",
+        "_scene",
+        "_parent",
+        "_parent_connections",
+        "_actual_position",
+        "_actual_size",
+        "_is_size_relative",
+        "_is_position_relative",
+        "on_update",
+        "on_destroy",
+        "_janitor",
+    )
 
     id: str
-    size: Vector2
-    position: Vector2
-    actual_position: Vector2
-    anchor: Vector2
-    color: Color
-
-    scene: "Scene | None"
-    parent: "Instance | None"
-    __on_parent_destroy_connection: str | None
-    __on_parent_update_connection: str | None
+    _anchor: Vector2
+    _position: Vector2
+    _size: Vector2
+    _color: Color
+    _rotation: int
+    _scale: Vector2
+    _scene: "Scene"
+    _parent: "Instance | None"
+    _parent_connections: Dict[str, str]
+    _actual_position: Vector2
+    _actual_size: Vector2
+    _is_size_relative: bool
+    _is_position_relative: bool
+    _bounding: Tuple[float, float, float, float]
+    _position_offset: Vector2
 
     on_update: Signal
     on_destroy: Signal
-    janitor: Janitor
+    _janitor: Janitor
 
-    def __init__(self):
+    def __init__(
+        self,
+        anchor: Vector2 = Vector2(0, 0),
+        _position: Vector2 = Vector2(0, 0),
+        _size: Vector2 = Vector2(1, 1),
+        _color: Color = Color(255, 255, 255),
+        _rotation: int = 0,
+        _scale: Vector2 = Vector2(1, 1),
+    ):
         super().__init__()
-        self.id: str = InstanceHandler.create_instance_id()
-        self.__on_parent_destroy_connection = None
-        self.__on_parent_update_connection = None
-        self.scene = None
-        self.parent = None
+        InstanceHandler.register_instance(self)
+
+        self._anchor = anchor
+        self._position = _position
+        self._size = _size
+        self._color = _color
+        self._rotation = _rotation
+        self._scale = _scale
+        self._is_size_relative = False
+        self._is_position_relative = False
+        self._actual_position = Vector2(0, 0)
+        self._actual_size = Vector2(0, 0)
+        self._position_offset = Vector2(0, 0)
+        self._parent = None
+        self._parent_connections = {}
 
         self.on_destroy = Signal()
         self.on_update = Signal()
-        self.janitor = Janitor()
-        self.janitor.add(self.on_update)
-        self.janitor.add(self.on_destroy.fire)
-        self.janitor.add(self.on_destroy)
 
-        self.anchor = Vector2(0, 0)
-        self.size = Vector2(100, 100)
-        self.color = Color(255, 255, 255)
-        self.set_position(Vector2(0, 0))
+        janitor: Janitor = Janitor()
+        janitor.add(self.on_update)
+        janitor.add(self.on_destroy.fire)
+        janitor.add(self.on_destroy)
+        janitor.add(InstanceHandler.unregister_instance, self.id)
+        self._janitor = janitor
 
-        InstanceHandler.register_instance(self)
-        self.janitor.add(InstanceHandler.unregister_instance, self)
+        # On next frame, calculate size and position for the first time
+        self.invalidate(self._recalculate_size)
+        self.invalidate(self._recalculate_position)
 
     def destroy(self):
-        self.janitor.destroy()
+        super().destroy()
+        self._janitor.destroy()
 
-    def parent_to(self, parent: "Instance | str | None"):
-        """
-        Set this instance's parent.
+    def invalidate(self, callback: EmptyFunction):
+        super().invalidate(callback)
+        InstanceHandler.queue_instance_for_update(self)
 
-        Args:
-            parent: Either an `Instance`, an ID string, or None.
-        """
-        self.__disconnect_parent_connections()
+    def parent_to(self, parent: "Instance | None"):
+        if parent is None:
+            self._parent = None
+            return
 
-        if isinstance(parent, str):
-            parent_cls = InstanceHandler.instances[parent]
-        elif isinstance(parent, Instance):
-            parent_cls = parent
+        my_scene = getattr(self, "_scene", None)
+        parent_scene = getattr(parent, "_scene", None)
+
+        if my_scene != None and parent_scene != None and my_scene != parent_scene:
+            parent._scene.add_instance(self)
+            Console.log(f"{self.id} was added to {parent._scene.id} because of parent")
+
+        self._parent = parent
+        self._parent_connections["on_update"] = parent.on_update.connect(
+            self._handle_parent_update
+        )
+        self._parent_connections["on_destroy"] = parent.on_destroy.connect(self.destroy)
+        Console.log(f"{self.id} was parented to {parent._scene.id}")
+
+        self.invalidate(self._recalculate_position)
+
+    def translate(self, move_by: Vector2):
+        self.position += move_by
+
+    def add_child(self, child: "Instance"):
+        child.parent_to(self)
+
+    def _recalculate_bounding(self):
+        self._bounding = (
+            self._actual_position.x,
+            self._actual_position.y,
+            self._actual_size.x,
+            self._actual_size.y,
+        )
+
+    def _handle_parent_update(self, property: InstanceUpdateType):
+        if property != InstanceUpdateType.POSITION:
+            return
+
+        self._recalculate_position()
+
+    def _disconnect_parent_connections(self):
+        if self._parent is None:
+            return
+
+        for signal, connection_id in self._parent_connections.items():
+            getattr(self._parent, signal).disconnect(connection_id)
+
+        self._parent_connections.clear()
+
+    def _recalculate_position(self):
+        if self._is_position_relative and self._parent:
+            [parent_x, parent_y, parent_width, parent_height] = self._parent._bounding
+            self._actual_position.x = (
+                parent_x
+                + (parent_width * self._position.x)
+                - (self._actual_size.x * self._anchor.x)
+            )
+            self._actual_position.y = (
+                parent_y
+                + (parent_height * self._position.y)
+                - (self._actual_size.y * self._anchor.y)
+            )
         else:
-            parent_cls = None
-
-        if parent_cls is None:
-            self.parent = None
-            return
-        elif self.scene is None and parent_cls.scene is not None:
-            parent_cls.scene.add_instance(self)
-            Console.log(
-                f"{self.id} was added to {parent_cls.scene.id} because of parent"
+            self._actual_position.x = self._position.x - (
+                self._actual_size.x * self._anchor.x
             )
-        elif (
-            self.scene is not None
-            and parent_cls.scene is not None
-            and self.scene.id != parent_cls.scene.id
-        ):
-            Console.log(
-                f"{self.id} could not be parented to {parent_cls.id} "
-                f"because they are in different scenes",
-                LogType.ERROR,
+            self._actual_position.y = self._position.y - (
+                self._actual_size.y * self._anchor.y
             )
-            return
 
-        self.parent = parent_cls
-        self.__on_parent_destroy_connection = parent_cls.on_update.connect(
-            self._on_parent_update
-        )
-        self.__on_parent_destroy_connection = parent_cls.on_destroy.connect(
-            self.destroy
-        )
+            if self._parent:
+                self._actual_position += self._parent._actual_position
 
-    def set_anchor(self, anchor: Vector2):
-        """
-        Set the anchor point of this instance.
+        self._actual_position += self._position_offset
+        self._recalculate_bounding()
+        self._apply_position()
 
-        The anchor determines the pivot for positioning and rotation.
-        """
-        self.anchor = anchor
-        self._apply_anchor_to_position()
-        self.__adjust_position_based_on_parent()
+    def _recalculate_size(self):
+        if self._is_size_relative and self._parent:
+            [_, _, parent_width, parent_height] = self._parent._bounding
+            self._actual_size.x = parent_width * self._size.x
+            self._actual_size.y = parent_height * self._size.y
+        else:
+            self._actual_size.x = self._size.x
+            self._actual_size.y = self._size.y
 
-    def set_position(self, position: Vector2):
-        """
-        Set the absolute position of this instance.
+        self._actual_size.x *= self._scale.x
+        self._actual_size.y *= self._scale.y
+        self._recalculate_bounding()
+        self._apply_size()
 
-        Updates the instance's position directly and applies its anchor offset.
-        """
-        self.position = position
-        self._apply_anchor_to_position()
-        self.__adjust_position_based_on_parent()
-        self.on_update.fire()
+    @property
+    def anchor(self):
+        return self._anchor
 
-    def set_relative_position(self, position: Vector2):
-        """
-        Set the position of this instance relative to its parent.
-
-        The position is calculated based on the parent's bounding box
-        and the relative coordinates provided.
-        """
-        if self.parent is None:
+    @anchor.setter
+    def anchor(self, anchor: Vector2):
+        if anchor.x > 1 or anchor.x < 0 or anchor.y > 1 or anchor.y < 0:
             Console.log(
-                "The instance must have a parent for `set_relative_position` to work",
-                LogType.WARNING,
+                "Anchor much be between Vector2(0, 0) and Vector2(1, 1)", LogType.ERROR
             )
             return
 
-        [parent_x, parent_y, parent_width, parent_height] = self.parent.get_bounding()
-        position.x = parent_x + (parent_width * position.x)
-        position.y = parent_y + (parent_height * position.y)
-        self.set_position(position)
+        self._anchor = anchor
+        self.invalidate(self._recalculate_position)
 
-    def set_relative_size(self, size: Vector2):
-        """
-        Set the size relative to the parent instance.
+    @property
+    def position(self):
+        return self._position
 
-        The size is calculated based on the parent's bounding box.
-        """
-        if self.parent is None:
-            Console.log(
-                "The instance must have a parent for `set_relative_size` to work",
-                LogType.WARNING,
-            )
-            return
+    @position.setter
+    def position(self, position: Vector2):
+        if position.x < 0 and position.y < 0:
+            self._is_position_relative = True
+            position.x = abs(position.x)
+            position.y = abs(position.y)
+        else:
+            self._is_position_relative = False
 
-        [_, _, parent_width, parent_height] = self.parent.get_bounding()
-        size.x = parent_width * size.x
-        size.y = parent_height * size.y
-        self.set_size(size)
+        self._position = position
+        self.invalidate(self._recalculate_position)
 
-    def set_size(self, size: Vector2):
-        self.size = size
-        self._apply_anchor_to_position()
-        self.on_update.fire()
+    @property
+    def size(self):
+        return self._size
 
-    def set_color(self, color: Color):
-        """Set the instance's display color."""
-        self.color = color
-        self.on_update.fire()
+    @size.setter
+    def size(self, size: Vector2):
+        if size.x < 0 and size.y < 0:
+            self._is_position_relative = True
+            size.x = abs(size.x)
+            size.y = abs(size.y)
+        else:
+            self._is_position_relative = False
 
-    def get_bounding(self) -> tuple[float, float, float, float]:
-        """
-        Get the bounding rectangle of this instance.
+        self._size = size
+        self.invalidate(self._recalculate_size)
 
-        Returns:
-            tuple[float, float, float, float]: (x, y, width, height)
-        """
-        return (
-            self.actual_position.x,
-            self.actual_position.y,
-            self.size.x,
-            self.size.y,
-        )
+    @property
+    def color(self):
+        return self._color
 
-    def mark_dirty(self, callback: EmptyFunction):
-        super().mark_dirty(callback)
-        InstanceHandler.queue_dirty_instance_for_update(self)
+    @color.setter
+    def color(self, color: Color):
+        self._color = color
+        self.invalidate(self._apply_color)
 
-    def _on_parent_update(self):
-        self._apply_anchor_to_position()
-        self.__adjust_position_based_on_parent()
+    @property
+    def rotation(self):
+        return self._rotation
 
-    def _apply_anchor_to_position(self):
-        """Adjust the actual position according to the anchor point."""
-        self.actual_position = self.position.copy()
-        self.actual_position.x -= self.size.x * self.anchor.x
-        self.actual_position.y -= self.size.y * self.anchor.y
+    @rotation.setter
+    def rotation(self, rotation: int):
+        self._rotation = rotation
+        self.invalidate(self._apply_rotation)
 
-    def __adjust_position_based_on_parent(self):
-        """Offset the actual position based on the parent's position."""
-        if self.parent is None:
-            return
+    @property
+    def scale(self):
+        return self._scale
 
-        self.actual_position += self.parent.actual_position
+    @scale.setter
+    def scale(self, scale: Vector2):
+        self._scale = scale
+        self._recalculate_size()
 
-    def __disconnect_parent_connections(self):
-        """Disconnect from the parent's signals."""
-        if self.parent is None:
-            return
+    @property
+    def bounding(self) -> Tuple[float, float, float, float]:
+        return self._bounding
 
-        if self.__on_parent_destroy_connection is not None:
-            self.parent.on_destroy.disconnect(self.__on_parent_destroy_connection)
-            self.__on_parent_destroy_connection = None
+    @abstractmethod
+    def _apply_new_batch(self):
+        pass
 
-        if self.__on_parent_update_connection is not None:
-            self.parent.on_update.disconnect(self.__on_parent_update_connection)
-            self.__on_parent_update_connection = None
+    @abstractmethod
+    def _apply_size(self):
+        self.on_update.fire(InstanceUpdateType.SIZE)
+
+    @abstractmethod
+    def _apply_position(self):
+        self.on_update.fire(InstanceUpdateType.POSITION)
+
+    @abstractmethod
+    def _apply_color(self):
+        pass
+
+    @abstractmethod
+    def _apply_rotation(self):
+        self.on_update.fire(InstanceUpdateType.ROTATION)

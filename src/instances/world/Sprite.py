@@ -4,44 +4,51 @@ from src.instances.core.CollisionInstance import CollisionInstance
 
 
 class Sprite(CollisionInstance):
-    image: pyglet.image.AbstractImage
+    __slots__ = ("_image",)
 
-    def set_image(self, path: str):
-        self.image = pyglet.image.load(path)
-        self.mark_dirty(self._apply_image)
+    _image: pyglet.image.AbstractImage
+
+    def __init__(self, image: str, **kwargs):
+        self._image = pyglet.image.load(image)
+        super().__init__(**kwargs)
 
     def create_mesh(self):
-        batch = super().get_batch_for_mesh_or_error()
-
-        if batch is None:
-            return
-
-        self.mesh = pyglet.sprite.Sprite(
-            img=self.image,
-            x=self.actual_position.x,
-            y=self.actual_position.y,
-            batch=batch,
+        self._create_mesh(
+            pyglet.sprite.Sprite,
+            x=self._actual_position.x,
+            y=self._actual_position.y,
+            img=self._image,
         )
-        super().create_mesh()
-        self.mesh.scale_x = self.size.x / self.image.width
-        self.mesh.scale_y = self.size.y / self.image.height
-        self.mesh.rotation = self.rotation
+        self._mesh.color = self._color.to_tuple()
+        self._mesh.rotation = self._rotation
+        self._mesh.scale_x = self._actual_size.x / self._image.width
+        self._mesh.scale_y = self._actual_size.y / self._image.height
+
+    @property
+    def image(self) -> pyglet.image.AbstractImage:
+        return self._image
+
+    @image.setter
+    def image(self, image: str):
+        self._image = pyglet.image.load(image)
+        self.invalidate(self._apply_image)
+
+    def _apply_image(self):
+        self._mesh.image = self._image
 
     def _apply_position(self):
         super()._apply_position()
-        self.mesh.position = (self.actual_position.x, self.actual_position.y, 0)
+        self._mesh.position = (self._actual_position.x, self._actual_position.y, 0)
 
     def _apply_size(self):
         super()._apply_size()
-        self.mesh.scale_x = self.size.x / self.image.width
-        self.mesh.scale_y = self.size.y / self.image.height
+        self._mesh.scale_x = self._actual_size.x / self._image.width
+        self._mesh.scale_y = self._actual_size.y / self._image.height
 
     def _apply_color(self):
-        self.mesh.color = self.color.to_tuple()
+        super()._apply_color()
+        self._mesh.color = self._color.to_tuple()
 
     def _apply_rotation(self):
         super()._apply_rotation()
-        self.mesh.rotation = self.rotation
-
-    def _apply_image(self):
-        self.mesh.img = self.image
+        self._mesh.rotation = self._rotation

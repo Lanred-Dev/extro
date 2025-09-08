@@ -5,34 +5,29 @@ from src.instances.core.CollisionInstance import CollisionInstance
 
 class Rectangle(CollisionInstance):
     def create_mesh(self):
-        batch = super().get_batch_for_mesh_or_error()
-
-        if batch is None:
-            return
-
-        self.mesh = pyglet.shapes.Rectangle(
-            x=self.actual_position.x,
-            y=self.actual_position.y,
-            width=self.size.x,
-            height=self.size.y,
-            color=self.color.to_tuple(),
-            batch=batch,
+        self._create_mesh(
+            pyglet.shapes.Rectangle,
+            x=self._actual_position.x,
+            y=self._actual_position.y,
+            width=self._size.x,
+            height=self._size.y,
+            color=self._color.to_tuple(),
         )
-        self.mesh.rotation = self.rotation
-        super().create_mesh()
+        self._mesh.rotation = self._rotation
 
     def _apply_position(self):
         super()._apply_position()
-        self.mesh.position = self.actual_position.to_tuple()
+        self._mesh.position = self._actual_position.to_tuple()
 
     def _apply_size(self):
         super()._apply_size()
-        self.mesh.width = self.size.x
-        self.mesh.height = self.size.y
+        self._mesh.width = self._size.x
+        self._mesh.height = self._size.y
 
     def _apply_color(self):
-        self.mesh.color = self.color.to_tuple()
+        super()._apply_color()
+        self._mesh.color = self._color.to_tuple()
 
     def _apply_rotation(self):
         super()._apply_rotation()
-        self.mesh.rotation = self.rotation
+        self._mesh.rotation = self._rotation

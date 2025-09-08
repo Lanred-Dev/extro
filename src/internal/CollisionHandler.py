@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List, Tuple, Dict
 
 
 from src.internal.Console import Console, LogType
@@ -22,77 +22,83 @@ class CollisionHandlerCls:
     are rendered in the correct order based on z-index.
     """
 
-    __instances: List[str]
-    __collidable: List[str]
+    _instances: List[str]
+    _collidable: Dict[str, List[str]]
+    _collisions: List[Tuple[str, str]]
 
     def __init__(self):
-        self.__instances = []
-        self.__collidable = []
-        self.__collisions = []
+        self._instances = []
+        self._collidable = {}
+        self._collisions = []
 
-    def register_instance(self, instance: str):
-        if not is_instance_collidable(instance):
+    def register_instance(self, instance_id: str):
+        if not is_instance_collidable(instance_id):
             Console.log(
-                f"{instance} cannot be registered as collidable because it is not",
+                f"{instance_id} cannot be registered as collidable because it is not",
                 LogType.ERROR,
             )
             return
 
-        self.__instances.append(instance)
-        Console.log(f"{instance} was registered as collidable")
+        self._instances.append(instance_id)
+        Console.log(f"{instance_id} was registered as collidable")
         self.update_collidable_instances_list()
 
-    def unregister_instance(self, instance: str):
-        if instance not in self.__instances:
+    def unregister_instance(self, instance_id: str):
+        if instance_id not in self._instances:
             Console.log(
-                f"{instance} does not exist as a collidable instance", LogType.ERROR
+                f"{instance_id} does not exist as a collidable instance", LogType.ERROR
             )
             return
 
-        self.__instances.remove(instance)
-        Console.log(f"{instance} was unregistered as collidable")
+        self._instances.remove(instance_id)
+        Console.log(f"{instance_id} was unregistered as collidable")
         self.update_collidable_instances_list()
 
     def update_collisions(self):
         collisions: List[Tuple[str, str]] = []
 
-        for index, instance1_id in enumerate(self.__collidable):
-            for instance2_id in self.__collidable[index + 1 :]:
-                instance1: CollisionInstance = InstanceHandler.instances[instance1_id]  # type: ignore
-                instance2: CollisionInstance = InstanceHandler.instances[instance2_id]  # type: ignore
+        for collision_group, instances in self._collidable.items():
+            for index, instance1_id in enumerate(instances):
+                for instance2_id in instances[index + 1 :]:
+                    instance1: "CollisionInstance" = InstanceHandler.instances[instance1_id]  # type: ignore
+                    instance2: "CollisionInstance" = InstanceHandler.instances[instance2_id]  # type: ignore
 
-                if instance1.collision_group != instance2.collision_group:
-                    continue
-
-                if instance1.collision_mask.collides_with(instance2.collision_mask):
-                    collisions.append((instance1_id, instance2_id))
+                    if instance1._collision_mask.collides_with(
+                        instance2._collision_mask
+                    ):
+                        collisions.append((instance1_id, instance2_id))
 
         # Handle collision end
-        for collision in self.__collisions:
+        for collision in self._collisions:
             if collision not in collisions:
-                instance1: CollisionInstance = InstanceHandler.instances[collision[0]]  # type: ignore
-                instance1.on_collision_end.fire()
-                instance2: CollisionInstance = InstanceHandler.instances[collision[1]]  # type: ignore
-                instance2.on_collision_end.fire()
+                instance1: "CollisionInstance" = InstanceHandler.instances[collision[0]].on_collision_end.fire()  # type: ignore
+                instance2: "CollisionInstance" = InstanceHandler.instances[collision[1]].on_collision_end.fire()  # type: ignore
 
         # Handle collision start
         for collision in collisions:
-            if collision not in self.__collisions:
-                instance1: CollisionInstance = InstanceHandler.instances[collision[0]]  # type: ignore
-                instance1.on_collision.fire()
-                instance2: CollisionInstance = InstanceHandler.instances[collision[1]]  # type: ignore
-                instance2.on_collision.fire()
+            if collision not in self._collisions:
+                instance1: "CollisionInstance" = InstanceHandler.instances[collision[0]].on_collision.fire()  # type: ignore
+                instance2: "CollisionInstance" = InstanceHandler.instances[collision[1]].on_collision.fire()  # type: ignore
 
-        self.__collisions = collisions
+        self._collisions = collisions
 
     def update_collidable_instances_list(self):
-        self.__collidable = [
-            instance_id
-            for instance_id in self.__instances
-            if is_instance_collidable(instance_id)
-        ]
+        self._collidable.clear()
 
-        Console.log(f"CollisionHandler is handling {len(self.__collidable)} instances")
+        for instance_id in self._instances:
+            if not is_instance_collidable(instance_id):
+                continue
+
+            collision_group: str = InstanceHandler.instances[instance_id]._collision_group  # type: ignore
+
+            if collision_group not in self._collidable:
+                self._collidable[collision_group] = []
+
+            self._collidable[collision_group].append(instance_id)
+
+        Console.log(
+            f"CollisionHandler is handling {sum(len(ids) for ids in self._collidable.values())} instances"
+        )
 
 
 CollisionHandler = CollisionHandlerCls()

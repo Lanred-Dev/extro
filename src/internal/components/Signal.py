@@ -1,6 +1,8 @@
-from typing import Any
-from src.shared_types import EmptyFunction
+from typing import Any, Dict, TYPE_CHECKING
 from src.internal.IdentityHandler import generate_id
+
+if TYPE_CHECKING:
+    from src.shared_types import EmptyFunction
 
 
 class Signal:
@@ -21,19 +23,19 @@ class Signal:
     Event received: 42
     """
 
-    __is_active: bool
-    __subscribers: dict[str, EmptyFunction]
+    _is_active: bool
+    _subscribers: Dict[str, "EmptyFunction"]
 
     def __init__(self):
-        self.__is_active = True
-        self.__subscribers = {}
+        self._is_active = True
+        self._subscribers = {}
 
     def destroy(self):
         """Destroy the signal and remove all subscribers."""
-        self.__is_active = False
+        self._is_active = False
         self.disconnect_all()
 
-    def connect(self, callback: EmptyFunction) -> str:
+    def connect(self, callback: "EmptyFunction") -> str:
         """
         Connect a callback function to the signal.
 
@@ -46,11 +48,11 @@ class Signal:
             str: A unique ID for the connection. Returns an empty string
                  if the signal has been destroyed.
         """
-        if not self.__is_active:
+        if not self._is_active:
             return ""
 
         connection_id = generate_id(5, "sig_")
-        self.__subscribers[connection_id] = callback
+        self._subscribers[connection_id] = callback
         return connection_id
 
     def disconnect(self, connection_id: str):
@@ -60,11 +62,11 @@ class Signal:
         Args:
             connection_id: The unique ID of the subscriber to remove.
         """
-        self.__subscribers.pop(connection_id, None)
+        self._subscribers.pop(connection_id, None)
 
     def disconnect_all(self):
         """Remove all subscribers from the signal."""
-        self.__subscribers.clear()
+        self._subscribers.clear()
 
     def fire(self, *args: Any, **kwargs: Any):
         """
@@ -74,11 +76,11 @@ class Signal:
             *args: Positional arguments passed to each callback.
             **kwargs: Keyword arguments passed to each callback.
         """
-        if not self.__is_active:
+        if not self._is_active:
             return
 
-        if not self.__subscribers:
+        if not self._subscribers:
             return
 
-        for subscriber in list(self.__subscribers.values()):
+        for subscriber in list(self._subscribers.values()):
             subscriber(*args, **kwargs)

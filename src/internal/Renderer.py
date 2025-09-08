@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, List, Dict
 
 from src.internal.Window import Window
 from src.internal.Console import Console, LogType
+from src.internal.IdentityHandler import generate_id
 
 if TYPE_CHECKING:
     from instances.Scene import Scene
@@ -15,67 +16,69 @@ class RendererCls:
     are rendered in the correct order based on z-index.
     """
 
-    __render_targets: Dict[str, "Scene"]
-    __render_order: List[str]
+    _render_targets: Dict[str, "Scene"]
+    _render_order: List[str]
 
     def __init__(self):
-        self.__render_targets = {}
-        self.__render_order = []
+        self._render_targets = {}
+        self._render_order = []
 
-    def add_render_target(self, scene: "Scene"):
+    def register_render_target(self, target: "Scene"):
         """
         Add a scene as a render target.
 
         Args:
             scene: The scene to register for rendering.
         """
-        self.__render_targets[scene.id] = scene
-        Console.log(f"{scene.id} is now a render target")
-        self.update_render_order_list()
+        target_id: str = generate_id(10, "rt_")
+        target.id = target_id
+        self._render_targets[target_id] = target
+        Console.log(f"{target_id} is now a render target")
+        self.update_render_order()
 
-    def remove_render_target(self, scene: "Scene | str"):
+    def unregister_render_target(self, target: "Scene | str"):
         """
         Remove a scene from the render targets.
 
         Args:
             scene: The scene object or its ID.
         """
-        if isinstance(scene, str):
-            target_id = scene
+        if isinstance(target, str):
+            target_id = target
         else:
-            target_id = scene.id
+            target_id = target.id
 
-        if target_id not in self.__render_targets:
+        if target_id not in self._render_targets:
             Console.log(f"{target_id} is not a render target", LogType.WARNING)
             return
 
-        self.__render_targets.pop(target_id, None)
+        self._render_targets.pop(target_id, None)
         Console.log(f"{target_id} is no longer a render target")
-        self.update_render_order_list()
+        self.update_render_order()
 
-    def update_render(self):
+    def render(self):
         """Render all active scenes in the correct order."""
-        Window.window.clear()
+        Window.clear()
 
-        for scene_id in self.__render_order:
-            self.__render_targets[scene_id].batch.draw()
+        for scene_id in self._render_order:
+            self._render_targets[scene_id]._batch.draw()
 
         Console.draw()
-        Window.window.flip()
+        Window.flip()
 
-    def update_render_order_list(self):
+    def update_render_order(self):
         """
         Sort render targets by z-index and update the render order.
         """
-        self.__render_order = [
+        self._render_order = [
             scene.id
             for scene in sorted(
-                self.__render_targets.values(),
-                key=lambda scene: scene.zindex,
+                self._render_targets.values(),
+                key=lambda target: target._zindex,
             )
         ]
 
-        Console.log(f"Renderer is rendering {len(self.__render_order)} scenes")
+        Console.log(f"Renderer is rendering {len(self._render_order)} scenes")
 
 
 Renderer = RendererCls()

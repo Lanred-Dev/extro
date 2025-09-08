@@ -7,7 +7,7 @@ cdef class Color:
         self.b = <unsigned char>b
         self.a = <unsigned char>a
 
-    cpdef tuple to_tuple(self):
+    cpdef tuple[int, int, int, int] to_tuple(self):
         """Return a tuple of RGBA values."""
         return (self.r, self.g, self.b, self.a)
 

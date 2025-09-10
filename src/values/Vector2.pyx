@@ -53,3 +53,6 @@ cdef class Vector2:
 
     def __str__(self):
         return f"Vector2({self.x}, {self.y})"
+
+    def __eq__(self, other: Vector2) -> bool:
+        return self.x == other.x and self.y == other.y

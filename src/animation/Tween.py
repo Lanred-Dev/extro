@@ -5,8 +5,8 @@ from src.animation.lerp import lerp, LerpableType
 from src.animation.easings import easings
 from src.internal.components.Signal import Signal
 from src.internal.components.Janitor import Janitor
-from src.internal.Engine import Engine
-from src.internal.Console import Console, LogType
+import src.internal.Engine as Engine
+import src.internal.Console as Console
 from src.shared_types import EasingFunction
 
 if TYPE_CHECKING:
@@ -89,7 +89,7 @@ class Tween(Generic[LerpableType]):
         if self.__state == TweenState.PLAYING:
             Console.log(
                 "Tween is already playing. If the intent is to restart use `restart()`.",
-                LogType.WARNING,
+                Console.LogType.WARNING,
             )
             return
 

@@ -37,17 +37,20 @@ cdef class CollisionMask:
         cdef list[list[float]] local_vertices = [[-width, -height], [width, -height], [width, height], [-width, height]]
         cdef float vertex_x
         cdef float vertex_y
-        cdef float cos_rotation
-        cdef float sin_rotation
+        cdef float cos_rotation = cos(rotation)
+        cdef float sin_rotation = sin(rotation)
 
         self._vertices = []
 
         for index in range(4):
             vertex_x = local_vertices[index][0]
             vertex_y = local_vertices[index][1]
-            cos_rotation = cos(rotation)
-            sin_rotation = sin(rotation)
-            self._vertices.append(Vector2(self._position.x + vertex_x * cos_rotation - vertex_y * sin_rotation, self._position.y + vertex_x * sin_rotation + vertex_y * cos_rotation))
+            self._vertices.append(
+                Vector2(
+                    (self._position.x + width) + vertex_x * cos_rotation - vertex_y * sin_rotation,
+                    (self._position.y + height) + vertex_x * sin_rotation + vertex_y * cos_rotation
+                )
+            )
 
     cdef _compute_axes(self):
         self._axes = []
@@ -67,19 +70,12 @@ cdef class CollisionMask:
 
         self._compute_vertices()
         self._compute_axes()
-
-    cdef list[object] get_vertices(self):
-        self._recompute_if_dirty()
-        return self._vertices
-
-    cdef list[object] get_axes(self):
-        self._recompute_if_dirty()
-        return self._axes
+        self._is_dirty = <bint>False
 
     cpdef bint collides_with(self, CollisionMask other_collision_mask):
         self._recompute_if_dirty()
 
-        cdef list[object] axes = self.get_axes() + other_collision_mask.get_axes()
+        cdef list[object] axes = self._axes + other_collision_mask.axes
         cdef object axis
         cdef float length
         cdef object projection1
@@ -98,7 +94,7 @@ cdef class CollisionMask:
 
             projection1 = project_polygon(axis, self._vertices)
             projection2 = project_polygon(
-                axis, other_collision_mask.get_vertices()
+                axis, other_collision_mask.vertices
             )
 
             if not (projection1.x <= projection2.y and projection2.x <= projection1.y):
@@ -132,3 +128,13 @@ cdef class CollisionMask:
     def rotation(self, rotation: float):
         self._rotation = rotation
         self._is_dirty = <bint>True
+
+    @property
+    def vertices(self):
+        self._recompute_if_dirty()
+        return self._vertices
+
+    @property
+    def axes(self):
+        self._recompute_if_dirty()
+        return self._axes

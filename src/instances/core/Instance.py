@@ -2,14 +2,15 @@ from abc import abstractmethod, ABCMeta
 from typing import TYPE_CHECKING, Tuple, Dict
 from enum import Enum
 
-from src.internal.InstanceHandler import InstanceHandler
+import src.internal.InstanceHandler as InstanceHandler
 from src.internal.components.InvalidationManager import InvalidationManager
 from src.internal.components.Signal import Signal
 from src.internal.components.Janitor import Janitor
 from src.shared_types import EmptyFunction
 from src.values.Vector2 import Vector2
 from src.values.Color import Color
-from src.internal.Console import Console, LogType
+import src.internal.Console as Console
+import src.internal.Renderer as Renderer
 
 if TYPE_CHECKING:
     from src.instances.Scene import Scene
@@ -19,6 +20,7 @@ class InstanceUpdateType(Enum):
     POSITION = 0
     SIZE = 1
     ROTATION = 2
+    COLOR = 3
 
 
 class Instance(InvalidationManager, metaclass=ABCMeta):
@@ -49,15 +51,16 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
     _color: Color
     _rotation: int
     _scale: Vector2
+    _zindex: int
     _scene: "Scene"
     _parent: "Instance | None"
     _parent_connections: Dict[str, str]
     _actual_position: Vector2
     _actual_size: Vector2
+    _actual_origin: Vector2
     _is_size_relative: bool
     _is_position_relative: bool
     _bounding: Tuple[float, float, float, float]
-    _position_offset: Vector2
 
     on_update: Signal
     on_destroy: Signal
@@ -66,26 +69,28 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
     def __init__(
         self,
         anchor: Vector2 = Vector2(0, 0),
-        _position: Vector2 = Vector2(0, 0),
-        _size: Vector2 = Vector2(1, 1),
-        _color: Color = Color(255, 255, 255),
-        _rotation: int = 0,
-        _scale: Vector2 = Vector2(1, 1),
+        position: Vector2 = Vector2(0, 0),
+        size: Vector2 = Vector2(1, 1),
+        color: Color = Color(255, 255, 255),
+        rotation: int = 0,
+        scale: Vector2 = Vector2(1, 1),
+        zindex: int = 0,
     ):
         super().__init__()
         InstanceHandler.register_instance(self)
 
         self._anchor = anchor
-        self._position = _position
-        self._size = _size
-        self._color = _color
-        self._rotation = _rotation
-        self._scale = _scale
+        self._position = position
+        self._size = size
+        self._color = color
+        self._rotation = rotation
+        self._scale = scale
+        self._zindex = zindex
         self._is_size_relative = False
         self._is_position_relative = False
         self._actual_position = Vector2(0, 0)
         self._actual_size = Vector2(0, 0)
-        self._position_offset = Vector2(0, 0)
+        self._actual_origin = Vector2(0, 0)
         self._parent = None
         self._parent_connections = {}
 
@@ -99,16 +104,15 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
         janitor.add(InstanceHandler.unregister_instance, self.id)
         self._janitor = janitor
 
-        # On next frame, calculate size and position for the first time
-        self.invalidate(self._recalculate_size)
-        self.invalidate(self._recalculate_position)
+        # Position depends on size and for that reason `_recalculate_position` is called at the end of `_recalculate_size`
+        self.invalidate(self._recalculate_size, 2)
 
     def destroy(self):
         super().destroy()
         self._janitor.destroy()
 
-    def invalidate(self, callback: EmptyFunction):
-        super().invalidate(callback)
+    def invalidate(self, callback: "EmptyFunction", priority: int = 0):
+        super().invalidate(callback=callback, priority=priority)
         InstanceHandler.queue_instance_for_update(self)
 
     def parent_to(self, parent: "Instance | None"):
@@ -150,6 +154,7 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
         if property != InstanceUpdateType.POSITION:
             return
 
+        # Recalculate immediately to prevent frame delays
         self._recalculate_position()
 
     def _disconnect_parent_connections(self):
@@ -162,32 +167,35 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
         self._parent_connections.clear()
 
     def _recalculate_position(self):
+        self._actual_position.x = self._position.x
+        self._actual_position.y = self._position.y
+
+        if self._scene._type == Renderer.RenderTargetType.WORLD:
+            Renderer.world_to_screen_coords(self._actual_position)
+        else:
+            Renderer.normalized_to_screen_coords(self._actual_position)
+
         if self._is_position_relative and self._parent:
             [parent_x, parent_y, parent_width, parent_height] = self._parent._bounding
-            self._actual_position.x = (
-                parent_x
-                + (parent_width * self._position.x)
-                - (self._actual_size.x * self._anchor.x)
+            self._actual_position.x = parent_x + (
+                parent_width * self._actual_position.x
             )
-            self._actual_position.y = (
-                parent_y
-                + (parent_height * self._position.y)
-                - (self._actual_size.y * self._anchor.y)
+            self._actual_position.y = parent_y + (
+                parent_height * self._actual_position.y
             )
-        else:
-            self._actual_position.x = self._position.x - (
-                self._actual_size.x * self._anchor.x
-            )
-            self._actual_position.y = self._position.y - (
-                self._actual_size.y * self._anchor.y
-            )
+        elif not self._is_position_relative and self._parent:
+            self._actual_position += self._parent._actual_position
 
-            if self._parent:
-                self._actual_position += self._parent._actual_position
+        # The instance will be drawn at its center so that needs to be accounted for along with the anchor
+        self._actual_position.x -= (
+            self._actual_size.x * self._anchor.x
+        ) - self._actual_origin.x
+        self._actual_position.y -= (
+            self._actual_size.y * self._anchor.y
+        ) - self._actual_origin.y
 
-        self._actual_position += self._position_offset
-        self._recalculate_bounding()
         self._apply_position()
+        self._recalculate_bounding()
 
     def _recalculate_size(self):
         if self._is_size_relative and self._parent:
@@ -199,9 +207,20 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
             self._actual_size.y = self._size.y
 
         self._actual_size.x *= self._scale.x
-        self._actual_size.y *= self._scale.y
-        self._recalculate_bounding()
+
+        if self._scene._type == Renderer.RenderTargetType.WORLD:
+            Renderer.world_to_screen_coords(self._actual_size)
+        else:
+            Renderer.normalized_to_screen_coords(self._actual_size)
+
+        self._actual_origin.x = self._actual_size.x / 2
+        self._actual_origin.y = self._actual_size.y / 2
+
         self._apply_size()
+        # Position depends on the size so it needs to be recalculated
+        self._recalculate_position()
+
+        # `_recalculate_bounding` is not called here because it is called in `_recalculate_position`
 
     @property
     def anchor(self):
@@ -211,7 +230,8 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
     def anchor(self, anchor: Vector2):
         if anchor.x > 1 or anchor.x < 0 or anchor.y > 1 or anchor.y < 0:
             Console.log(
-                "Anchor much be between Vector2(0, 0) and Vector2(1, 1)", LogType.ERROR
+                "Anchor much be between Vector2(0, 0) and Vector2(1, 1)",
+                Console.LogType.ERROR,
             )
             return
 
@@ -224,15 +244,14 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
 
     @position.setter
     def position(self, position: Vector2):
-        if position.x < 0 and position.y < 0:
-            self._is_position_relative = True
+        self._is_position_relative = position.x < 0 and position.y < 0
+
+        if self._is_position_relative:
             position.x = abs(position.x)
             position.y = abs(position.y)
-        else:
-            self._is_position_relative = False
 
         self._position = position
-        self.invalidate(self._recalculate_position)
+        self.invalidate(self._recalculate_position, 1)
 
     @property
     def size(self):
@@ -240,15 +259,14 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
 
     @size.setter
     def size(self, size: Vector2):
-        if size.x < 0 and size.y < 0:
-            self._is_position_relative = True
+        self._is_size_relative = size.x < 0 and size.y < 0
+
+        if self._is_size_relative:
             size.x = abs(size.x)
             size.y = abs(size.y)
-        else:
-            self._is_position_relative = False
 
         self._size = size
-        self.invalidate(self._recalculate_size)
+        self.invalidate(self._recalculate_size, 2)
 
     @property
     def color(self):
@@ -281,22 +299,18 @@ class Instance(InvalidationManager, metaclass=ABCMeta):
     def bounding(self) -> Tuple[float, float, float, float]:
         return self._bounding
 
-    @abstractmethod
-    def _apply_new_batch(self):
-        pass
-
-    @abstractmethod
     def _apply_size(self):
         self.on_update.fire(InstanceUpdateType.SIZE)
 
-    @abstractmethod
     def _apply_position(self):
         self.on_update.fire(InstanceUpdateType.POSITION)
 
-    @abstractmethod
     def _apply_color(self):
-        pass
+        self.on_update.fire(InstanceUpdateType.COLOR)
 
-    @abstractmethod
     def _apply_rotation(self):
         self.on_update.fire(InstanceUpdateType.ROTATION)
+
+    @abstractmethod
+    def draw(self):
+        raise NotImplementedError("Draw method must be implemented by subclass")

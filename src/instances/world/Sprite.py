@@ -1,54 +1,126 @@
-import pyglet
+import pyray
+import time
 
 from src.instances.core.CollisionInstance import CollisionInstance
+from src.values.Vector2 import Vector2
+import src.internal.Console as Console
 
 
 class Sprite(CollisionInstance):
-    __slots__ = ("_image",)
+    __slots__ = (
+        "_texture",
+        "_texture_rect",
+        "_texture_source",
+        "_frame_size",
+        "_is_animated",
+        "_current_frame",
+        "_frame_time",
+        "_last_frame_at",
+    )
 
-    _image: pyglet.image.AbstractImage
+    _texture: pyray.Texture
+    _texture_rect: pyray.Rectangle
+    _texture_source: pyray.Rectangle
+    _frame_size: Vector2
+    _is_animated: bool
+    _current_frame: int
+    _frame_time: float
+    _last_frame_at: float
+    _frame_count: int
 
-    def __init__(self, image: str, **kwargs):
-        self._image = pyglet.image.load(image)
+    def __init__(
+        self,
+        image_path: str,
+        is_animated: bool = False,
+        frame_size: Vector2 = Vector2(0, 0),
+        frame_time: float = 0.1,
+        starting_frame: int = 0,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
-    def create_mesh(self):
-        self._create_mesh(
-            pyglet.sprite.Sprite,
-            x=self._actual_position.x,
-            y=self._actual_position.y,
-            img=self._image,
+        self._texture = pyray.load_texture(image_path)
+        self._texture_rect = pyray.Rectangle(
+            self._actual_position.x,
+            self._actual_position.y,
+            self._actual_size.x,
+            self._actual_size.y,
         )
-        self._mesh.color = self._color.to_tuple()
-        self._mesh.rotation = self._rotation
-        self._mesh.scale_x = self._actual_size.x / self._image.width
-        self._mesh.scale_y = self._actual_size.y / self._image.height
 
-    @property
-    def image(self) -> pyglet.image.AbstractImage:
-        return self._image
+        if is_animated:
+            self._frame_size = frame_size
+        else:
+            self._frame_size = Vector2(self._texture.width, self._texture.height)
 
-    @image.setter
-    def image(self, image: str):
-        self._image = pyglet.image.load(image)
-        self.invalidate(self._apply_image)
+        self._texture_source = pyray.Rectangle(
+            self._frame_size.x * starting_frame,
+            self._frame_size.y * starting_frame,
+            self._frame_size.x,
+            self._frame_size.y,
+        )
 
-    def _apply_image(self):
-        self._mesh.image = self._image
+        self._is_animated = is_animated
+        self._current_frame = starting_frame
+        self._frame_count = (
+            int(self._texture.width // self._frame_size.x) if is_animated else 1
+        )
+        self._frame_time = frame_time
+        self._last_frame_at = time.time()
 
-    def _apply_position(self):
-        super()._apply_position()
-        self._mesh.position = (self._actual_position.x, self._actual_position.y, 0)
+    def destroy(self):
+        super().destroy()
+        pyray.unload_texture(self._texture)
+
+    def draw(self):
+        if self._is_animated:
+            now = time.time()
+
+            if now - self._last_frame_at >= self._frame_time:
+                self._set_frame((self._current_frame + 1) % self._frame_count)
+                self._last_frame_at = now
+
+        pyray.draw_texture_pro(
+            self._texture,
+            self._texture_source,
+            self._texture_rect,
+            self._actual_origin.to_tuple(),
+            self._rotation,
+            self._color.to_tuple(),
+        )
 
     def _apply_size(self):
         super()._apply_size()
-        self._mesh.scale_x = self._actual_size.x / self._image.width
-        self._mesh.scale_y = self._actual_size.y / self._image.height
+        self._texture_rect.width = self._actual_size.x
+        self._texture_rect.height = self._actual_size.y
 
-    def _apply_color(self):
-        super()._apply_color()
-        self._mesh.color = self._color.to_tuple()
+    def _apply_position(self):
+        super()._apply_position()
+        self._texture_rect.x = self._actual_position.x
+        self._texture_rect.y = self._actual_position.y
 
-    def _apply_rotation(self):
-        super()._apply_rotation()
-        self._mesh.rotation = self._rotation
+    @property
+    def is_animated(self) -> bool:
+        return self._is_animated
+
+    @is_animated.setter
+    def is_animated(self, is_animated: bool):
+        self._is_animated = is_animated
+
+    @property
+    def current_frame(self) -> int:
+        return self._current_frame
+
+    @current_frame.setter
+    def current_frame(self, frame: int):
+        if frame < 0 or frame >= self._frame_count:
+            Console.log(
+                f"Frame {frame} is out of bounds for this sprite (0-{self._frame_count - 1})",
+                Console.LogType.ERROR,
+            )
+            return
+
+        self._set_frame(frame)
+
+    def _set_frame(self, frame: int):
+        self._current_frame = frame
+        self._texture_source.x = frame * self._frame_size.x

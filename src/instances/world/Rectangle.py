@@ -1,33 +1,37 @@
-import pyglet
+from typing import Tuple
+import pyray
 
 from src.instances.core.CollisionInstance import CollisionInstance
 
 
 class Rectangle(CollisionInstance):
-    def create_mesh(self):
-        self._create_mesh(
-            pyglet.shapes.Rectangle,
-            x=self._actual_position.x,
-            y=self._actual_position.y,
-            width=self._size.x,
-            height=self._size.y,
-            color=self._color.to_tuple(),
-        )
-        self._mesh.rotation = self._rotation
+    __slots__ = ("_rect",)
 
-    def _apply_position(self):
-        super()._apply_position()
-        self._mesh.position = self._actual_position.to_tuple()
+    _rect: pyray.Rectangle
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._rect = pyray.Rectangle(
+            self._actual_position.x,
+            self._actual_position.y,
+            self._actual_size.x,
+            self._actual_size.y,
+        )
 
     def _apply_size(self):
         super()._apply_size()
-        self._mesh.width = self._size.x
-        self._mesh.height = self._size.y
+        self._rect.width = self._actual_size.x
+        self._rect.height = self._actual_size.y
 
-    def _apply_color(self):
-        super()._apply_color()
-        self._mesh.color = self._color.to_tuple()
+    def _apply_position(self):
+        super()._apply_position()
+        self._rect.x = self._actual_position.x
+        self._rect.y = self._actual_position.y
 
-    def _apply_rotation(self):
-        super()._apply_rotation()
-        self._mesh.rotation = self._rotation
+    def draw(self):
+        pyray.draw_rectangle_pro(
+            self._rect,
+            self._actual_origin.to_tuple(),
+            self._rotation,
+            self._color.to_tuple(),
+        )

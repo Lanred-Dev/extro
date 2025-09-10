@@ -1,13 +1,12 @@
 from typing import List
-from abc import abstractmethod
 
-from src.instances.core.MeshInstance import MeshInstance
+from src.instances.core.Instance import Instance
 from src.instances.core.CollisionMask import CollisionMask
 from src.internal.components.Signal import Signal
-from src.internal.CollisionHandler import CollisionHandler
+import src.internal.CollisionHandler as CollisionHandler
 
 
-class CollisionInstance(MeshInstance):
+class CollisionInstance(Instance):
     __slots__ = (
         "_is_collidable",
         "_collision_group",
@@ -25,8 +24,8 @@ class CollisionInstance(MeshInstance):
     on_collision: Signal
     on_collision_end: Signal
 
-    def __init__(self, is_collidable: bool = True, collision_group=""):
-        super().__init__()
+    def __init__(self, is_collidable: bool = True, collision_group="", **kwargs):
+        super().__init__(**kwargs)
 
         self._is_collidable = is_collidable
         self._collision_group = collision_group
@@ -52,7 +51,7 @@ class CollisionInstance(MeshInstance):
     @is_collidable.setter
     def is_collidable(self, is_collidable: bool):
         self._is_collidable = is_collidable
-        CollisionHandler.update_collidable_instances_list()
+        CollisionHandler._recompute_collidable_instances()
 
     @property
     def collision_group(self) -> str:
@@ -61,19 +60,16 @@ class CollisionInstance(MeshInstance):
     @collision_group.setter
     def collision_group(self, collision_group: str):
         self._collision_group = collision_group
-        CollisionHandler.update_collidable_instances_list()
+        CollisionHandler._recompute_collidable_instances()
 
-    @abstractmethod
     def _apply_size(self):
         super()._apply_size()
         self._collision_mask.size = self._actual_size
 
-    @abstractmethod
     def _apply_position(self):
         super()._apply_position()
         self._collision_mask.position = self._actual_position
 
-    @abstractmethod
     def _apply_rotation(self):
         super()._apply_rotation()
         self._collision_mask.rotation = self._rotation

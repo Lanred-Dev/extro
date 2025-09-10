@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from src.shared_types import EmptyFunction
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class InvalidationManager:
     _suspend_updates: bool
     _is_dirty: bool
-    _callbacks: List["EmptyFunction"]
+    _callbacks: List[Tuple[int, "EmptyFunction"]]
 
     def __init__(self):
         self._callbacks = []
@@ -19,12 +19,12 @@ class InvalidationManager:
         self._suspend_updates = True
         self._callbacks.clear()
 
-    def invalidate(self, callback: "EmptyFunction"):
+    def invalidate(self, callback: "EmptyFunction", priority: int = 0):
         if callback in self._callbacks:
             return
 
         self._is_dirty = True
-        self._callbacks.append(callback)
+        self._callbacks.append((priority, callback))
 
     @contextmanager
     def batch_update(self):
@@ -40,7 +40,7 @@ class InvalidationManager:
         if not self._is_dirty or self._suspend_updates:
             return
 
-        for callback in list(self._callbacks):
+        for priority, callback in sorted(self._callbacks, key=lambda x: x[0]):
             callback()
 
         self._callbacks.clear()

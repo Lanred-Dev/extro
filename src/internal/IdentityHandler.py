@@ -19,3 +19,6 @@ def generate_id(length: int = 8, prefix: Optional[str] = "") -> str:
 
     id = "".join(random.choice(CHARACTERS) for _ in range(length))
     return (prefix or "") + id
+
+
+__all__ = ["generate_id"]

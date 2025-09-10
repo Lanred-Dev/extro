@@ -1,85 +1,136 @@
-from typing import TYPE_CHECKING, List, Dict
+from typing import TYPE_CHECKING, List, Dict, TypedDict
+import pyray
 
+import src.internal.Console as Console
+import src.internal.IdentityHandler as IdentityHandler
 from src.internal.Window import Window
-from src.internal.Console import Console, LogType
-from src.internal.IdentityHandler import generate_id
+from src.values.Vector2 import Vector2
+from src.shared_types import RenderTargetType
 
 if TYPE_CHECKING:
     from instances.Scene import Scene
+    from instances.core.Instance import Instance
 
 
-class RendererCls:
-    """
-    Central renderer manager for handling scenes and rendering order.
+class _RenderOrder(TypedDict):
+    world: List[str]
+    independent: List[str]
 
-    Keeps track of active render targets (scenes) and ensures they
-    are rendered in the correct order based on z-index.
-    """
 
-    _render_targets: Dict[str, "Scene"]
-    _render_order: List[str]
+_render_targets: Dict[str, "Scene"] = {}
+_render_order: _RenderOrder = {"world": [], "independent": []}
+world_tile_size: int = 32
+camera_position: Vector2 = Vector2(0, 0)
 
-    def __init__(self):
-        self._render_targets = {}
-        self._render_order = []
 
-    def register_render_target(self, target: "Scene"):
-        """
-        Add a scene as a render target.
+def register_render_target(target: "Scene"):
+    if getattr(target, "_type", None) not in RenderTargetType:
+        Console.log(
+            f"{target.id} cannot be registered as a render target because it has no type",
+            Console.LogType.ERROR,
+        )
+        return
 
-        Args:
-            scene: The scene to register for rendering.
-        """
-        target_id: str = generate_id(10, "rt_")
-        target.id = target_id
-        self._render_targets[target_id] = target
-        Console.log(f"{target_id} is now a render target")
-        self.update_render_order()
+    target.id = IdentityHandler.generate_id(10, "rt_")
+    _render_targets[target.id] = target
+    Console.log(f"{target.id} is now a render target")
+    _recalculate_render_target_order()
 
-    def unregister_render_target(self, target: "Scene | str"):
-        """
-        Remove a scene from the render targets.
 
-        Args:
-            scene: The scene object or its ID.
-        """
-        if isinstance(target, str):
-            target_id = target
+def unregister_render_target(target_id: str):
+    if target_id not in _render_targets:
+        Console.log(f"{target_id} is not a render target", Console.LogType.ERROR)
+        return
+
+    _render_targets.pop(target_id)
+    Console.log(f"{target_id} is no longer a render target")
+    _recalculate_render_target_order()
+
+
+def _render():
+    pyray.begin_drawing()
+    pyray.clear_background(pyray.BLACK)
+
+    for target_id in _render_order["world"]:
+        _render_targets[target_id].draw()
+
+    for target_id in _render_order["independent"]:
+        _render_targets[target_id].draw()
+
+    Console._draw()
+    pyray.end_drawing()
+
+
+def _recalculate_render_target_order():
+    global _render_order
+
+    _render_order["world"] = []
+    _render_order["independent"] = []
+
+    new_render_order: List[str] = calculate_render_order(list(_render_targets.values()))
+    for target_id in new_render_order:
+        if _render_targets[target_id]._type == RenderTargetType.WORLD:
+            _render_order["world"].append(target_id)
         else:
-            target_id = target.id
+            _render_order["independent"].append(target_id)
 
-        if target_id not in self._render_targets:
-            Console.log(f"{target_id} is not a render target", LogType.WARNING)
-            return
-
-        self._render_targets.pop(target_id, None)
-        Console.log(f"{target_id} is no longer a render target")
-        self.update_render_order()
-
-    def render(self):
-        """Render all active scenes in the correct order."""
-        Window.clear()
-
-        for scene_id in self._render_order:
-            self._render_targets[scene_id]._batch.draw()
-
-        Console.draw()
-        Window.flip()
-
-    def update_render_order(self):
-        """
-        Sort render targets by z-index and update the render order.
-        """
-        self._render_order = [
-            scene.id
-            for scene in sorted(
-                self._render_targets.values(),
-                key=lambda target: target._zindex,
-            )
-        ]
-
-        Console.log(f"Renderer is rendering {len(self._render_order)} scenes")
+    Console.log(
+        f"Renderer is rendering {len(_render_order['world']) + len(_render_order['independent'])} targets"
+    )
 
 
-Renderer = RendererCls()
-__all__ = ["Renderer"]
+def calculate_render_order(targets: "List[Instance | Scene]") -> List[str]:
+    return [
+        target.id
+        for target in sorted(
+            targets,
+            key=lambda target: target._zindex,
+        )
+    ]
+
+
+def normalized_to_screen_coords(vector: Vector2):
+    vector.x *= Window._actual_size.x
+    vector.y *= Window._actual_size.y
+
+
+def world_to_screen_coords(vector: Vector2):
+    vector.x = (vector.x - camera_position.x) * world_tile_size
+    vector.y = (vector.y - camera_position.y) * world_tile_size
+
+
+def screen_to_world_coords(vector: Vector2):
+    vector.x = (vector.x / world_tile_size) + camera_position.x
+    vector.y = (vector.y / world_tile_size) + camera_position.y
+
+
+def set_world_tile_size(size: int):
+    global world_tile_size
+
+    if size <= 0:
+        Console.log("World tile size must be greater than 0", Console.LogType.ERROR)
+        return
+
+    world_tile_size = size
+    Console.log(f"World tile size set to {world_tile_size}")
+
+
+def set_fps(fps: int):
+    if fps <= 0:
+        Console.log("FPS must be greater than 0", Console.LogType.ERROR)
+        return
+
+    pyray.set_target_fps(fps)
+    Console.log(f"Target FPS set to {fps}")
+
+
+# `RenderTargetType` is re-exported here for unified access to the developer
+__all__ = [
+    "register_render_target",
+    "unregister_render_target",
+    "_render",
+    "_recalculate_render_target_order",
+    "calculate_render_order",
+    "RenderTargetType",
+    "world_tile_size",
+]

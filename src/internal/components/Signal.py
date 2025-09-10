@@ -1,5 +1,5 @@
 from typing import Any, Dict, TYPE_CHECKING
-from src.internal.IdentityHandler import generate_id
+import src.internal.IdentityHandler as IdentityHandler
 
 if TYPE_CHECKING:
     from src.shared_types import EmptyFunction
@@ -51,7 +51,7 @@ class Signal:
         if not self._is_active:
             return ""
 
-        connection_id = generate_id(5, "sig_")
+        connection_id = IdentityHandler.generate_id(5, "sig_")
         self._subscribers[connection_id] = callback
         return connection_id
 

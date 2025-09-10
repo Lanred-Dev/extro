@@ -1,53 +1,71 @@
 from typing import TYPE_CHECKING, Dict
-from src.internal.IdentityHandler import generate_id
-from src.internal.Console import Console, LogType
+import src.internal.IdentityHandler as IdentityHandler
+import src.internal.Console as Console
 
 if TYPE_CHECKING:
     from src.instances.core.Instance import Instance
     from src.shared_types import EmptyFunction
 
 
-class InstanceHandlerCls:
-    """Manages creation, registration, and retrieval of instances."""
-
-    instances: Dict[str, "Instance"]
-    _queued_for_update: Dict[str, "EmptyFunction"]
-
-    def __init__(self):
-        self.instances = {}
-        self._queued_for_update = {}
-
-    def register_instance(self, instance: "Instance"):
-        """Register an instance for tracking."""
-        instance_id: str = generate_id(10, "i_")
-        instance.id = instance_id
-        self.instances[instance_id] = instance
-        Console.log(f"Registered instance {instance_id}")
-
-    def unregister_instance(self, instance_id: str):
-        """Unregister an instance by object or ID."""
-        if instance_id not in self.instances:
-            Console.log(f"{instance_id} is not an instance", LogType.WARNING)
-            return
-
-        self.instances.pop(instance_id, None)
-        Console.log(f"{instance_id} is no longer an instance")
-
-    def update_instances(self):
-        if len(self._queued_for_update) == 0:
-            return
-
-        for flush_instance in self._queued_for_update.values():
-            flush_instance()
-
-        self._queued_for_update.clear()
-
-    def queue_instance_for_update(self, instance: "Instance"):
-        if instance.id in self._queued_for_update:
-            return
-
-        self._queued_for_update[instance.id] = instance.flush
+instances: "Dict[str, Instance]" = {}
+_queued_for_update: Dict[str, "EmptyFunction"] = {}
 
 
-InstanceHandler = InstanceHandlerCls()
-__all__ = ["InstanceHandler"]
+def register_instance(instance: "Instance"):
+    instance.id = IdentityHandler.generate_id(10, "i_")
+    instances[instance.id] = instance
+    Console.log(f"Registered instance {instance.id}")
+
+
+def unregister_instance(instance_id: str):
+    if instance_id not in instances:
+        Console.log(f"{instance_id} is not an instance", Console.LogType.ERROR)
+        return
+
+    del instances[instance_id]
+    del _queued_for_update[instance_id]
+    Console.log(f"{instance_id} is no longer an instance")
+
+
+def _update_instances():
+    global _queued_for_update
+
+    if len(_queued_for_update) == 0:
+        return
+
+    still_queued: Dict[str, "EmptyFunction"] = {}
+
+    for instance_id, flush_instance in _queued_for_update.items():
+        instance: "Instance" = instances[instance_id]
+
+        # Instances depend on a scene when converting their vectors to screen space, so no need to flush if they aren't in one
+        if instance._scene is None:
+            still_queued[instance_id] = flush_instance
+            continue
+
+        flush_instance()
+
+    _queued_for_update = still_queued
+
+
+def queue_instance_for_update(instance: "Instance"):
+    if instance.id in _queued_for_update:
+        return
+
+    _queued_for_update[instance.id] = instance.flush
+
+
+def _force_update_all_instances():
+    for instance in instances.values():
+        instance._recalculate_position()
+        instance._recalculate_size()
+
+
+__all__ = [
+    "instances",
+    "register_instance",
+    "unregister_instance",
+    "_update_instances",
+    "queue_instance_for_update",
+    "_force_update_all_instances",
+]

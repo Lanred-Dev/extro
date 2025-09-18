@@ -1,10 +1,10 @@
 from abc import abstractmethod
 import pyray
 
-from src.instances.core.Instance import Instance
+from src.instances.core.DrawableInstance import DrawableInstance
 
 
-class BackgroundInstance(Instance):
+class BackgroundInstance(DrawableInstance):
     __slots__ = ("_texture", "_texture_rect", "_texture_source")
 
     _texture: pyray.RenderTexture
@@ -37,7 +37,7 @@ class BackgroundInstance(Instance):
     def _recalculate_texture(self):
         pyray.begin_texture_mode(self._texture)
         pyray.clear_background(pyray.BLANK)
-        self._draw_texture()
+        self._render_texture()
         pyray.end_texture_mode()
 
     def _apply_color(self):
@@ -45,23 +45,25 @@ class BackgroundInstance(Instance):
         self._recalculate_texture()
 
     def _apply_size(self):
-        super()._apply_size()
         self._texture_rect.width = self._size.x
         self._texture_rect.height = self._size.y
         self._texture_source.width = self._size.x
         self._texture_source.height = self._size.y
         self._recalculate_texture()
 
+        super()._apply_size()
+
     def _apply_position(self):
-        super()._apply_position()
         self._texture_rect.x = self._actual_position.x
         self._texture_rect.y = self._actual_position.y
         self._recalculate_texture()
 
+        super()._apply_position()
+
     def _apply_rotation(self):
-        super()._apply_rotation()
         self._recalculate_texture()
+        super()._apply_rotation()
 
     @abstractmethod
-    def _draw_texture(self):
+    def _render_texture(self):
         raise NotImplementedError("Draw texture method must be implemented by subclass")

@@ -31,10 +31,10 @@ cdef class CollisionMask:
         self._is_dirty = <bint>True
 
     cdef _compute_vertices(self):
-        cdef float width = self._size.x / 2
-        cdef float height = self._size.y / 2
+        cdef float half_width = self._size.x / 2
+        cdef float half_height = self._size.y / 2
         cdef double rotation = self._rotation * M_PI / 180
-        cdef list[list[float]] local_vertices = [[-width, -height], [width, -height], [width, height], [-width, height]]
+        cdef list[list[float]] local_vertices = [[-half_width, -half_height], [half_width, -half_height], [half_width, half_height], [-half_width, half_height]]
         cdef float vertex_x
         cdef float vertex_y
         cdef float cos_rotation = cos(rotation)
@@ -47,8 +47,8 @@ cdef class CollisionMask:
             vertex_y = local_vertices[index][1]
             self._vertices.append(
                 Vector2(
-                    (self._position.x + width) + vertex_x * cos_rotation - vertex_y * sin_rotation,
-                    (self._position.y + height) + vertex_x * sin_rotation + vertex_y * cos_rotation
+                    self._position.x + vertex_x * cos_rotation - vertex_y * sin_rotation,
+                    self._position.y + vertex_x * sin_rotation + vertex_y * cos_rotation
                 )
             )
 
@@ -59,9 +59,8 @@ cdef class CollisionMask:
         cdef object vertex2
 
         for index in range(len(self._vertices)):
-            vertex1 = self._vertices[(index + 1) % len(self._vertices)]
-            vertex2 = self._vertices[index]
-            # This subtracts the two then gets the perpendicular vector
+            vertex1 = self._vertices[index]
+            vertex2 = self._vertices[(index + 1) % len(self._vertices)]
             self._axes.append(Vector2(-(vertex1.y - vertex2.y), vertex1.x - vertex2.x))
 
     cdef _recompute_if_dirty(self):
@@ -85,7 +84,7 @@ cdef class CollisionMask:
             axis = axes[index]
             length = hypot(<double>axis.x, <double>axis.y)
 
-            if <bint>length == 0:
+            if length == 0:
                 continue
 
             # Normalize the axis

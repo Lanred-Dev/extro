@@ -1,12 +1,20 @@
-from typing import List
 from src.values.Vector2 import Vector2
 
 class CollisionMask:
-    position: Vector2
-    size: Vector2
-    rotation: float
-    vertices: List[Vector2]
-    axes: List[Vector2]
+    vertices: list[Vector2]
+    axes: list[Vector2]
 
     def __init__(self, position: Vector2, size: Vector2, rotation: float = 0): ...
     def collides_with(self, other_collision_mask: CollisionMask) -> bool: ...
+    @property
+    def position(self) -> Vector2: ...
+    @position.setter
+    def position(self, position: Vector2): ...
+    @property
+    def size(self) -> Vector2: ...
+    @size.setter
+    def size(self, size: Vector2): ...
+    @property
+    def rotation(self) -> float: ...
+    @rotation.setter
+    def rotation(self, rotation: float): ...

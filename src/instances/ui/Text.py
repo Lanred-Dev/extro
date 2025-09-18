@@ -1,11 +1,14 @@
 import pyray
 
+from src.instances.core.DrawableInstance import DrawableInstance
 from src.instances.core.Instance import Instance
 from src.instances.ui.Font import Font
+from src.instances.ui.Fonts import Arial
 from src.values.Vector2 import Vector2
+import src.internal.Console as Console
 
 
-class Text(Instance):
+class Text(DrawableInstance):
     __slots__ = ("_text", "_font", "_font_size", "_character_spacing")
 
     _text: str
@@ -16,24 +19,28 @@ class Text(Instance):
     def __init__(
         self,
         text: str,
-        font: Font,
         font_size: int,
+        font: Font = Arial,
         character_spacing: int = 1,
         **kwargs
     ):
+        # Dont allow size to be set, as it is determined by the font size
+        if "size" in kwargs:
+            del kwargs["size"]
+
         super().__init__(**kwargs)
         self._text = text
         self._font = font
         self._character_spacing = character_spacing
         self._font_size = font_size
-        self.invalidate(self._scale_size_to_fix_text)
+        self.invalidate(self._scale_size_to_fix_text, 3)
 
     def draw(self):
         pyray.draw_text_pro(
             self._font._font,
             self._text,
-            (self._actual_position.x, self._actual_position.y),
-            (0, 0),
+            self._actual_position.to_tuple(),
+            self._render_origin.to_tuple(),
             self._rotation,
             self._font_size,
             self._character_spacing,
@@ -62,33 +69,19 @@ class Text(Instance):
 
     @font_size.setter
     def font_size(self, size: int):
-        self._font_size = size
-        self.invalidate(self._scale_size_to_fix_text)
+        self._font_size = int(size * (self._scale.x + self._scale.y))
+        self.invalidate(self._scale_size_to_fix_text, 3)
 
-    @Instance.size.setter
+    @DrawableInstance.size.setter
     def size(self, size: Vector2):
-        text_length: pyray.Vector2 = pyray.measure_text_ex(
-            self._font._font, self._text, size.y, self._character_spacing
-        )
+        Console.log("Cannot set size of `Text` instance", Console.LogType.WARNING)
 
-        if size.x < text_length.x:
-            size.y = (size.x / text_length.x) * size.y
-
-        self._font_size = int(size.y)
-
-        if size.x < 0 and size.y < 0:
-            self._is_position_relative = True
-            size.x = abs(size.x)
-            size.y = abs(size.y)
-        else:
-            self._is_position_relative = False
-
-        self._size = size
-        self.invalidate(self._recalculate_size)
+    def _recalculate_size(self, *_: object, **__: object):
+        Instance._recalculate_size(self, None)
 
     def _scale_size_to_fix_text(self):
-        text_length: pyray.Vector2 = pyray.measure_text_ex(
+        text_size: pyray.Vector2 = pyray.measure_text_ex(
             self._font._font, self._text, self._font_size, self._character_spacing
         )
-        self._actual_size = Vector2(text_length.x, text_length.y)
-        self.invalidate(self._apply_size)
+        self._size = Vector2(text_size.x, text_size.y)
+        self._recalculate_size()

@@ -1,12 +1,12 @@
 import pyray
 import time
 
-from src.instances.core.CollisionInstance import CollisionInstance
+from src.instances.core.DrawableInstance import DrawableInstance
 from src.values.Vector2 import Vector2
 import src.internal.Console as Console
 
 
-class Sprite(CollisionInstance):
+class Sprite(DrawableInstance):
     __slots__ = (
         "_texture",
         "_texture_rect",
@@ -67,9 +67,7 @@ class Sprite(CollisionInstance):
         self._frame_time = frame_time
         self._last_frame_at = time.time()
 
-    def destroy(self):
-        super().destroy()
-        pyray.unload_texture(self._texture)
+        self._janitor.add(pyray.unload_texture, self._texture)
 
     def draw(self):
         if self._is_animated:
@@ -83,20 +81,20 @@ class Sprite(CollisionInstance):
             self._texture,
             self._texture_source,
             self._texture_rect,
-            self._actual_origin.to_tuple(),
+            self._render_origin.to_tuple(),
             self._rotation,
             self._color.to_tuple(),
         )
 
     def _apply_size(self):
-        super()._apply_size()
         self._texture_rect.width = self._actual_size.x
         self._texture_rect.height = self._actual_size.y
+        super()._apply_size()
 
     def _apply_position(self):
-        super()._apply_position()
         self._texture_rect.x = self._actual_position.x
         self._texture_rect.y = self._actual_position.y
+        super()._apply_position()
 
     @property
     def is_animated(self) -> bool:

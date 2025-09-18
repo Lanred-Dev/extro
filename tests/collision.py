@@ -3,8 +3,8 @@
 import src as extro
 
 extro.Renderer.set_fps(60)
-extro.Renderer.set_world_tile_size(100)
-extro.Window.title = "Collision Test"
+extro.Window.set_title("Collision Test")
+extro.WorldService.set_world_tile_size(100)
 
 
 def on_rect1_collision(other):
@@ -25,21 +25,24 @@ def on_rect2_collision_end(other):
 
 scene = extro.Instances.Scene()
 
-rect1 = extro.Instances.world.Rectangle()
-rect1.color = extro.Color(255, 0, 0)
-rect1.size = extro.Vector2(2, 2)
-rect1.position = extro.Vector2(0, 0)
-rect1.on_collision.connect(on_rect1_collision)
-rect1.on_collision_end.connect(on_rect1_collision_end)
-scene.add_instance(rect1)
+rect1 = extro.Instances.world.Rectangle(
+    color=extro.Color(255, 0, 0),
+    size=extro.Vector2(2, 2),
+    position=extro.Vector2(0, 0),
+)
+rect1.add_collider()
+rect1.collider.on_collision.connect(on_rect1_collision)
+rect1.collider.on_collision_end.connect(on_rect1_collision_end)
+scene.add(rect1)
 
-rect2 = extro.Instances.world.Rectangle()
-rect2.color = extro.Color(255, 0, 0)
-rect2.size = extro.Vector2(2, 2)
-rect2.on_collision.connect(on_rect2_collision)
-rect2.on_collision_end.connect(on_rect2_collision_end)
-rect2.anchor = extro.Vector2(0.5, 0.5)
-scene.add_instance(rect2)
+rect2 = extro.Instances.world.Rectangle(
+    color=extro.Color(255, 0, 0),
+    size=extro.Vector2(1, 1),
+)
+rect2.add_collider()
+rect2.collider.on_collision.connect(on_rect2_collision)
+rect2.collider.on_collision_end.connect(on_rect2_collision_end)
+scene.add(rect2)
 
 
 def rotate_rect1():
@@ -49,14 +52,34 @@ def rotate_rect1():
         rect1.rotation = 0
 
 
+def increase_rect2_size():
+    rect2.size += extro.Vector2(0.2, 0.2)
+
+
+def decrease_rect2_size():
+    rect2.size -= extro.Vector2(0.2, 0.2)
+
+
 def on_mouse_move(position: extro.Vector2):
-    rect2.position = position
+    rect2.position = extro.ScreenService.screen_to_world_coords(position)
 
 
-extro.InputHandler.on_mouse_event.connect(
+extro.InputService.on_mouse_event.connect(
     on_mouse_move,
-    extro.InputHandler.InputSignalConnectionType.ACTIVE,
-    extro.InputHandler.Mouse.MOVE,
+    extro.InputService.InputSignalConnectionType.ACTIVE,
+    extro.InputService.Mouse.MOVE,
+)
+
+extro.InputService.on_key_event.connect(
+    increase_rect2_size,
+    extro.InputService.InputSignalConnectionType.PRESS,
+    extro.InputService.Key.E,
+)
+
+extro.InputService.on_key_event.connect(
+    decrease_rect2_size,
+    extro.InputService.InputSignalConnectionType.PRESS,
+    extro.InputService.Key.Q,
 )
 
 extro.Engine.on_pre_render.connect(rotate_rect1)

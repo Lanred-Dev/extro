@@ -16,4 +16,4 @@ def lerp(start: LerpableType, end: LerpableType, progress: float) -> LerpableTyp
     elif isinstance(start, (float, int)) and isinstance(end, (float, int)):
         return type(start)(lerpNumber(start, end, progress))
 
-    return start  # Fallback if types do not match or are unsupported
+    return start

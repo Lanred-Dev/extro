@@ -1,16 +1,13 @@
-from typing import Generic, TYPE_CHECKING
+from typing import Generic
 from copy import deepcopy
 from enum import Enum
-from src.animation.lerp import lerp, LerpableType
+from src.animation.lerp import lerp
 from src.animation.easings import easings
-from src.internal.components.Signal import Signal
-from src.internal.components.Janitor import Janitor
+from src.internal.helpers.Signal import Signal
+from src.internal.helpers.Janitor import Janitor
 import src.internal.Engine as Engine
 import src.internal.Console as Console
-from src.shared_types import EasingFunction
-
-if TYPE_CHECKING:
-    from . import LerpableType
+from src.internal.shared_types import EasingFunction, LerpableType
 
 
 class TweenState(Enum):
@@ -88,7 +85,7 @@ class Tween(Generic[LerpableType]):
         """Start or resume the tween. Connects to the engine's pre-render event."""
         if self.__state == TweenState.PLAYING:
             Console.log(
-                "Tween is already playing. If the intent is to restart use `restart()`.",
+                "Tween is already playing. If the intent is to restart use `restart()`",
                 Console.LogType.WARNING,
             )
             return
@@ -105,7 +102,7 @@ class Tween(Generic[LerpableType]):
         """Stop the tween and disconnect from the engine."""
         self.__state = TweenState.STOPPED
 
-        if self.__on_pre_render_connection is not None:
+        if self.__on_pre_render_connection:
             Engine.on_pre_render.disconnect(self.__on_pre_render_connection)
             self.__on_pre_render_connection = None
 

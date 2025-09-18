@@ -9,8 +9,7 @@ def linearize(c: float) -> float:
     )
 
 
-# Gamma correction
-def gamma(c: float) -> float:
+def correct_gamma(c: float) -> float:
     return 12.92 * c if c < 0.0031306684425 else 1.055 * c ** (1 / 2.4) - 0.055
 
 
@@ -81,7 +80,7 @@ def lerpColor(start: Color, end: Color, progress: float) -> Color:
     elif b < 0:
         r, g, b = r - b, g - b, 0
 
-    r, g, b = gamma(r), gamma(g), gamma(b)
+    r, g, b = correct_gamma(r), correct_gamma(g), correct_gamma(b)
 
     # Clamp 0..1 and convert to 0..255
     r = max(0, min(int(r * 255), 255))

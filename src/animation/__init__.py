@@ -1,11 +1,10 @@
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
+
 from src.animation.easings import easings
 from src.animation.Tween import TweenState, Tween
 
 if TYPE_CHECKING:
-    from src.values.Color import Color
-    from src.values.Vector2 import Vector2
+    from src.internal.shared_types import LerpableType
 
-LerpableType = TypeVar("LerpableType", float, int, "Vector2", "Color")
-
+# `LerpableType` is re-exported for unified access to the developer
 __all__ = ["Tween", "TweenState", "easings", "LerpableType"]

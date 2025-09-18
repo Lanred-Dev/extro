@@ -1,11 +1,10 @@
 import random
 import string
-from typing import Optional
 
-CHARACTERS = string.ascii_letters + string.digits
+_VALID_ID_CHARACTERS = string.ascii_letters + string.digits
 
 
-def generate_id(length: int = 8, prefix: Optional[str] = "") -> str:
+def generate_id(length: int = 8, prefix: str | None = None) -> str:
     """
     Generate a random string ID with optional prefix.
 
@@ -17,7 +16,7 @@ def generate_id(length: int = 8, prefix: Optional[str] = "") -> str:
     'obj_d4e5f6'
     """
 
-    id = "".join(random.choice(CHARACTERS) for _ in range(length))
+    id = "".join(random.choice(_VALID_ID_CHARACTERS) for _ in range(length))
     return (prefix or "") + id
 
 

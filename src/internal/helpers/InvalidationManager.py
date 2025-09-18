@@ -1,14 +1,14 @@
 from contextlib import contextmanager
-from typing import List, TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.shared_types import EmptyFunction
+    from src.internal.shared_types import EmptyFunction
 
 
 class InvalidationManager:
     _suspend_updates: bool
     _is_dirty: bool
-    _callbacks: List[Tuple[int, "EmptyFunction"]]
+    _callbacks: list[tuple[int, "EmptyFunction"]]
 
     def __init__(self):
         self._callbacks = []

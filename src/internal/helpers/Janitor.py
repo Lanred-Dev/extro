@@ -1,7 +1,7 @@
-from typing import Any, List, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.shared_types import EmptyFunction, Destroyable
+    from src.internal.shared_types import EmptyFunction, Destroyable
 
 
 class Janitor:
@@ -11,7 +11,7 @@ class Janitor:
     This class helps track objects or functions that need to be destroyed, disconnected, or otherwise cleaned up when they are no longer in use.
     """
 
-    _managed: List[List["EmptyFunction"]]
+    _managed: list[list["EmptyFunction"]]
 
     def __init__(self):
         self._managed = []
@@ -20,7 +20,7 @@ class Janitor:
         """Destroy the Janitor and clean up all managed resources."""
         self.cleanup()
 
-    def add(self, instance: "Union[Destroyable, EmptyFunction]", *args: Any):
+    def add(self, instance: "Destroyable | EmptyFunction", *args):
         """
         Add a resource to be managed by the Janitor.
 
@@ -48,6 +48,8 @@ class Janitor:
         then clears the internal list.
         """
         for [method, *args] in list(self._managed):
-            method(*args)
+            # Instances may be destroyed before the janitor is cleaned up, so we need to check if the method is callable
+            if callable(method):
+                method(*args)
 
         self._managed.clear()

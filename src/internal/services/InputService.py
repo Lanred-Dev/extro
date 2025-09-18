@@ -1,14 +1,14 @@
-from typing import Dict, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import pyray
 from enum import Enum
 
 import src.internal.Console as Console
-from src.internal.components.Signal import Signal
+from src.internal.helpers.Signal import Signal
 from src.values.Vector2 import Vector2
-import src.internal.Renderer as Renderer
+import src.internal.services.ScreenService as ScreenService
 
 if TYPE_CHECKING:
-    from src.shared_types import EmptyFunction
+    from src.internal.shared_types import EmptyFunction
 
 
 class Key(Enum):
@@ -91,6 +91,7 @@ class Mouse(Enum):
 _mouse_position: Vector2 = Vector2(0, 0)
 _last_mouse_position: Vector2 = Vector2(0, 0)
 _mouse_moved: bool = False
+_active_inputs: set[Key | Mouse] = set()
 
 
 class InputSignalConnectionType(Enum):
@@ -107,7 +108,7 @@ class _InputSignalType(Enum):
 class InputSignal(Signal):
     __slots__ = ("_subscriber_types", "_type")
 
-    _subscriber_types: Dict[str, Tuple[InputSignalConnectionType, Union[Key, Mouse]]]
+    _subscriber_types: dict[str, tuple[InputSignalConnectionType, Key | Mouse | None]]
     _type: _InputSignalType
 
     def __init__(self, type: _InputSignalType):
@@ -119,19 +120,21 @@ class InputSignal(Signal):
         self,
         callback: "EmptyFunction",
         type: InputSignalConnectionType = InputSignalConnectionType.PRESS,
-        input: Union[Key, Mouse] = Key.A,
+        input: Key | Mouse | None = None,
     ) -> str:
-        if self._type == _InputSignalType.KEY and not isinstance(input, Key):
-            Console.log(
-                "Input must be of type Key for key input signals", Console.LogType.ERROR
-            )
-            return ""
-        if self._type == _InputSignalType.MOUSE and not isinstance(input, Mouse):
-            Console.log(
-                "Input must be of type Mouse for mouse input signals",
-                Console.LogType.ERROR,
-            )
-            return ""
+        if input is not None:
+            if self._type == _InputSignalType.KEY and not isinstance(input, Key):
+                Console.log(
+                    "Input must be of type Key for key input signals",
+                    Console.LogType.ERROR,
+                )
+                return ""
+            if self._type == _InputSignalType.MOUSE and not isinstance(input, Mouse):
+                Console.log(
+                    "Input must be of type Mouse for mouse input signals",
+                    Console.LogType.ERROR,
+                )
+                return ""
 
         connection_id = super().connect(callback)
         self._subscriber_types[connection_id] = (type, input)
@@ -141,48 +144,83 @@ class InputSignal(Signal):
         super().disconnect(connection_id)
         del self._subscriber_types[connection_id]
 
-    def fire_active_inputs(self):
-        for connection_id, (type, input) in self._subscriber_types.items():
-            match (type):
-                case InputSignalConnectionType.PRESS:
-                    if pyray.is_key_pressed(input.value):
-                        self._subscribers[connection_id](input)
-                    elif pyray.is_mouse_button_pressed(input.value):
-                        self._subscribers[connection_id](input)
-                case InputSignalConnectionType.RELEASE:
-                    if pyray.is_key_released(input.value):
-                        self._subscribers[connection_id](input)
-                    elif pyray.is_mouse_button_released(input.value):
-                        self._subscribers[connection_id](input)
-                case InputSignalConnectionType.ACTIVE:
-                    if input == Mouse.MOVE:
-                        if not _mouse_moved:
-                            continue
-                        Renderer.screen_to_world_coords(_mouse_position)
-                        self._subscribers[connection_id](_mouse_position)
-                    elif pyray.is_key_down(input.value):
-                        self._subscribers[connection_id](input)
-                    elif pyray.is_mouse_button_down(input.value):
-                        self._subscribers[connection_id](input)
+    def fire_subscribers_with_filter(
+        self, type: InputSignalConnectionType, input: Key | Mouse
+    ):
+        for connection_id, (
+            subscriber_type,
+            subscriber_input,
+        ) in self._subscriber_types.items():
+            if subscriber_type is not type or (
+                subscriber_input is not None and subscriber_input != input
+            ):
+                continue
+
+            if isinstance(input, Mouse):
+                self._subscribers[connection_id](_mouse_position)
+            elif subscriber_input is None:
+                self._subscribers[connection_id](input)
+            else:
+                self._subscribers[connection_id]()
 
 
 on_key_event: InputSignal = InputSignal(_InputSignalType.KEY)
 on_mouse_event: InputSignal = InputSignal(_InputSignalType.MOUSE)
 
 
-def _update_inputs():
-    global _mouse_position, _last_mouse_position, _mouse_moved
+def _update():
+    global _mouse_position, _last_mouse_position, _mouse_moved, _active_inputs
     _mouse_position.x = pyray.get_mouse_x()
     _mouse_position.y = pyray.get_mouse_y()
+    _mouse_moved = _mouse_position != _last_mouse_position
 
-    if _mouse_position != _last_mouse_position:
-        _mouse_moved = True
+    if _mouse_moved:
         _last_mouse_position = _mouse_position.copy()
-    else:
-        _mouse_moved = False
+        on_mouse_event.fire_subscribers_with_filter(
+            InputSignalConnectionType.ACTIVE, Mouse.MOVE
+        )
 
-    on_key_event.fire_active_inputs()
-    on_mouse_event.fire_active_inputs()
+    new_inputs: set[Key | Mouse] = set()
+
+    for key in Key:
+        if not pyray.is_key_down(key.value):
+            continue
+
+        new_inputs.add(key)
+
+    for mouse in Mouse:
+        if mouse == Mouse.MOVE or not pyray.is_mouse_button_down(mouse.value):
+            continue
+
+        new_inputs.add(mouse)
+
+    old_inputs = _active_inputs.copy()
+    _active_inputs = new_inputs
+
+    # Determine which inputs where released
+    for input in old_inputs:
+        if input in new_inputs:
+            continue
+
+        (
+            on_key_event if isinstance(input, Key) else on_mouse_event
+        ).fire_subscribers_with_filter(InputSignalConnectionType.RELEASE, input)
+
+    # Determine which inputs where pressed
+    for input in new_inputs:
+        is_key: bool = isinstance(input, Key)
+
+        # Also fire ACTIVE for pressed inputs
+        (on_key_event if is_key else on_mouse_event).fire_subscribers_with_filter(
+            InputSignalConnectionType.ACTIVE, input
+        )
+
+        if input in old_inputs:
+            continue
+
+        (on_key_event if is_key else on_mouse_event).fire_subscribers_with_filter(
+            InputSignalConnectionType.PRESS, input
+        )
 
 
 def set_mouse_visibility(is_visible: bool):
@@ -192,12 +230,17 @@ def set_mouse_visibility(is_visible: bool):
         pyray.hide_cursor()
 
 
+def is_input_active(input: Key | Mouse) -> bool:
+    return input in _active_inputs
+
+
 __all__ = [
     "on_key_event",
     "on_mouse_event",
-    "_update_inputs",
+    "_update",
     "Key",
     "Mouse",
     "InputSignalConnectionType",
     "set_mouse_visibility",
+    "is_input_active",
 ]

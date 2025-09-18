@@ -2,11 +2,13 @@ import time
 import sys
 import pyray
 
-import src.internal.Renderer as Renderer
-import src.internal.CollisionHandler as CollisionHandler
-import src.internal.InstanceHandler as InstanceHandler
-import src.internal.InputHandler as InputHandler
-from src.internal.components.Signal import Signal
+import src.internal.handlers.Renderer as Renderer
+import src.internal.handlers.CollisionHandler as CollisionHandler
+import src.internal.handlers.InstanceManager as InstanceManager
+import src.internal.services.InputService as InputService
+import src.internal.Window as Window
+import src.internal.handlers.PhysicsHandler as PhysicsHandler
+from src.internal.helpers.Signal import Signal
 from src.__version__ import __version__
 
 delta: float = 0
@@ -23,9 +25,10 @@ def start():
         delta = now - _last_frame_at
         _last_frame_at = now
 
-        InputHandler._update_inputs()
-        InstanceHandler._update_instances()
-        CollisionHandler._update_collisions()
+        InputService._update()
+        InstanceManager._update()
+        PhysicsHandler._update()
+        CollisionHandler._update()
 
         on_pre_render.fire()
         Renderer._render()
@@ -35,7 +38,7 @@ def start():
 
 
 def quit():
-    pyray.close_window()
+    Window._close()
     sys.exit()
 
 

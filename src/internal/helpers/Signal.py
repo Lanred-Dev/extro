@@ -1,8 +1,8 @@
-from typing import Any, Dict, TYPE_CHECKING
-import src.internal.IdentityHandler as IdentityHandler
+from typing import TYPE_CHECKING
+import src.internal.services.IdentityService as IdentityService
 
 if TYPE_CHECKING:
-    from src.shared_types import EmptyFunction
+    from src.internal.shared_types import EmptyFunction
 
 
 class Signal:
@@ -24,7 +24,7 @@ class Signal:
     """
 
     _is_active: bool
-    _subscribers: Dict[str, "EmptyFunction"]
+    _subscribers: dict[str, "EmptyFunction"]
 
     def __init__(self):
         self._is_active = True
@@ -51,7 +51,7 @@ class Signal:
         if not self._is_active:
             return ""
 
-        connection_id = IdentityHandler.generate_id(5, "sig_")
+        connection_id = IdentityService.generate_id(5, "sig_")
         self._subscribers[connection_id] = callback
         return connection_id
 
@@ -68,7 +68,7 @@ class Signal:
         """Remove all subscribers from the signal."""
         self._subscribers.clear()
 
-    def fire(self, *args: Any, **kwargs: Any):
+    def fire(self, *args):
         """
         Invoke all connected callbacks with the given arguments.
 
@@ -83,4 +83,4 @@ class Signal:
             return
 
         for subscriber in list(self._subscribers.values()):
-            subscriber(*args, **kwargs)
+            subscriber(*args)

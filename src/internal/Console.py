@@ -1,10 +1,9 @@
-from typing import List, Tuple
 import time
 import pyray
 from enum import Enum
 
 from src.__version__ import __version__
-from src.internal.Window import Window
+import src.internal.Window as Window
 from src.instances.ui.Fonts import Arial
 
 
@@ -15,7 +14,7 @@ class LogType(Enum):
     NONE = ["", (255, 255, 255, 255)]
 
 
-_logs: List[Tuple[Tuple[int, int, int, int], str]] = []
+_logs: list[tuple[tuple[int, int, int, int], str]] = []
 _is_visible: bool = False
 _last_frame_at: float = time.perf_counter()
 
@@ -42,16 +41,14 @@ def _draw():
     delta = now - (_last_frame_at if _last_frame_at > 0 else now)
     _last_frame_at = now
 
-    pyray.draw_rectangle(
-        0, 0, int(Window._actual_size.x), int(Window._actual_size.y), (0, 0, 0, 150)
-    )
+    pyray.draw_rectangle(0, 0, int(Window.size.x), int(Window.size.y), (0, 0, 0, 150))
 
     fps_text: str = f"{1 / delta:.0f} FPS"
     fps_label_width: pyray.Vector2 = pyray.measure_text_ex(Arial._font, fps_text, 20, 1)
     pyray.draw_text_ex(
         Arial._font,
         fps_text,
-        (int(Window._actual_size.x) - fps_label_width.x, 0),
+        (int(Window.size.x) - fps_label_width.x, 0),
         20,
         1,
         (255, 255, 255, 255),
@@ -61,7 +58,7 @@ def _draw():
         pyray.draw_text_ex(
             Arial._font,
             text,
-            (0, int(Window._actual_size.y - ((index + 1) * 20))),
+            (0, int(Window.size.y - ((index + 1) * 20))),
             20,
             1,
             color,

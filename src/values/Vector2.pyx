@@ -11,6 +11,10 @@ cdef class Vector2:
         """Return a tuple of RGBA values."""
         return (self.x, self.y)
 
+    cpdef float magnitude(self):
+        """Return the magnitude of this vector."""
+        return (self.x**2 + self.y**2) ** 0.5
+
     cdef Vector2 __cadd__(self, Vector2 other):
         return Vector2(self.x + other.x, self.y + other.y)
 
@@ -50,6 +54,20 @@ cdef class Vector2:
             return self.__ctruediv_vector__(other)
         else:
             return self.__ctruediv_float__(other)
+
+    def __neg__(self):
+        """Return a new vector with both components negated."""
+        return Vector2(-self.x, -self.y)
+
+    def __lt__(self, other: Vector2) -> bool:
+        return self.x < other.x and self.y < other.y
+
+    def __gt__(self, other: Vector2) -> bool:
+        return self.x > other.x and self.y > other.y
+
+    def __abs__(self):
+        """Return a new vector with both components as their absolute values."""
+        return Vector2(abs(self.x), abs(self.y))
 
     def __str__(self):
         return f"Vector2({self.x}, {self.y})"

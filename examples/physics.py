@@ -1,6 +1,6 @@
 # python -m tests.physics
 
-import src as extro
+import extro as extro
 
 extro.Renderer.set_fps(1000)
 extro.WorldService.set_world_tile_size(20)

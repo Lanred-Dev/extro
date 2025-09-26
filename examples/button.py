@@ -1,11 +1,13 @@
-# python -m tests.button
+# python -m examples.button
 
-import src as extro
+import extro as extro
 
-extro.Renderer.set_fps(60)
+extro.services.RenderService.set_fps(60)
 extro.Window.set_title("Button Test")
 
-scene = extro.Instances.Scene(type=extro.Renderer.RenderTargetType.INDEPENDENT)
+scene = extro.Instances.Scene(
+    type=extro.services.RenderService.RenderTargetType.INDEPENDENT
+)
 button = extro.Instances.ui.Button(
     color=extro.Color(0, 0, 255),
     size=extro.Vector2(0.2, 0.1),

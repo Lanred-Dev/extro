@@ -1,9 +1,9 @@
-# python -m tests.proximity_area
+# python -m examples.proximity_area
 
-import src as extro
+import extro as extro
 
-extro.Renderer.set_fps(60)
-extro.WorldService.set_world_tile_size(100)
+extro.services.RenderService.set_fps(60)
+extro.services.WorldService.set_tile_size(100)
 extro.Window.set_title("Proximity Area Test")
 
 
@@ -43,13 +43,13 @@ scene.add(debug_box)
 
 
 def on_mouse_move(position: extro.Vector2):
-    rect1.position = position
+    rect1.position = extro.services.ScreenService.screen_to_world_coords(position)
 
 
-extro.InputService.on_mouse_event.connect(
+extro.services.InputService.on_mouse_event.connect(
     on_mouse_move,
-    extro.InputService.InputSignalConnectionType.ACTIVE,
-    extro.InputService.Mouse.MOVE,
+    extro.services.InputService.SubscriberType.ACTIVE,
+    extro.services.InputService.Mouse.MOVE,
 )
 
 extro.Engine.start()

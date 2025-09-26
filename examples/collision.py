@@ -1,10 +1,10 @@
-# python -m tests.collision
+# python -m examples.collision
 
-import src as extro
+import extro as extro
 
-extro.Renderer.set_fps(60)
+extro.services.RenderService.set_fps(60)
+extro.services.WorldService.set_tile_size(100)
 extro.Window.set_title("Collision Test")
-extro.WorldService.set_world_tile_size(100)
 
 
 def on_rect1_collision(other):
@@ -61,25 +61,25 @@ def decrease_rect2_size():
 
 
 def on_mouse_move(position: extro.Vector2):
-    rect2.position = extro.ScreenService.screen_to_world_coords(position)
+    rect2.position = extro.services.ScreenService.screen_to_world_coords(position)
 
 
-extro.InputService.on_mouse_event.connect(
+extro.services.InputService.on_mouse_event.connect(
     on_mouse_move,
-    extro.InputService.InputSignalConnectionType.ACTIVE,
-    extro.InputService.Mouse.MOVE,
+    extro.services.InputService.SubscriberType.ACTIVE,
+    extro.services.InputService.Mouse.MOVE,
 )
 
-extro.InputService.on_key_event.connect(
+extro.services.InputService.on_key_event.connect(
     increase_rect2_size,
-    extro.InputService.InputSignalConnectionType.PRESS,
-    extro.InputService.Key.E,
+    extro.services.InputService.SubscriberType.PRESS,
+    extro.services.InputService.Key.E,
 )
 
-extro.InputService.on_key_event.connect(
+extro.services.InputService.on_key_event.connect(
     decrease_rect2_size,
-    extro.InputService.InputSignalConnectionType.PRESS,
-    extro.InputService.Key.Q,
+    extro.services.InputService.SubscriberType.PRESS,
+    extro.services.InputService.Key.Q,
 )
 
 extro.Engine.on_pre_render.connect(rotate_rect1)

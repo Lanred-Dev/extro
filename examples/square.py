@@ -1,9 +1,9 @@
-# python -m tests.square
+# python -m examples.square
 
-import src as extro
+import extro as extro
 
-extro.Renderer.set_fps(60)
-extro.WorldService.set_world_tile_size(100)
+extro.services.RenderService.set_fps(60)
+extro.services.WorldService.set_tile_size(100)
 extro.Window.set_title("Square Test")
 
 scene = extro.Instances.Scene()

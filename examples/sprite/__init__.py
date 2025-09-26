@@ -1,6 +1,6 @@
 # python -m tests.sprite
 
-import src as extro
+import extro as extro
 
 extro.Renderer.set_fps(60)
 extro.Window.set_title("Sprite Test")

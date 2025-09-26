@@ -1,0 +1,8 @@
+from extro.core.AudioSource import AudioSource
+
+
+class EffectAudioSource(AudioSource):
+    """An audio source specifically for sound effects."""
+
+    def __init__(self, audio_file: str, volume: float = 1.0):
+        super().__init__(audio_file=audio_file, volume=volume, is_stream=False)

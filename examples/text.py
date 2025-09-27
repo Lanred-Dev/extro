@@ -2,11 +2,11 @@
 
 import extro as extro
 
-extro.services.RenderService.set_fps(60)
+extro.Services.RenderService.set_fps(60)
 extro.Window.set_title("Text Test")
 
 scene = extro.Instances.Scene(
-    type=extro.services.RenderService.RenderTargetType.INDEPENDENT
+    type=extro.Services.RenderService.RenderTargetType.INDEPENDENT
 )
 text = extro.Instances.ui.Text(
     text="Hello, World!",

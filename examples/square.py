@@ -2,8 +2,8 @@
 
 import extro as extro
 
-extro.services.RenderService.set_fps(60)
-extro.services.WorldService.set_tile_size(100)
+extro.Services.RenderService.set_fps(60)
+extro.Services.WorldService.set_tile_size(100)
 extro.Window.set_title("Square Test")
 
 scene = extro.Instances.Scene()

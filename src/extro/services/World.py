@@ -1,9 +1,8 @@
 """Provides configuration for the game world, including the active camera and tile size."""
 
 import extro.Console as Console
-import extro.internal.InstanceManager as InstanceManager
-from extro.core.Camera import Camera
-from extro.shared.Vector2 import Vector2
+from extro.instances.core.Camera import Camera
+from extro.shared.Vector2C import Vector2
 
 _DEFAULT_CAMERA: Camera = Camera()
 _DEFAULT_TILE_SIZE: Vector2 = Vector2(30, 30)
@@ -18,13 +17,13 @@ def set_tile_size(size: Vector2 | float | int):
         size = Vector2(size, size)
 
     if size <= Vector2(0, 0):
-        Console.log(f"`tile_size` must be > 0 (tried {size})", Console.LogType.ERROR)
+        Console.log(f"`tile_size` must be >0 (tried {size})", Console.LogType.ERROR)
         return
 
     global tile_size
-    tile_size = size
+    tile_size.x = size.x
+    tile_size.y = size.y
     Console.log(f"`tile_size` set to {size}")
-    InstanceManager.queue_all_for_update()
 
 
 def set_camera(new_camera: "Camera | None"):

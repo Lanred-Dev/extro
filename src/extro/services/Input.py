@@ -6,8 +6,7 @@ import extro.internal.systems.Input as InputSystem
 Key = InputSystem.Key
 Mouse = InputSystem.Mouse
 SubscriberType = InputSystem.SubscriberType
-on_key_event: InputSystem.InputSignal = InputSystem.on_key_event
-on_mouse_event: InputSystem.InputSignal = InputSystem.on_mouse_event
+on_event: InputSystem.InputSignal = InputSystem.on_event
 
 _actions: dict[str, int] = {}
 
@@ -68,8 +67,7 @@ __all__ = [
     "Key",
     "Mouse",
     "SubscriberType",
-    "on_key_event",
-    "on_mouse_event",
+    "on_event",
     "set_mouse_visibility",
     "is_input_active",
     "register_action",

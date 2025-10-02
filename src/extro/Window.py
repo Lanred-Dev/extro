@@ -2,7 +2,7 @@
 
 import pyray
 
-from extro.shared.Vector2 import Vector2
+from extro.shared.Vector2C import Vector2
 from extro.utils.Signal import Signal
 
 _PRIMARY_MONITOR_INDEX: int = pyray.get_current_monitor()
@@ -27,7 +27,8 @@ def set_title(title: str):
 def set_size(new_size: Vector2):
     """Set the window size."""
     global size
-    size = new_size
+    size.x = new_size.x
+    size.y = new_size.y
     pyray.set_window_size(int(new_size.x), int(new_size.y))
     on_resize.fire(new_size)
 

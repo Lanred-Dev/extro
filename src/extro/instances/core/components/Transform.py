@@ -1,0 +1,148 @@
+from extro.utils.Signal import Signal
+from extro.instances.core.components.Component import Component
+from extro.shared.Vector2C import Vector2
+from extro.shared.Coord import Coord
+import extro.Console as Console
+import extro.internal.systems.Transform as TransformSystem
+import extro.internal.ComponentManager as ComponentManager
+
+
+class Transform(Component):
+    __slots__ = Component.__slots__ + (
+        "_position",
+        "_size",
+        "_rotation",
+        "_scale",
+        "_anchor",
+        "_position_offset",
+        "_relative_to",
+        "_bounding",
+        "_actual_position",
+        "_actual_size",
+        "on_update",
+    )
+
+    _position: Coord
+    _size: Coord
+    _rotation: int
+    _scale: Vector2
+    _anchor: Vector2
+    _position_offset: tuple[float, float]
+    _relative_to: int | None
+    _bounding: tuple[float, float, float, float]
+    _actual_position: tuple[float, float]
+    _actual_size: tuple[float, float]
+
+    on_update: Signal
+
+    def __init__(
+        self,
+        owner: int,
+        position: Coord,
+        size: Coord,
+        rotation: int = 0,
+        scale: Vector2 = Vector2(1, 1),
+        anchor: Vector2 = Vector2(0, 0),
+    ):
+        super().__init__(owner)
+
+        self._position = position
+        self._size = size
+        self._rotation = rotation
+        self._scale = scale
+        self._anchor = anchor
+        self._position_offset = (0, 0)
+        self._bounding = (0, 0, 0, 0)
+        self._relative_to = None
+        self._actual_position = (0, 0)
+        self._actual_size = (0, 0)
+
+        self.on_update = Signal()
+
+        # Force an initial calculation, only need size because it will trigger position recalculation
+        self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
+
+        ComponentManager.register(
+            self._owner, ComponentManager.ComponentType.TRANSFORM, self
+        )
+
+    def destroy(self):
+        self.on_update.destroy()
+
+    def translate(self, translation: Coord):
+        self._position.absolute_x += translation.absolute_x
+        self._position.absolute_y += translation.absolute_y
+        self.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
+
+    def is_point_inside(self, point: Vector2) -> bool:
+        x, y, width, height = self._bounding
+        return (
+            point.x >= x
+            and point.x <= x + width
+            and point.y >= y
+            and point.y <= y + height
+        )
+
+    @property
+    def anchor(self) -> Vector2:
+        return self._anchor
+
+    @anchor.setter
+    def anchor(self, anchor: Vector2):
+        if anchor.x > 1 or anchor.x < 0 or anchor.y > 1 or anchor.y < 0:
+            Console.log(
+                "Anchor much be between Vector2(0, 0) and Vector2(1, 1)",
+                Console.LogType.ERROR,
+            )
+            return
+
+        self._anchor = anchor
+        self.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
+
+    @property
+    def position(self) -> Coord:
+        return self._position
+
+    @position.setter
+    def position(self, position: Coord):
+        self._position = position
+        self.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
+
+    @property
+    def size(self) -> Coord:
+        return self._size
+
+    @size.setter
+    def size(self, size: Coord):
+        self._size = size
+        self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
+
+    @property
+    def rotation(self) -> int:
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, rotation: int):
+        self._rotation = rotation
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale: Vector2):
+        self._scale = scale
+        self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
+
+    @property
+    def bounding(self) -> tuple[float, float, float, float]:
+        return self._bounding
+
+    @property
+    def relative_to(self) -> int | None:
+        return self._relative_to
+
+    @relative_to.setter
+    def relative_to(self, instance_id: int | None):
+        self._relative_to = instance_id
+        self.add_flag(TransformSystem.TransformDirtyFlags.POSITION)

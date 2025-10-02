@@ -60,29 +60,29 @@ def _draw():
 
     stats_width += 10
     pyray.draw_rectangle(
-        int(Window.size.x) - stats_width,
-        int(Window.size.y - stats_height - 10),
+        0,
+        0,
         stats_width,
         stats_height + 10,
         (0, 0, 0, 255),
     )
 
-    current_y: int = int(Window.size.y)
+    current_y: int = 5
 
     for name, value in stats.items():
-        current_y -= 25
         stat_text: str = f"{name}: {value * 1000:.2f} ms"
         pyray.draw_text_ex(
             Arial._font,
             f"{name}: {value * 1000:.2f} ms",
             (
-                int(Window.size.x) - stats_width + 10,
+                5,
                 current_y,
             ),
             20,
             1,
             (255, 255, 255, 255),
         )
+        current_y += 25
 
 
 __all__ = [

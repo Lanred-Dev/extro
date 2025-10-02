@@ -6,6 +6,6 @@
 
 Start by creating a `.venv` Python environment, then install the dependencies from `requirements.txt`.
 
-### Building Cython
+### Building C++ extensions
 
-`cybuilder build --no-interface`
+CD to root folder and run `./build_release.sh`

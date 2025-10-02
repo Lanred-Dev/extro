@@ -6,7 +6,7 @@ from enum import Enum
 
 import extro.Window as Window
 from extro.assets.Fonts import Arial
-from extro.shared.Color import Color
+from extro.shared.RGBAColorC import RGBAColor
 import extro.Profiler as Profiler
 
 
@@ -18,9 +18,9 @@ class LogPriority(Enum):
 
 
 class LogType(Enum):
-    DEBUG = [LogPriority.DEBUG, "Debug", Color(255, 255, 255)]
-    WARNING = [LogPriority.WARNING, "Warning", Color(255, 255, 0)]
-    ERROR = [LogPriority.ERROR, "Error", Color(255, 0, 0)]
+    DEBUG = [LogPriority.DEBUG, "Debug", RGBAColor(255, 255, 255)]
+    WARNING = [LogPriority.WARNING, "Warning", RGBAColor(255, 255, 0)]
+    ERROR = [LogPriority.ERROR, "Error", RGBAColor(255, 0, 0)]
 
 
 logs: list[tuple[LogType, str]] = []

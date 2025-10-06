@@ -4,7 +4,7 @@ from typing import Any
 import extro.internal.systems.Audio as AudioSystem
 from extro.utils.Signal import Signal
 import extro.Console as Console
-import extro.internal.services.Cache as CacheService
+import extro.internal.services.FileCache as FileCacheService
 from extro.instances.core.Instance import Instance
 
 
@@ -110,7 +110,7 @@ class AudioSource(Instance):
         if self._is_stream:
             self._audio = pyray.load_music_stream(self._audio_file)
         else:
-            self._audio = CacheService.audio_cache.load(self._audio_file)
+            self._audio = FileCacheService.audio_cache.load(self._audio_file)
 
         self._apply_pitch()
         self._apply_volume()
@@ -123,7 +123,7 @@ class AudioSource(Instance):
             pyray.unload_music_stream(self._audio)
         else:
             pyray.unload_sound(self._audio)
-            CacheService.audio_cache.unload(self._audio_file)
+            FileCacheService.audio_cache.unload(self._audio_file)
 
     @property
     def volume(self) -> float:

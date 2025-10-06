@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from extro.utils.Signal import Signal
 from extro.instances.core.components.Component import Component
 from extro.shared.Vector2C import Vector2
@@ -5,6 +7,9 @@ from extro.shared.Coord import Coord
 import extro.Console as Console
 import extro.internal.systems.Transform as TransformSystem
 import extro.internal.ComponentManager as ComponentManager
+
+if TYPE_CHECKING:
+    from extro.internal.InstanceManager import InstanceIDType
 
 
 class Transform(Component):
@@ -19,6 +24,8 @@ class Transform(Component):
         "_bounding",
         "_actual_position",
         "_actual_size",
+        "_parent",
+        "_children",
         "on_update",
     )
 
@@ -32,19 +39,21 @@ class Transform(Component):
     _bounding: tuple[float, float, float, float]
     _actual_position: tuple[float, float]
     _actual_size: tuple[float, float]
+    _parent: "InstanceIDType | None"
+    _children: "list[InstanceIDType]"
 
     on_update: Signal
 
     def __init__(
         self,
-        owner: int,
+        owner: "InstanceIDType",
         position: Coord,
         size: Coord,
         rotation: int = 0,
         scale: Vector2 = Vector2(1, 1),
         anchor: Vector2 = Vector2(0, 0),
     ):
-        super().__init__(owner)
+        super().__init__(owner, ComponentManager.ComponentType.TRANSFORM)
 
         self._position = position
         self._size = size
@@ -62,10 +71,6 @@ class Transform(Component):
         # Force an initial calculation, only need size because it will trigger position recalculation
         self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
 
-        ComponentManager.register(
-            self._owner, ComponentManager.ComponentType.TRANSFORM, self
-        )
-
     def destroy(self):
         self.on_update.destroy()
 
@@ -82,6 +87,12 @@ class Transform(Component):
             and point.y >= y
             and point.y <= y + height
         )
+
+    def add_child(self, instance_id: "InstanceIDType"):
+        if instance_id in self._children:
+            return
+
+        self._children.append(instance_id)
 
     @property
     def anchor(self) -> Vector2:

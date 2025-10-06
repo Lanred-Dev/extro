@@ -6,13 +6,10 @@ from extro.shared.Vector2C import Vector2
 class PhysicsBody(Component):
     def __init__(
         self,
-        owner: int,
         mass: float,
         restitution: float = 0.2,
         is_anchored: bool = False,
     ):
-        super().__init__(owner)
-
         self.mass = mass
         self.restitution = restitution
         self.is_anchored = is_anchored

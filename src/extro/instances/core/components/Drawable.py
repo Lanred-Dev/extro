@@ -6,6 +6,7 @@ import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
     from extro.shared.types import EmptyFunction
+    from extro.internal.InstanceManager import InstanceIDType
 
 
 class Drawable(Component):
@@ -23,22 +24,18 @@ class Drawable(Component):
 
     def __init__(
         self,
-        owner: int,
+        owner: "InstanceIDType",
         render_command: "EmptyFunction",
         color: RGBAColor = RGBAColor(255, 255, 255),
         zindex: int = 0,
         is_visible: bool = True,
     ):
-        super().__init__(owner)
+        super().__init__(owner, ComponentManager.ComponentType.DRAWABLE)
 
         self._render_command = render_command
         self.color = color
         self._zindex = zindex
         self.is_visible = is_visible
-
-        ComponentManager.register(
-            self._owner, ComponentManager.ComponentType.DRAWABLE, self
-        )
 
     @property
     def zindex(self) -> int:

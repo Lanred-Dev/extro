@@ -5,9 +5,11 @@ import extro.internal.systems.Collision as CollisionSystem
 import extro.services.CollisionGroup as CollisionGroupService
 import extro.Console as Console
 from extro.instances.core.components.Component import Component
+import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
     from extro.shared.Vector2C import Vector2
+    from extro.internal.InstanceManager import InstanceIDType
 
 
 class Collider(Component):
@@ -30,11 +32,11 @@ class Collider(Component):
 
     def __init__(
         self,
-        owner: int,
+        owner: "InstanceIDType",
         is_collidable: bool,
         collision_group: str,
     ):
-        super().__init__(owner)
+        super().__init__(owner, ComponentManager.ComponentType.COLLIDER)
 
         self._is_collidable = is_collidable
         self.collision_group = collision_group

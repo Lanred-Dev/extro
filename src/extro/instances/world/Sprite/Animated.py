@@ -1,17 +1,12 @@
 import pyray
 
 from extro.instances.world.Sprite import Sprite
-from extro.shared.Vector2 import Vector2
-import extro.internal.systems.Animation as AnimationSystem
+from extro.shared.Vector2C import Vector2
+from extro.instances.core.components.Animator import Animator
 
 
 class AnimatedSprite(Sprite):
-    _frame_size: Vector2
-    _current_frame: Vector2
-    _frame_duration: float
-    _last_frame_at: float
-    _frame_count: int
-    _is_active: bool
+    animator: "Animator"
 
     def __init__(
         self,
@@ -26,25 +21,14 @@ class AnimatedSprite(Sprite):
             source_size=frame_size,
         )
 
-        self._is_active = is_active
-        self._frame_count = frame_count
-        self._frame_duration = frame_duration
-        self._current_frame = Vector2(0, 0)
-        # Force frame update on first update call
-        self._last_frame_at = pyray.get_time() - frame_duration
-        self._frame_size = frame_size
-
-        AnimationSystem.register_sprite(self._id)
-        self._janitor.add(AnimationSystem.unregister_sprite, self._id)
-
-    @property
-    def is_active(self) -> bool:
-        return self._is_active
-
-    @is_active.setter
-    def is_active(self, is_active: bool):
-        self._is_active = is_active
-
-    @property
-    def frame(self) -> Vector2:
-        return self._current_frame
+        self.add_component(
+            "animator",
+            Animator(
+                self.id,
+                texture_source=self._texture_source,
+                frame_duration=frame_duration,
+                is_active=is_active,
+                frame_count=frame_count,
+            ),
+        )
+        self.animator = self.get_component_unsafe("animator")

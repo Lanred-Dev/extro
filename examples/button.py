@@ -1,31 +1,27 @@
-# python -m examples.button
-
-import extro as extro
+import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("Button Test")
+extro.Window.set_title("Click the button :)")
 
-scene = extro.Instances.Scene(
-    type=extro.Services.RenderService.RenderTargetType.INDEPENDENT
-)
+layer = extro.Instances.ui.Layer()
 button = extro.Instances.ui.Button(
-    color=extro.Color(0, 0, 255),
-    size=extro.Vector2(0.2, 0.1),
-    position=extro.Vector2(0.5, 0.5),
+    color=extro.RGBAColor(0, 0, 255),
+    size=extro.Coord(0.2, 0.1, extro.CoordType.NORMALIZED),
+    position=extro.Coord(0.5, 0.5, extro.CoordType.NORMALIZED),
 )
 button.on_click.connect(lambda: print("Button clicked!"))
-scene.add(button)
+layer.add(button)
 
 text = extro.Instances.ui.Text(
     text="Click Me",
-    font=extro.Instances.ui.Fonts.Arial,
+    font=extro.Assets.Fonts.Arial,
     font_size=20,
     character_spacing=2,
-    color=extro.Color(255, 255, 255),
-    position=extro.Vector2(0.5, 0.5),
+    color=extro.RGBAColor(255, 255, 255),
+    position=extro.Coord(0.5, 0.5, extro.CoordType.NORMALIZED),
     anchor=extro.Vector2(0.5, 0.5),
-    is_position_relative=True,
+    scale_size_to_font=True,
 )
-button.add_child(text)
+layer.add(text)
 
 extro.Engine.start()

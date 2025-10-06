@@ -1,50 +1,42 @@
 from typing import TYPE_CHECKING
-
 import pyray
+from enum import Enum, auto
 
-import extro.Console as Console
 import extro.internal.InstanceManager as InstanceManager
+from extro.internal.utils.InstanceRegistry import InstanceRegistry
+import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
-    from extro.instances.world.Sprite.Animated import AnimatedSprite
-
-sprites: list[int] = []
-tweens: list[str] = []
+    from extro.animation.Tween import Tween
 
 
-def register_sprite(sprite_id: int):
-    if sprite_id in sprites:
-        Console.log(
-            f"Sprite {sprite_id} is already registered", Console.LogType.WARNING
-        )
-        return
-
-    sprites.append(sprite_id)
-    Console.log(f"Sprite {sprite_id} registered")
+class AnimatedInstanceType(Enum):
+    ANIMATOR = auto()
+    TWEEN = auto()
 
 
-def unregister_sprite(sprite_id: int):
-    if sprite_id not in sprites:
-        Console.log(f"Sprite {sprite_id} is not registered", Console.LogType.WARNING)
-        return
-
-    sprites.remove(sprite_id)
-    Console.log(f"Sprite {sprite_id} unregistered")
+tweens: InstanceRegistry = InstanceRegistry(
+    "Animation System",
+)
 
 
 def update():
-    current_time: float = pyray.get_time()
+    now: float = pyray.get_time()
 
-    for sprite_id in sprites:
-        sprite: "AnimatedSprite" = InstanceManager.instances[sprite_id]  # type: ignore
-
+    for animator in ComponentManager.animators.values():
         if (
-            not sprite._is_active
-            or current_time - sprite._last_frame_at < sprite._frame_duration
+            not animator._is_active
+            or now - animator._last_frame_at < animator._frame_duration
         ):
             continue
 
-        sprite._current_frame.x = (sprite._current_frame.x + 1) % sprite._frame_count
-        sprite._texture_source.x = sprite._current_frame.x * sprite._source_size.x
-        sprite._texture_source.y = sprite._current_frame.y * sprite._source_size.y
-        sprite._last_frame_at = current_time
+        animator._current_frame.x = (
+            animator._current_frame.x + 1
+        ) % animator._frame_count
+        animator._texture_source.x = (
+            animator._current_frame.x * animator._texture_source.width
+        )
+        animator._texture_source.y = (
+            animator._current_frame.y * animator._texture_source.height
+        )
+        animator._last_frame_at = now

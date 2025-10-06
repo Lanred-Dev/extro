@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING
 import pyray
 from enum import IntEnum
+import time
 
 import extro.Console as Console
 from extro.utils.Signal import Signal
-from extro.shared.Vector2 import Vector2
+from extro.shared.Vector2C import Vector2
 
 if TYPE_CHECKING:
     from extro.shared.types import EmptyFunction
@@ -84,12 +85,12 @@ class Mouse(IntEnum):
     MOVE = -1
 
 
-ALL_KEYS: list[Key] = [key for key in Key]
-ALL_MOUSE_BUTTONS: list[Mouse] = [Mouse.LEFT, Mouse.RIGHT, Mouse.MIDDLE]
-
 mouse_position: Vector2 = Vector2(0, 0)
-active_inputs: dict[int, bool] = {key: False for key in ALL_KEYS + ALL_MOUSE_BUTTONS}
+active_inputs: dict[int, bool] = {
+    key: False for key in [key for key in Key] + [Mouse.LEFT, Mouse.RIGHT, Mouse.MIDDLE]
+}
 old_active_inputs: dict[int, bool] = active_inputs.copy()
+input_usage_map: dict[int, int] = {}
 
 
 class SubscriberType(IntEnum):
@@ -98,70 +99,72 @@ class SubscriberType(IntEnum):
     ACTIVE = 2
 
 
-class InternalSignalType(IntEnum):
-    KEY = 0
-    MOUSE = 1
-
-
 class InputSignal(Signal):
-    __slots__ = ("_subscriber_types", "_type")
+    __slots__ = Signal.__slots__ + ("_subscriber_input_map", "_subscriber_type_map")
 
-    _subscriber_types: dict[str, tuple[SubscriberType, Key | Mouse | None]]
-    _type: InternalSignalType
+    _subscriber_input_map: dict[SubscriberType, dict[str, tuple[Key | Mouse] | None]]
+    _subscriber_type_map: dict[str, SubscriberType]
 
-    def __init__(self, type: InternalSignalType):
+    def __init__(self):
         super().__init__()
-        self._subscriber_types = {}
-        self._type = type
+
+        self._subscriber_input_map = {type: {} for type in SubscriberType}
+        self._subscriber_type_map = {}
 
     def connect(
         self,
         callback: "EmptyFunction",
         type: SubscriberType = SubscriberType.PRESS,
-        input: Key | Mouse | None = None,
+        inputs: Key | Mouse | tuple[Key | Mouse] | None = None,
     ) -> str:
-        if input is not None:
-            if self._type == InternalSignalType.KEY and not isinstance(input, Key):
-                Console.log(
-                    "Input must be of type Key for key input signals",
-                    Console.LogType.ERROR,
-                )
-                return ""
-            if self._type == InternalSignalType.MOUSE and not isinstance(input, Mouse):
-                Console.log(
-                    "Input must be of type Mouse for mouse input signals",
-                    Console.LogType.ERROR,
-                )
-                return ""
-
         connection_id = super().connect(callback)
-        self._subscriber_types[connection_id] = (type, input)
+
+        inputs = (
+            inputs
+            if isinstance(inputs, tuple)
+            else (inputs,) if inputs is not None else None
+        )
+        self._subscriber_type_map[connection_id] = type
+        self._subscriber_input_map[type][connection_id] = inputs
+
+        if inputs:
+            for input in inputs:
+                if input not in input_usage_map:
+                    input_usage_map[input] = 0
+
+                input_usage_map[input] += 1
+
         return connection_id
 
     def disconnect(self, connection_id: str):
         super().disconnect(connection_id)
-        del self._subscriber_types[connection_id]
 
-    def fire_subscribers_with_filter(
-        self, type: SubscriberType, input: Key | Mouse, *args
-    ):
-        for connection_id, (
-            subscriber_type,
-            subscriber_input,
-        ) in self._subscriber_types.items():
-            if subscriber_type is not type or (
-                subscriber_input is not None and subscriber_input != input
-            ):
-                continue
+        for input in (
+            self._subscriber_input_map[self._subscriber_type_map[connection_id]][
+                connection_id
+            ]
+            or ()
+        ):
+            input_usage_map[input] -= 1
 
-            self._subscribers[connection_id](*args)
+            if input_usage_map[input] <= 0:
+                del input_usage_map[input]
+
+        del self._subscriber_input_map[self._subscriber_type_map[connection_id]][
+            connection_id
+        ]
+        del self._subscriber_type_map[connection_id]
+
+    def fire_subscribers_with_filter(self, type: SubscriberType, input: int, *args):
+        for connection_id, inputs in self._subscriber_input_map[type].items():
+            if inputs is None or input in inputs:
+                self._subscribers[connection_id](input, *args)
 
 
-on_key_event: InputSignal = InputSignal(InternalSignalType.KEY)
-on_mouse_event: InputSignal = InputSignal(InternalSignalType.MOUSE)
+on_event: InputSignal = InputSignal()
 
 
-def update_inputs():
+def update():
     global mouse_position, active_inputs
     new_mouse_x = pyray.get_mouse_x()
     new_mouse_y = pyray.get_mouse_y()
@@ -169,35 +172,26 @@ def update_inputs():
     if new_mouse_x != mouse_position.x or new_mouse_y != mouse_position.y:
         mouse_position.x = new_mouse_x
         mouse_position.y = new_mouse_y
-        on_mouse_event.fire_subscribers_with_filter(
+        on_event.fire_subscribers_with_filter(
             SubscriberType.ACTIVE, Mouse.MOVE, mouse_position
         )
 
-    for key in ALL_KEYS:
-        active_inputs[key] = pyray.is_key_down(key)
+    for input in input_usage_map.keys():
+        active_inputs[input] = (
+            pyray.is_key_down(input)
+            if input in Key
+            else pyray.is_mouse_button_down(input)
+        )
+        args = (mouse_position,) if input in Mouse else ()
 
-        if active_inputs[key]:
-            on_key_event.fire_subscribers_with_filter(SubscriberType.ACTIVE, key, key)
+        if active_inputs[input]:
+            on_event.fire_subscribers_with_filter(SubscriberType.ACTIVE, input, *args)
 
-            if not old_active_inputs[key]:
-                on_key_event.fire_subscribers_with_filter(
-                    SubscriberType.PRESS, key, key
+            if not old_active_inputs[input]:
+                on_event.fire_subscribers_with_filter(
+                    SubscriberType.PRESS, input, *args
                 )
-        elif not active_inputs[key] and old_active_inputs[key]:
-            on_key_event.fire_subscribers_with_filter(SubscriberType.RELEASE, key, key)
+        elif not active_inputs[input] and old_active_inputs[input]:
+            on_event.fire_subscribers_with_filter(SubscriberType.RELEASE, input, *args)
 
-        old_active_inputs[key] = active_inputs[key]
-
-    for mouse in ALL_MOUSE_BUTTONS:
-        active_inputs[mouse] = pyray.is_mouse_button_down(mouse)
-
-        if active_inputs[mouse] and not old_active_inputs[mouse]:
-            on_mouse_event.fire_subscribers_with_filter(
-                SubscriberType.PRESS, mouse, mouse_position
-            )
-        elif not active_inputs[mouse] and old_active_inputs[mouse]:
-            on_mouse_event.fire_subscribers_with_filter(
-                SubscriberType.RELEASE, mouse, mouse_position
-            )
-
-        old_active_inputs[mouse] = active_inputs[mouse]
+        old_active_inputs[input] = active_inputs[input]

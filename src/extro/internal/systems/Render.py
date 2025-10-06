@@ -1,66 +1,81 @@
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Any
 import pyray
+from enum import IntFlag, auto, Enum
 
-import extro.Console as Console
-import extro.services.World as WorldService
-import extro.internal.services.Identity as IdentityService
-from extro.shared.types import RenderTargetType
+from extro.internal.utils.InstanceRegistry import InstanceRegistry
 import extro.services.Render as RenderService
+import extro.services.World as WorldService
+import extro.Console as Console
+import extro.internal.InstanceManager as InstanceManager
 
 if TYPE_CHECKING:
-    from extro.core.Scene import Scene
-    from extro.core.Instance.Drawable import DrawableInstance
+    from extro.internal.InstanceManager import InstanceIDType
+    from extro.instances.core.RenderTarget import RenderTarget
 
 
-class RenderOrder(TypedDict):
-    world: list[str]
-    independent: list[str]
+class DrawableDirtyFlags(IntFlag):
+    ZINDEX = auto()
+    IS_VISIBLE = auto()
 
 
-render_targets: dict[str, "Scene"] = {}
-render_order: RenderOrder = {"world": [], "independent": []}
+class RenderTargetDirtyFlags(IntFlag):
+    ZINDEX = auto()
+    RENDER_ORDER = auto()
 
 
-def register(target: "Scene"):
-    if getattr(target, "_type", None) not in RenderTargetType:
-        # Cant use id for this error message because register is what assigns the id
-        Console.log(
-            "Scene cannot be registered as a render target because it has no type",
-            Console.LogType.ERROR,
-        )
+class RenderTargetType(Enum):
+    INDEPENDENT = auto()
+    WORLD = auto()
+
+
+render_targets: InstanceRegistry = InstanceRegistry(
+    "Render System",
+    on_list_change=lambda: recalculate_render_order(),
+)
+render_order: "list[list[RenderTarget]]" = [[], []]  # 0 = world, 1 = independent
+is_dirty: bool = False
+
+
+def draw_render_target(target: "RenderTarget"):
+    if not target.is_visible:
         return
 
-    id: str = IdentityService.generate_id(10, "rt_")
-    target._id = id
-    render_targets[id] = target
-    Console.log(f"{id} is now a render target")
-    recalculate_render_order()
-
-
-def unregister(target_id: str):
-    if target_id not in render_targets:
-        Console.log(f"{target_id} is not a render target", Console.LogType.ERROR)
-        return
-
-    render_targets.pop(target_id)
-    Console.log(f"{target_id} is no longer a render target")
-    recalculate_render_order()
+    target.draw()
 
 
 def render():
+    should_recalculate_render_order: bool = False
+
+    for target_id in render_targets.instances[:]:
+        target: "RenderTarget" = InstanceManager.instances[target_id]  # type: ignore
+
+        if target.bitmask._flags == 0:
+            continue
+
+        if target.bitmask.has_flag(RenderTargetDirtyFlags.ZINDEX):
+            should_recalculate_render_order = True
+
+        if target.bitmask.has_flag(RenderTargetDirtyFlags.RENDER_ORDER):
+            target._render_order = calculate_render_order(target._instances.instances)
+
+        target.bitmask.clear_flags()
+
+    if should_recalculate_render_order:
+        recalculate_render_order()
+
     RenderService.on_pre_render.fire()
 
     pyray.begin_drawing()
     pyray.clear_background(pyray.BLACK)
     pyray.begin_mode_2d(WorldService.camera._camera)
 
-    for target_id in render_order["world"]:
-        render_targets[target_id].draw()
+    for instance in render_order[0]:
+        draw_render_target(instance)
 
     pyray.end_mode_2d()
 
-    for target_id in render_order["independent"]:
-        render_targets[target_id].draw()
+    for instance in render_order[1]:
+        draw_render_target(instance)
 
     Console._draw()
     pyray.end_drawing()
@@ -69,28 +84,35 @@ def render():
 
 
 def recalculate_render_order():
-    """Recalculate the render order of all registered render targets."""
     global render_order
-    render_order["world"] = []
-    render_order["independent"] = []
+    render_order = [[], []]
 
-    for target_id in calculate_render_order(list(render_targets.values())):
-        if render_targets[target_id]._type == RenderTargetType.WORLD:
-            render_order["world"].append(target_id)
-        else:
-            render_order["independent"].append(target_id)
+    sorted_targets: "list[RenderTarget]" = sorted(
+        (
+            InstanceManager.instances[target_id]
+            for target_id in render_targets.instances[:]
+        ),
+        key=lambda target: target.zindex,  # type: ignore
+    )
+
+    for target in sorted_targets:
+        (
+            render_order[0]
+            if target._type == RenderTargetType.WORLD
+            else render_order[1]
+        ).append(target)
 
     Console.log(
-        f"Renderer is rendering {len(render_order['world']) + len(render_order['independent'])} targets"
+        f"Render System is rendering {sum(len(targets) for targets in render_order)} targets"
     )
 
 
-def calculate_render_order(targets: "list[DrawableInstance | Scene]") -> list:
-    """Calculate the render order of the given targets based on their z-index."""
+def calculate_render_order(targets: "list[InstanceIDType]") -> "list[InstanceIDType]":
+    instances = [InstanceManager.instances[target] for target in targets]
     return [
-        target.id
-        for target in sorted(
-            targets,
-            key=lambda target: target._zindex,
+        instance.id
+        for instance in sorted(
+            instances,
+            key=lambda instance: instance.get_component_unsafe("drawable")._zindex,
         )
     ]

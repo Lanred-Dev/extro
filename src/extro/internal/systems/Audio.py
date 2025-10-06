@@ -1,47 +1,22 @@
 import pyray
 from typing import TYPE_CHECKING
 
-import extro.Console as Console
-import extro.internal.services.Identity as IdentityService
+import extro.internal.InstanceManager as InstanceManager
+from extro.internal.utils.InstanceRegistry import InstanceRegistry
 
 if TYPE_CHECKING:
-    from extro.core.AudioSource import AudioSource
+    from extro.instances.core.Instance.Audio import AudioSource
 
 pyray.init_audio_device()
 
 global_volume: float = 1.0
-
-instances: "dict[str, AudioSource]" = {}
-
-
-def register(source: "AudioSource"):
-    if source in instances:
-        Console.log(
-            f"Audio source {source._id} is already registered", Console.LogType.WARNING
-        )
-        return
-
-    id: str = IdentityService.generate_id(10, "i_")
-    source._id = id
-    instances[id] = source
-    Console.log(f"Audio source {id} is now registered", Console.LogType.DEBUG)
-
-
-def unregister(source_id: str):
-    if source_id not in instances:
-        Console.log(
-            f"Audio source {source_id} is not registered", Console.LogType.WARNING
-        )
-        return
-
-    del instances[source_id]
-    Console.log(
-        f"Audio source {source_id} is no longer registered", Console.LogType.DEBUG
-    )
+instances: InstanceRegistry = InstanceRegistry("Audio System")
 
 
 def update():
-    for source in instances.values():
+    for source_id in instances.instances[:]:
+        source: "AudioSource" = InstanceManager.instances[source_id]  # type: ignore
+
         if not source._is_playing:
             continue
 
@@ -50,10 +25,9 @@ def update():
 
             if not pyray.is_music_stream_playing(source._audio):
                 source.on_finish.fire()
-        else:
-            if not pyray.is_sound_playing(source._audio):
-                source._is_playing = False
-                source.on_finish.fire()
+        elif not pyray.is_sound_playing(source._audio):
+            source._is_playing = False
+            source.on_finish.fire()
 
 
 def quit():

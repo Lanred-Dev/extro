@@ -1,4 +1,4 @@
-from extro.core.AudioSource import AudioSource
+from extro.instances.core.Instance.Audio import AudioSource
 
 
 class EffectAudioSource(AudioSource):

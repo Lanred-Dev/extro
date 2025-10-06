@@ -80,7 +80,7 @@ def _draw():
     for index, (type, text) in enumerate(logs):
         [_, prefix, color] = type.value
         pyray.draw_text_ex(
-            Arial._font,
+            Arial(),
             f"[{prefix}]: {text}",
             (0, int(Window.size.y - ((index + 1) * 20))),
             20,
@@ -90,7 +90,7 @@ def _draw():
 
     # FPS counter
     fps_text: str = f"{pyray.get_fps()} FPS"
-    fps_label_size: pyray.Vector2 = pyray.measure_text_ex(Arial._font, fps_text, 20, 1)
+    fps_label_size: pyray.Vector2 = pyray.measure_text_ex(Arial(), fps_text, 20, 1)
     fps_label_x: int = int(Window.size.x) - int(fps_label_size.x)
     pyray.draw_rectangle(
         fps_label_x - 5,
@@ -100,7 +100,7 @@ def _draw():
         (0, 0, 0, 255),
     )
     pyray.draw_text_ex(
-        Arial._font,
+        Arial(),
         fps_text,
         (fps_label_x, 5),
         20,

@@ -54,7 +54,7 @@ def _draw():
 
     for name, value in stats.items():
         stat_text: str = f"{name}: {value * 1000:.2f} ms"
-        stat_size: pyray.Vector2 = pyray.measure_text_ex(Arial._font, stat_text, 20, 1)
+        stat_size: pyray.Vector2 = pyray.measure_text_ex(Arial(), stat_text, 20, 1)
         stats_width = max(stats_width, int(stat_size.x))
         stats_height += int(stat_size.y) + 5
 
@@ -72,7 +72,7 @@ def _draw():
     for name, value in stats.items():
         stat_text: str = f"{name}: {value * 1000:.2f} ms"
         pyray.draw_text_ex(
-            Arial._font,
+            Arial(),
             f"{name}: {value * 1000:.2f} ms",
             (
                 5,

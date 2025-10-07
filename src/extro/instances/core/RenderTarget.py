@@ -10,11 +10,11 @@ import extro.Console as Console
 
 if TYPE_CHECKING:
     from extro.instances.core.Instance import Instance
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
     from extro.instances.core.components.Drawable import Drawable
 
 
-def is_instance_renderable(instance_id: "InstanceIDType") -> bool:
+def is_instance_renderable(instance_id: "InstanceManager.InstanceIDType") -> bool:
     instance = InstanceManager.instances[instance_id]
     return (
         instance.get_component("drawable") is not None
@@ -37,7 +37,7 @@ class RenderTarget(Instance):
     _instances: InstanceRegistry
     _type: RenderSystem.RenderTargetType
     bitmask: BitMask
-    _render_order: "list[InstanceIDType]"
+    _render_order: "list[InstanceManager.InstanceIDType]"
 
     def __init__(
         self,
@@ -71,7 +71,7 @@ class RenderTarget(Instance):
     def remove(self, instance: "Instance"):
         self._instances.unregister(instance._id)
 
-    def add_component(self, name: str, component: Any):
+    def add_component(self, component: Any):
         Console.log("`RenderTarget` cannot have components", Console.LogType.ERROR)
         return
 

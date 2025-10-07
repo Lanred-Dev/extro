@@ -7,7 +7,7 @@ import extro.internal.ComponentManager as ComponentManager
 import extro.internal.systems.Animation as AnimationSystem
 
 if TYPE_CHECKING:
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
 
 
 class Animator(Component):
@@ -28,11 +28,11 @@ class Animator(Component):
     _last_frame_at: float
     _frame_count: int
     _is_active: bool
-    _owner: "InstanceIDType"
+    _owner: "InstanceManager.InstanceIDType"
 
     def __init__(
         self,
-        owner: "InstanceIDType",
+        owner: "InstanceManager.InstanceIDType",
         texture_source: pyray.Rectangle,
         frame_duration: float,
         is_active: bool,

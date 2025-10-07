@@ -9,7 +9,7 @@ import extro.internal.systems.Transform as TransformSystem
 import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
 
 
 class Transform(Component):
@@ -41,14 +41,14 @@ class Transform(Component):
     _bounding: tuple[float, float, float, float]
     _actual_position: tuple[float, float]
     _actual_size: tuple[float, float]
-    _parent: "InstanceIDType | None"
-    _children: "list[InstanceIDType]"
+    _parent: "InstanceManager.InstanceIDType | None"
+    _children: "list[InstanceManager.InstanceIDType]"
 
     on_update: Signal
 
     def __init__(
         self,
-        owner: "InstanceIDType",
+        owner: "InstanceManager.InstanceIDType",
         position: Coord,
         size: Coord,
         rotation: int = 0,
@@ -90,7 +90,7 @@ class Transform(Component):
             and point.y <= y + height
         )
 
-    def add_child(self, instance_id: "InstanceIDType"):
+    def add_child(self, instance_id: "InstanceManager.InstanceIDType"):
         if instance_id in self._children:
             return
 

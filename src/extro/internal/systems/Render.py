@@ -9,7 +9,7 @@ import extro.Console as Console
 import extro.internal.InstanceManager as InstanceManager
 
 if TYPE_CHECKING:
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
     from extro.instances.core.RenderTarget import RenderTarget
 
 
@@ -107,7 +107,9 @@ def recalculate_render_order():
     )
 
 
-def calculate_render_order(targets: "list[InstanceIDType]") -> "list[InstanceIDType]":
+def calculate_render_order(
+    targets: "list[InstanceManager.InstanceIDType]",
+) -> "list[InstanceManager.InstanceIDType]":
     instances = [InstanceManager.instances[target] for target in targets]
     return [
         instance.id

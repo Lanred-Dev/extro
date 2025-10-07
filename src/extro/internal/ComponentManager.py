@@ -4,7 +4,7 @@ from enum import Enum, auto
 import extro.Console as Console
 
 if TYPE_CHECKING:
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
     from extro.instances.core.components.Transform import Transform
     from extro.instances.core.components.Collider import Collider
     from extro.instances.core.components.Drawable import Drawable
@@ -20,12 +20,12 @@ class ComponentType(Enum):
     ANIMATOR = auto()
 
 
-transforms: "dict[InstanceIDType, Transform]" = {}
-colliders: "dict[InstanceIDType, Collider]" = {}
-drawables: "dict[InstanceIDType, Drawable]" = {}
-physics_bodies: "dict[InstanceIDType, PhysicsBody]" = {}
-animators: "dict[InstanceIDType, Animator]" = {}
-component_lists: "dict[ComponentType, dict[InstanceIDType, Any]]" = {
+transforms: "dict[InstanceManager.InstanceIDType, Transform]" = {}
+colliders: "dict[InstanceManager.InstanceIDType, Collider]" = {}
+drawables: "dict[InstanceManager.InstanceIDType, Drawable]" = {}
+physics_bodies: "dict[InstanceManager.InstanceIDType, PhysicsBody]" = {}
+animators: "dict[InstanceManager.InstanceIDType, Animator]" = {}
+component_lists: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]" = {
     ComponentType.TRANSFORM: transforms,
     ComponentType.COLLIDER: colliders,
     ComponentType.DRAWABLE: drawables,
@@ -34,12 +34,14 @@ component_lists: "dict[ComponentType, dict[InstanceIDType, Any]]" = {
 }
 
 
-def register(instance_id: "InstanceIDType", type: ComponentType, component):
+def register(
+    instance_id: "InstanceManager.InstanceIDType", type: ComponentType, component
+):
     component_lists[type][instance_id] = component
     Console.log(f"Registered component {type.name} for instance {instance_id}")
 
 
-def unregister(instance_id: "InstanceIDType"):
+def unregister(instance_id: "InstanceManager.InstanceIDType"):
     for component_list in component_lists.values():
         if instance_id in component_list:
             component_list[instance_id].destroy()

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from extro.instances.ui.Button import Button
     from extro.instances.ui.Text import Text
     from extro.shared.Vector2C import Vector2
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
     from extro.instances.core.Instance.UI import UIInstance
 
 
@@ -31,7 +31,7 @@ class TextDirtyFlags(IntFlag):
 instances: InstanceRegistry = InstanceRegistry(
     "UI System", on_list_change=lambda: recompute_type_map()
 )
-type_map: "dict[UIInstanceType, list[InstanceIDType]]" = {
+type_map: "dict[UIInstanceType, list[InstanceManager.InstanceIDType]]" = {
     type: [] for type in UIInstanceType
 }
 

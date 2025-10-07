@@ -11,6 +11,10 @@ def normalized_to_absolute_coords(x: float, y: float) -> tuple[float, float]:
     return (x * Window.size.x, y * Window.size.y)
 
 
+def absolute_to_normalized_coords(x: float, y: float) -> tuple[float, float]:
+    return (x / Window.size.x, y / Window.size.y)
+
+
 def world_to_absolute_coords(x: float, y: float) -> tuple[float, float]:
     return (x * WorldService.tile_size.x, y * WorldService.tile_size.y)
 
@@ -29,6 +33,7 @@ def random_absolute_coords() -> tuple[float, float]:
 
 __all__ = [
     "normalized_to_absolute_coords",
+    "absolute_to_normalized_coords",
     "world_to_absolute_coords",
     "absolute_to_world_coords",
     "random_world_coords",

@@ -17,7 +17,6 @@ import extro.services.__services__ as Services
 import extro.instances.__instances__ as Instances
 
 # API Wrappers for convenience
-delta = Engine.delta
 quit = Engine.quit
 start = Engine.start
 
@@ -32,7 +31,6 @@ __all__ = [
     "types",
     "Utils",
     "Services",
-    "delta",
     "quit",
     "Instances",
     "Assets",

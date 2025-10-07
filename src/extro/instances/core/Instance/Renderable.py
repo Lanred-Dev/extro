@@ -22,25 +22,21 @@ class Renderable(Instance):
     ):
         super().__init__()
 
-        self.add_component(
-            "transform",
-            Transform(
-                self.id, position=position, size=size, anchor=anchor, scale=scale
-            ),
+        transform: Transform = Transform(
+            self._id, position=position, size=size, anchor=anchor, scale=scale
         )
-        self.transform = self.get_component_unsafe("transform")
+        self.add_component(transform)
+        self.transform = transform
 
-        self.add_component(
-            "drawable",
-            Drawable(
-                self.id,
-                render_command=self.draw,
-                color=color,
-                zindex=zindex,
-                is_visible=is_visible,
-            ),
+        drawable: Drawable = Drawable(
+            self._id,
+            render_command=self.draw,
+            color=color,
+            zindex=zindex,
+            is_visible=is_visible,
         )
-        self.drawable = self.get_component_unsafe("drawable")
+        self.add_component(drawable)
+        self.drawable = drawable
 
     def draw(self):
         raise NotImplementedError("`draw` method must be implemented by subclass")

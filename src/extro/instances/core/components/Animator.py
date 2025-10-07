@@ -21,6 +21,8 @@ class Animator(Component):
         "_owner",
     )
 
+    _key = "animator"
+
     _current_frame: Vector2
     _frame_duration: float
     _last_frame_at: float

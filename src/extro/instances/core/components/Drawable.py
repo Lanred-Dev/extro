@@ -17,6 +17,8 @@ class Drawable(Component):
         "_render_command",
     )
 
+    _key = "drawable"
+
     color: RGBAColor
     _zindex: int
     is_visible: bool

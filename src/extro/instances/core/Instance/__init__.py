@@ -36,8 +36,8 @@ class Instance:
         self._janitor.destroy()
         InstanceManager.unregister(self._id)
 
-    def add_component(self, name: str, component: Any):
-        self._components[name] = component
+    def add_component(self, component: Any):
+        self._components[component._key] = component
         self._janitor.add(component.destroy)
 
     def get_component(self, name: str) -> Any | None:

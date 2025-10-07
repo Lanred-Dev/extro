@@ -29,6 +29,8 @@ class Transform(Component):
         "on_update",
     )
 
+    _key = "transform"
+
     _position: Coord
     _size: Coord
     _rotation: int

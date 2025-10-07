@@ -90,6 +90,11 @@ struct Vector2
         return *this;
     }
 
+    Vector2 operator-() const
+    {
+        return Vector2(-x, -y);
+    }
+
     bool operator==(const Vector2 &other) const
     {
         return x == other.x && y == other.y;
@@ -158,6 +163,8 @@ NB_MODULE(Vector2C, m)
         .def(nanobind::self <= nanobind::self)
         .def(nanobind::self > nanobind::self)
         .def(nanobind::self >= nanobind::self)
+        .def("__neg__", [](const Vector2 &self)
+             { return -self; })
         .def("__repr__", [](const Vector2 &vector)
              { return nanobind::str(std::string("Vector2(x=" + std::to_string(vector.x) +
                                                 " y=" + std::to_string(vector.y) + ")")

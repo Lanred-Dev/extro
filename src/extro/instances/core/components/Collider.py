@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from extro.utils.Signal import Signal
-import extro.internal.systems.Collision as CollisionSystem
 import extro.services.CollisionGroup as CollisionGroupService
 import extro.Console as Console
 from extro.instances.core.components.Component import Component
@@ -9,12 +8,12 @@ import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
     from extro.shared.Vector2C import Vector2
-    from extro.internal.InstanceManager import InstanceIDType
+    import extro.internal.InstanceManager as InstanceManager
 
 
 class Collider(Component):
     __slots__ = Component.__slots__ + (
-        "_is_collidable",
+        "is_collidable",
         "_collision_group",
         "_axes",
         "_vertices",
@@ -22,7 +21,9 @@ class Collider(Component):
         "on_collision_end",
     )
 
-    _is_collidable: bool
+    _key = "collider"
+
+    is_collidable: bool
     _collision_group: str
     _axes: "list[Vector2]"
     _vertices: "list[Vector2]"
@@ -32,13 +33,13 @@ class Collider(Component):
 
     def __init__(
         self,
-        owner: "InstanceIDType",
-        is_collidable: bool,
-        collision_group: str,
+        owner: "InstanceManager.InstanceIDType",
+        is_collidable: bool = True,
+        collision_group: str = CollisionGroupService.DEFAULT_COLLISION_GROUP,
     ):
         super().__init__(owner, ComponentManager.ComponentType.COLLIDER)
 
-        self._is_collidable = is_collidable
+        self.is_collidable = is_collidable
         self.collision_group = collision_group
 
         self.on_collision = Signal()
@@ -47,15 +48,6 @@ class Collider(Component):
     def destroy(self):
         self.on_collision.destroy()
         self.on_collision_end.destroy()
-
-    @property
-    def is_collidable(self) -> bool:
-        return self._is_collidable
-
-    @is_collidable.setter
-    def is_collidable(self, is_collidable: bool):
-        self._is_collidable = is_collidable
-        self.add_flag(CollisionSystem.ColliderDirtyFlags.IS_COLLIDABLE)
 
     @property
     def collision_group(self) -> str:

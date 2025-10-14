@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 import pyray
 from enum import IntFlag, auto, Enum
 
 from extro.internal.utils.InstanceRegistry import InstanceRegistry
-import extro.services.Render as RenderService
+import extro.services.Timing as TimingService
 import extro.services.World as WorldService
 import extro.Console as Console
 import extro.internal.InstanceManager as InstanceManager
@@ -63,7 +63,7 @@ def render():
     if should_recalculate_render_order:
         recalculate_render_order()
 
-    RenderService.on_pre_render.fire()
+    TimingService.on_pre_render.fire()
 
     pyray.begin_drawing()
     pyray.clear_background(pyray.BLACK)
@@ -80,7 +80,7 @@ def render():
     Console._draw()
     pyray.end_drawing()
 
-    RenderService.on_post_render.fire()
+    TimingService.on_post_render.fire()
 
 
 def recalculate_render_order():

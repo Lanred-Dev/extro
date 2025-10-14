@@ -19,6 +19,7 @@ class TransformUpdateType(Enum):
 class TransformDirtyFlags(IntFlag):
     POSITION = auto()
     SIZE = auto()
+    ROTATION = auto()
 
 
 def recalculate_position(

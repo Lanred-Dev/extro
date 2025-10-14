@@ -33,7 +33,7 @@ class Transform(Component):
 
     _position: Coord
     _size: Coord
-    _rotation: int
+    _rotation: float
     _scale: Vector2
     _anchor: Vector2
     _position_offset: tuple[float, float]
@@ -131,14 +131,6 @@ class Transform(Component):
         self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
 
     @property
-    def rotation(self) -> int:
-        return self._rotation
-
-    @rotation.setter
-    def rotation(self, rotation: int):
-        self._rotation = rotation
-
-    @property
     def scale(self):
         return self._scale
 
@@ -159,3 +151,12 @@ class Transform(Component):
     def relative_to(self, instance_id: int | None):
         self._relative_to = instance_id
         self.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
+
+    @property
+    def rotation(self) -> float:
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, rotation: float):
+        self._rotation = rotation
+        self.add_flag(TransformSystem.TransformDirtyFlags.ROTATION)

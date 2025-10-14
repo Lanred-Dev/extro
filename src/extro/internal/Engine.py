@@ -9,13 +9,14 @@ import extro.internal.systems.Transform as TransformSystem
 import extro.internal.systems.Audio as AudioSystem
 import extro.internal.systems.Animation as AnimationSystem
 import extro.internal.systems.UI as UISystem
+import extro.internal.systems.Collision as CollisionSystem
+import extro.internal.systems.Physics as PhysicsSystem
+import extro.internal.systems.Timing as TimingSystem
 import extro.Window as Window
 import extro.Profiler as Profiler
 
 if TYPE_CHECKING:
     from extro.shared.types import EmptyFunction
-
-delta: float = 0
 
 
 def run_system(update: "EmptyFunction", system_name: str):
@@ -26,17 +27,16 @@ def run_system(update: "EmptyFunction", system_name: str):
 
 
 def start():
-    global delta
-
     while not pyray.window_should_close():
-        delta = pyray.get_frame_time()
-
         # The order matters, aka dont change it :)
+        run_system(TimingSystem.update, "timing")
         run_system(InputSystem.update, "input")
         run_system(TransformSystem.update, "transform")
         run_system(
             UISystem.update, "ui"
-        )  # Any transform changes will be applied next frame
+        )  # If any transform changes happen because of UI events, they will be applied next frame
+        run_system(CollisionSystem.update, "collision")
+        run_system(PhysicsSystem.update, "physics")
         run_system(AnimationSystem.update, "animation")
         run_system(RenderSystem.render, "render")
         run_system(AudioSystem.update, "audio")
@@ -50,4 +50,4 @@ def quit():
     sys.exit()
 
 
-__all__ = ["start", "quit", "delta"]
+__all__ = ["start", "quit"]

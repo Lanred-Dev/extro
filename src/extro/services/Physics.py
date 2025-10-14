@@ -1,10 +1,15 @@
-from extro.utils.Signal import Signal
+from enum import auto, Enum
 
 dampening: float = 0.8
 
-on_pre_physics = Signal()
+
+class PhysicsBodyType(Enum):
+    DYNAMIC = auto()
+    STATIC = auto()
+    KINEMATIC = auto()
+
 
 __all__ = [
     "dampening",
-    "on_pre_physics",
+    "PhysicsBodyType",
 ]

@@ -2,11 +2,8 @@ import pyray
 
 from extro import Console
 from extro.shared.types import RenderTargetType
-from extro.utils.Signal import Signal
 
 fps: int = 60
-on_pre_render: Signal = Signal()
-on_post_render: Signal = Signal()
 
 
 def set_fps(new_fps: int):
@@ -31,6 +28,4 @@ __all__ = [
     "set_fps",
     "get_fps",
     "RenderTargetType",
-    "on_pre_render",
-    "on_post_render",
 ]

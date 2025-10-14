@@ -4,3 +4,4 @@ ext
 **/*.pyd
 build
 src/extro.egg-info
+dist

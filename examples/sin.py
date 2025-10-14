@@ -25,25 +25,24 @@ def next_frame():
     if current_x >= extro.Window.size.x:
         current_x = 0
 
-    current_x += 1
+    current_x += 60 * extro.Services.TimingService.delta
     y = math.sin(current_x * frequency) * amplitude + (extro.Window.size.y / 2)
     rect.transform.position = extro.Coord(current_x, y, extro.CoordType.ABSOLUTE)
-    time.start()
 
 
-time = extro.Utils.Timeout(0)
-time.on_finish.connect(next_frame)
-time.start()
+extro.Services.TimingService.on_pre_render.connect(next_frame)
 
 
 def increment_amplitude(increment: int):
     global amplitude
     amplitude += increment
+    extro.Console.log(f"Amplitude: {amplitude}")
 
 
 def increment_frequency(increment: float):
     global frequency
     frequency += increment
+    extro.Console.log(f"Frequency: {frequency}")
 
 
 extro.Services.InputService.on_event.connect(

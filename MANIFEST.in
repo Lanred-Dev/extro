@@ -1,0 +1,2 @@
+include src/extro/**/*.pyd
+include src/extro/**/*.pyi

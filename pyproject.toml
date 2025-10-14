@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "extro"
-version = "0.8.0a0"
+version = "0.8.1a"
 description = "2d game engine with raylib as the backend"
 authors = [{name="Landon Redmond"}]
 readme = "README.md"

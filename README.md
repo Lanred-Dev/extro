@@ -1,6 +1,6 @@
 # Extro
 
-**Extro** is an in-development **2D game engine** written in Python, using **Raylib** as the rendering backend. It is lightweight, flexible, and designed specifically for **Windows**.
+**Extro** is an in-development **2D game engine** written in Python, using **Raylib** as the rendering backend.
 
 ---
 

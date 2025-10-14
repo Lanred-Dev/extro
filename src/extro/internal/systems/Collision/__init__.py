@@ -22,22 +22,14 @@ old_collisions: "list[Collision]" = []
 
 
 def on_transform_change(collider: "Collider", transform: "Transform"):
-    collider._axes = CollisionMask.compute_axes(
-        CollisionMask.compute_vertices(
-            transform.size.x,
-            transform.size.y,
-            transform.position.x,
-            transform.position.y,
-            transform.rotation,
-        )
-    )
     collider._vertices = CollisionMask.compute_vertices(
-        transform.size.x,
-        transform.size.y,
-        transform.position.x,
-        transform.position.y,
+        transform._actual_size[0],
+        transform._actual_size[1],
+        transform._actual_position[0],
+        transform._actual_position[1],
         transform.rotation,
     )
+    collider._axes = CollisionMask.compute_axes(collider._vertices)
 
 
 def update():

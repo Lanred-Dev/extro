@@ -1,9 +1,10 @@
-import extro.services.Render as RenderService
 from extro.utils.Signal import Signal
-import extro.internal.Engine as Engine
+import extro.internal.systems.Timing as TimingSystem
+from extro.instances.core.Instance import Instance
+import extro.Console as Console
 
 
-class Timeout:
+class Timeout(Instance):
     """
     A simple timeout class that fires a signal after a delay. Can be reused.
 
@@ -22,49 +23,46 @@ class Timeout:
         "on_finish",
         "_is_running",
         "_elapsed",
-        "_engine_post_render_connection",
     )
 
     delay: float
     on_finish: Signal
     _is_running: bool
     _elapsed: float
-    _engine_post_render_connection: str
 
     def __init__(self, delay: float):
+        super().__init__()
+
         self.delay = delay
         self.on_finish = Signal()
+        self._janitor.add(self.on_finish)
         self._is_running = False
         self._elapsed = 0.0
-        self._engine_post_render_connection = RenderService.on_post_render.connect(
-            self._update
-        )
 
-    def destroy(self):
-        RenderService.on_post_render.disconnect(self._engine_post_render_connection)
-        self.on_finish.destroy()
+        TimingSystem.timeouts.register(self._id)
+        self._janitor.add(TimingSystem.timeouts.unregister, self._id)
 
     def start(self):
-        """Start the timeout. If it is already running, it will be restarted."""
+        if self._is_running:
+            Console.log(
+                f"Cannot start timeout {self._id} because its already running",
+                Console.LogType.WARNING,
+            )
+            return
+
         self._elapsed = 0.0
         self._is_running = True
 
+    def restart(self):
+        self.cancel()
+        self.start()
+
     def cancel(self):
-        """Cancel the timeout if it is running."""
         if not self._is_running:
+            Console.log(
+                f"Cannot cancel timeout {self._id} because its not running",
+                Console.LogType.WARNING,
+            )
             return
 
         self._is_running = False
-
-    def _update(self):
-        if not self._is_running:
-            return
-
-        self._elapsed += Engine.delta
-
-        if self._elapsed >= self.delay:
-            self._finish()
-
-    def _finish(self):
-        self._is_running = False
-        self.on_finish.fire()

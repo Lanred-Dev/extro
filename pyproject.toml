@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=80.9.0", "wheel"]
+requires = ["scikit-build", "setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,6 +16,4 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "nanobind>=2.9.2",
-    "setuptools>=80.9.0",
-    "wheel",
 ]

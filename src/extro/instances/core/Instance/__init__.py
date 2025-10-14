@@ -3,8 +3,6 @@ from typing import Any
 from extro.utils.Signal import Signal
 from extro.utils.Janitor import Janitor
 import extro.internal.InstanceManager as InstanceManager
-import extro.Console as Console
-from extro.instances.core.components.Component import Component
 
 
 class Instance:

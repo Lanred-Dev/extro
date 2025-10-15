@@ -1,2 +1,2 @@
-include src/extro/**/*.pyd
-include src/extro/**/*.pyi
+recursive-include src/extro *.pyi
+recursive-include src/extro *.pyd

@@ -1,2 +1,3 @@
 recursive-include src/extro *.pyi
 recursive-include src/extro *.pyd
+recursive-include src/extro/assets *.ttf

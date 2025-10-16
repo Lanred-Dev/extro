@@ -54,8 +54,8 @@ class AudioSource(Instance):
         self._recalculate_volume()
         self._janitor.add(self._unload_audio)
 
-        AudioSystem.instances.register(self._id)
-        self._janitor.add(AudioSystem.instances.unregister, self._id)
+        AudioSystem.sources.register(self._id)
+        self._janitor.add(AudioSystem.sources.unregister, self._id)
 
     def play(self):
         """Plays the audio source from the start. If it's already playing, it restarts it."""

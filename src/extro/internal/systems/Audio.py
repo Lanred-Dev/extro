@@ -10,11 +10,11 @@ if TYPE_CHECKING:
 pyray.init_audio_device()
 
 global_volume: float = 1.0
-instances: InstanceRegistry = InstanceRegistry("Audio System")
+sources: InstanceRegistry = InstanceRegistry("Audio System")
 
 
 def update():
-    for source_id in instances.instances[:]:
+    for source_id in sources.instances[:]:
         source: "AudioSource" = InstanceManager.instances[source_id]  # type: ignore
 
         if not source._is_playing:

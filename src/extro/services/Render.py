@@ -1,7 +1,10 @@
 import pyray
+from typing import TYPE_CHECKING
 
 from extro import Console
-from extro.shared.types import RenderTargetType
+
+if TYPE_CHECKING:
+    from extro.internal.systems.Render import RenderTargetType
 
 fps: int = 60
 

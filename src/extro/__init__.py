@@ -15,6 +15,7 @@ from extro.shared.__shared__ import Vector2, RGBAColor, types, Coord, CoordType
 import extro.utils.__utils__ as Utils
 import extro.services.__services__ as Services
 import extro.instances.__instances__ as Instances
+import extro.animation.__animation__ as Animation
 
 # API Wrappers for convenience
 quit = Engine.quit
@@ -34,4 +35,5 @@ __all__ = [
     "quit",
     "Instances",
     "Assets",
+    "Animation",
 ]

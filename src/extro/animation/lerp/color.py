@@ -1,5 +1,5 @@
 from extro.animation.lerp.number import lerpNumber
-from extro.values.Color import Color
+from extro.shared.RGBAColorC import RGBAColor
 
 
 def linearize(c: float) -> float:
@@ -13,12 +13,7 @@ def correct_gamma(c: float) -> float:
     return 12.92 * c if c < 0.0031306684425 else 1.055 * c ** (1 / 2.4) - 0.055
 
 
-def lerpColor(start: Color, end: Color, progress: float) -> Color:
-    """
-    Lerp between a start color and a end color at x.
-
-    This function was adapted from https://github.com/Upbeat-Roblox/fluid/blob/main/src/modules/lerpers/color.lua
-    """
+def lerpColor(start: RGBAColor, end: RGBAColor, progress: float) -> RGBAColor:
     # Alpha is just treated as a normal number
     alpha = max(0, min(int(lerpNumber(start.a, end.a, progress)), 255))
 
@@ -53,7 +48,7 @@ def lerpColor(start: Color, end: Color, progress: float) -> Color:
     # Interpolation
     l = (1 - progress) * l0 + progress * l1
     if l < 0.0197955:
-        return Color(0, 0, 0, alpha)
+        return RGBAColor(0, 0, 0, alpha)
 
     u = ((1 - progress) * u0 + progress * u1) / l + 0.19783
     v = ((1 - progress) * v0 + progress * v1) / l + 0.46832
@@ -86,4 +81,4 @@ def lerpColor(start: Color, end: Color, progress: float) -> Color:
     r = max(0, min(int(r * 255), 255))
     g = max(0, min(int(g * 255), 255))
     b = max(0, min(int(b * 255), 255))
-    return Color(r, g, b, alpha)
+    return RGBAColor(r, g, b, alpha)

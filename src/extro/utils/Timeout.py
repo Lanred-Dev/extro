@@ -54,7 +54,9 @@ class Timeout(Instance):
         self._is_running = True
 
     def restart(self):
-        self.cancel()
+        if self._is_running:
+            self.cancel()
+
         self.start()
 
     def cancel(self):

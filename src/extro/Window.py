@@ -17,6 +17,7 @@ pyray.set_config_flags(pyray.ConfigFlags.FLAG_MSAA_4X_HINT)
 pyray.set_config_flags(pyray.ConfigFlags.FLAG_WINDOW_HIGHDPI)
 pyray.init_window(int(size.x), int(size.y), title)
 pyray.set_window_state(pyray.ConfigFlags.FLAG_WINDOW_ALWAYS_RUN)
+pyray.set_exit_key(0)
 
 
 def set_title(title: str):

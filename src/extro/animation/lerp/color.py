@@ -2,15 +2,19 @@ from extro.animation.lerp.number import lerpNumber
 from extro.shared.RGBAColorC import RGBAColor
 
 
-def linearize(c: float) -> float:
-    c = c / 255.0
+def linearize(value: float) -> float:
+    value = value / 255.0
     return (
-        c / 12.92 if c < 0.0404482362771076 else 0.87941546140213 * (c + 0.055) ** 2.4
+        value / 12.92
+        if value < 0.0404482362771076
+        else 0.87941546140213 * (value + 0.055) ** 2.4
     )
 
 
-def correct_gamma(c: float) -> float:
-    return 12.92 * c if c < 0.0031306684425 else 1.055 * c ** (1 / 2.4) - 0.055
+def correctGamma(value: float) -> float:
+    return (
+        12.92 * value if value < 0.0031306684425 else 1.055 * value ** (1 / 2.4) - 0.055
+    )
 
 
 def lerpColor(start: RGBAColor, end: RGBAColor, progress: float) -> RGBAColor:
@@ -75,7 +79,7 @@ def lerpColor(start: RGBAColor, end: RGBAColor, progress: float) -> RGBAColor:
     elif b < 0:
         r, g, b = r - b, g - b, 0
 
-    r, g, b = correct_gamma(r), correct_gamma(g), correct_gamma(b)
+    r, g, b = correctGamma(r), correctGamma(g), correctGamma(b)
 
     # Clamp 0..1 and convert to 0..255
     r = max(0, min(int(r * 255), 255))

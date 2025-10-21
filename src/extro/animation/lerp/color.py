@@ -14,7 +14,7 @@ def correct_gamma(c: float) -> float:
 
 
 def lerpColor(start: RGBAColor, end: RGBAColor, progress: float) -> RGBAColor:
-    # Alpha is just treated as a normal number
+    # Alpha does not use any special interpolation
     alpha = max(0, min(int(lerpNumber(start.a, end.a, progress)), 255))
 
     # Start color

@@ -1,6 +1,6 @@
-# Extro
+# extro
 
-**Extro** is an in-development **2D game engine** written in Python, using **Raylib** as the rendering backend.
+**extro** is an in-development **2D game engine** written in Python, using **Raylib** as the rendering backend.
 
 ---
 

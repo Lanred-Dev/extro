@@ -20,7 +20,6 @@ class Transform(Component):
         "_scale",
         "_anchor",
         "_position_offset",
-        "_relative_to",
         "_bounding",
         "_actual_position",
         "_actual_size",
@@ -37,7 +36,6 @@ class Transform(Component):
     _scale: Vector2
     _anchor: Vector2
     _position_offset: tuple[float, float]
-    _relative_to: int | None
     _bounding: tuple[float, float, float, float]
     _actual_position: tuple[float, float]
     _actual_size: tuple[float, float]
@@ -64,7 +62,6 @@ class Transform(Component):
         self._anchor = anchor
         self._position_offset = (0, 0)
         self._bounding = (0, 0, 0, 0)
-        self._relative_to = None
         self._actual_position = (0, 0)
         self._actual_size = (0, 0)
 
@@ -142,15 +139,6 @@ class Transform(Component):
     @property
     def bounding(self) -> tuple[float, float, float, float]:
         return self._bounding
-
-    @property
-    def relative_to(self) -> int | None:
-        return self._relative_to
-
-    @relative_to.setter
-    def relative_to(self, instance_id: int | None):
-        self._relative_to = instance_id
-        self.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
 
     @property
     def rotation(self) -> float:

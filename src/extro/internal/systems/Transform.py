@@ -8,6 +8,7 @@ import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
     from extro.instances.core.components.Transform import Transform
+    from extro.instances.core.components.Hierarchy import Hierarchy
 
 
 class TransformUpdateType(Enum):
@@ -24,16 +25,15 @@ class TransformDirtyFlags(IntFlag):
 
 def recalculate_position(
     transform: "Transform",
+    hierarchy: "Hierarchy | None",
 ):
     new_x: float = 0
     new_y: float = 0
 
     match transform._position.type:
-        case CoordType.RELATIVE if transform._relative_to:
+        case CoordType.RELATIVE if hierarchy and hierarchy._parent is not None:
             parent_x, parent_y, parent_width, parent_height = (
-                InstanceManager.instances[transform._relative_to]
-                .get_component_unsafe("transform")
-                ._bounding
+                ComponentManager.transforms[hierarchy._parent]._bounding
             )
             new_x = parent_x + (parent_width * transform._position.x)
             new_y = parent_y + (parent_height * transform._position.y)
@@ -66,16 +66,19 @@ def recalculate_bounding(
 
 def recalculate_size(
     transform: "Transform",
+    hierarchy: "Hierarchy | None",
 ):
     new_x = transform._size.absolute_x * transform._scale.x
     new_y = transform._size.absolute_y * transform._scale.y
 
-    if transform._size.type == CoordType.RELATIVE and transform._relative_to:
-        _, _, parent_width, parent_height = (
-            InstanceManager.instances[transform._relative_to]
-            .get_component_unsafe("transform")
-            ._bounding
-        )
+    if (
+        transform._size.type == CoordType.RELATIVE
+        and hierarchy
+        and hierarchy._parent is not None
+    ):
+        _, _, parent_width, parent_height = ComponentManager.transforms[
+            hierarchy._parent
+        ]._bounding
         new_x *= parent_width
         new_y *= parent_height
 
@@ -85,13 +88,37 @@ def recalculate_size(
 
 
 def update():
-    for instance_id, transform in ComponentManager.transforms.items():
+    transforms = ComponentManager.transforms.items()
+
+    # Do an initial pass to calculate if any children need updating due to parent changes
+    for instance_id, transform in transforms:
+        hierarchy = ComponentManager.hierarchies.get(instance_id)
+
+        if not hierarchy:
+            continue
+
+        if not transform.has_flag(TransformDirtyFlags.SIZE) and not transform.has_flag(
+            TransformDirtyFlags.POSITION
+        ):
+            continue
+
+        for child_id in hierarchy._children:
+            child_transform = ComponentManager.transforms.get(child_id)
+
+            if not child_transform:
+                continue
+
+            child_transform._flags |= transform._flags
+
+    for instance_id, transform in transforms:
         if transform._flags == 0:
             continue
 
+        hierarchy = ComponentManager.hierarchies.get(instance_id)
+
         # if/else because size change requires position to be recalculated
         if transform.has_flag(TransformDirtyFlags.SIZE):
-            recalculate_size(transform)
+            recalculate_size(transform, hierarchy)
 
             # If the instance has a `Drawable` component the transform needs to be offset by half (because the render origin is in the center)
             if ComponentManager.drawables.get(instance_id):
@@ -100,9 +127,9 @@ def update():
                     transform._actual_size[1] / 2,
                 )
 
-            recalculate_position(transform)
+            recalculate_position(transform, hierarchy)
         elif transform.has_flag(TransformDirtyFlags.POSITION):
-            recalculate_position(transform)
+            recalculate_position(transform, hierarchy)
 
         transform.clear_flags()
 

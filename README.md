@@ -41,8 +41,7 @@ Build the `nanobind` extensions by running the provided script:
 To create a distributable `.whl` file that includes the compiled `.pyd` extensions:
 
 ```bash
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install scikit-build nanobind
+python -m pip install --upgrade pip setuptools wheel build nanobind scikit-build
 python -m build
 ```
 

@@ -4,11 +4,13 @@ from extro.shared.Coord import Coord
 from extro.shared.Vector2C import Vector2
 from extro.instances.core.components.Drawable import Drawable
 from extro.instances.core.components.Transform import Transform
+from extro.instances.core.components.Hierarchy import Hierarchy
 
 
 class Renderable(Instance):
     drawable: "Drawable"
     transform: "Transform"
+    hierarchy: "Hierarchy"
 
     def __init__(
         self,
@@ -37,6 +39,10 @@ class Renderable(Instance):
         )
         self.add_component(drawable)
         self.drawable = drawable
+
+        hierarchy: Hierarchy = Hierarchy(self._id)
+        self.add_component(hierarchy)
+        self.hierarchy = hierarchy
 
     def draw(self):
         raise NotImplementedError("`draw` method must be implemented by subclass")

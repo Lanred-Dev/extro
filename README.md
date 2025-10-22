@@ -21,7 +21,7 @@ python -m venv .venv
 3. Install dependencies:
 
 ```bash
-pip install -e .
+pip install raylib nanobind # You only need nanobind if you plan to build the project!
 ```
 
 ---

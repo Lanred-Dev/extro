@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from extro.instances.core.components.Drawable import Drawable
     from extro.instances.core.components.PhysicsBody import PhysicsBody
     from extro.instances.core.components.Animator import Animator
+    from extro.instances.core.components.Hierarchy import Hierarchy
 
 
 class ComponentType(Enum):
@@ -18,6 +19,7 @@ class ComponentType(Enum):
     DRAWABLE = auto()
     PHYSICS_BODY = auto()
     ANIMATOR = auto()
+    HIERARCHY = auto()
 
 
 transforms: "dict[InstanceManager.InstanceIDType, Transform]" = {}
@@ -25,12 +27,14 @@ colliders: "dict[InstanceManager.InstanceIDType, Collider]" = {}
 drawables: "dict[InstanceManager.InstanceIDType, Drawable]" = {}
 physics_bodies: "dict[InstanceManager.InstanceIDType, PhysicsBody]" = {}
 animators: "dict[InstanceManager.InstanceIDType, Animator]" = {}
+hierarchies: "dict[InstanceManager.InstanceIDType, Hierarchy]" = {}
 component_lists: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]" = {
     ComponentType.TRANSFORM: transforms,
     ComponentType.COLLIDER: colliders,
     ComponentType.DRAWABLE: drawables,
     ComponentType.PHYSICS_BODY: physics_bodies,
     ComponentType.ANIMATOR: animators,
+    ComponentType.HIERARCHY: hierarchies,
 }
 
 

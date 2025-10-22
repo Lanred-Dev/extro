@@ -4,11 +4,11 @@ from extro.instances.core.Instance import Instance
 import extro.Console as Console
 from extro.utils.Signal import Signal
 import extro.internal.systems.Animation as AnimationSystem
-from extro.animation.easings import linear
+from extro.animation.easings.linear import linear
 from extro.animation.lerp import LerpableType
 
 if TYPE_CHECKING:
-    from extro.animation.easings import EasingFunction
+    from extro.animation.easings.__easings__ import EasingFunction
 
 
 class Tween(Instance, Generic[LerpableType]):

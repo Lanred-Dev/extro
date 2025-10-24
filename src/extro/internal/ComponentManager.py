@@ -30,6 +30,7 @@ drawables: "dict[InstanceManager.InstanceIDType, Drawable]" = {}
 physics_bodies: "dict[InstanceManager.InstanceIDType, PhysicsBody]" = {}
 animators: "dict[InstanceManager.InstanceIDType, Animator]" = {}
 hierarchies: "dict[InstanceManager.InstanceIDType, Hierarchy]" = {}
+audio_sources: "dict[InstanceManager.InstanceIDType, AudioSource]" = {}
 
 component_list_map: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]" = {
     ComponentType.TRANSFORM: transforms,
@@ -38,6 +39,7 @@ component_list_map: "dict[ComponentType, dict[InstanceManager.InstanceIDType, An
     ComponentType.PHYSICS_BODY: physics_bodies,
     ComponentType.ANIMATOR: animators,
     ComponentType.HIERARCHY: hierarchies,
+    ComponentType.AUDIO_SOURCE: audio_sources,
 }
 
 

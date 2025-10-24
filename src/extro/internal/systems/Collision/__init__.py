@@ -7,7 +7,6 @@ import extro.internal.systems.Collision.CollisionMask as CollisionMask
 import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
-    from extro.shared.Vector2C import Vector2
     from extro.instances.core.components.Collider import Collider
     from extro.instances.core.components.Transform import Transform
 

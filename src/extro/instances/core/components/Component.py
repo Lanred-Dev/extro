@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from extro.internal.utils.BitMask import BitMask
 import extro.internal.ComponentManager as ComponentManager
 import extro.internal.InstanceManager as InstanceManager
@@ -7,7 +5,6 @@ import extro.internal.InstanceManager as InstanceManager
 
 class Component(BitMask):
     __slots__ = BitMask.__slots__ + (
-        "_key",
         "_owner",
         "_type",
     )

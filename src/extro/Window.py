@@ -7,7 +7,7 @@ from extro.utils.Signal import Signal
 
 _PRIMARY_MONITOR_INDEX: int = pyray.get_current_monitor()
 
-title: str = "extro engine"
+title: str = "extro"
 size: Vector2 = Vector2(500, 500)
 is_fullscreen: bool = False
 on_resize: Signal = Signal()

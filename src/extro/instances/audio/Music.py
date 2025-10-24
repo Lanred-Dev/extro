@@ -2,7 +2,7 @@ from extro.instances.core.Instance.Audio import Audio
 import extro.services.Audio as AudioService
 
 
-class EffectAudio(Audio):
+class MusicAudio(Audio):
     def __init__(
         self,
         audio_file: str,
@@ -16,6 +16,6 @@ class EffectAudio(Audio):
             volume=volume,
             pitch=pitch,
             remove_on_finish=remove_on_finish,
-            source_type=AudioService.AudioSourceType.EFFECT,
+            source_type=AudioService.AudioSourceType.STREAM,
             behavior=behavior,
         )

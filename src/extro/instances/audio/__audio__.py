@@ -1,8 +1,8 @@
-from extro.instances.audio.Effect import EffectAudioSource
-from extro.instances.audio.Spatial import SpatialAudioSource
+from extro.instances.audio.Effect import EffectAudio
+from extro.instances.audio.Music import MusicAudio
 
 
 __all__ = [
-    "EffectAudioSource",
-    "SpatialAudioSource",
+    "EffectAudio",
+    "MusicAudio",
 ]

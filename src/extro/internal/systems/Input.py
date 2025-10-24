@@ -1,9 +1,7 @@
 from typing import TYPE_CHECKING
 import pyray
 from enum import IntEnum
-import time
 
-import extro.Console as Console
 from extro.utils.Signal import Signal
 from extro.shared.Vector2C import Vector2
 

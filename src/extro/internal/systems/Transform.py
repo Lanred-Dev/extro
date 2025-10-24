@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 from enum import Enum, auto, IntFlag
 
-import extro.internal.InstanceManager as InstanceManager
 from extro.shared.Coord import CoordType
 import extro.internal.systems.Collision as CollisionSystem
 import extro.internal.ComponentManager as ComponentManager

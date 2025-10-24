@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from extro.instances.core.components.PhysicsBody import PhysicsBody
     from extro.instances.core.components.Animator import Animator
     from extro.instances.core.components.Hierarchy import Hierarchy
+    from extro.instances.core.components.AudioSource import AudioSource
 
 
 class ComponentType(Enum):
@@ -20,6 +21,7 @@ class ComponentType(Enum):
     PHYSICS_BODY = auto()
     ANIMATOR = auto()
     HIERARCHY = auto()
+    AUDIO_SOURCE = auto()
 
 
 transforms: "dict[InstanceManager.InstanceIDType, Transform]" = {}
@@ -28,7 +30,8 @@ drawables: "dict[InstanceManager.InstanceIDType, Drawable]" = {}
 physics_bodies: "dict[InstanceManager.InstanceIDType, PhysicsBody]" = {}
 animators: "dict[InstanceManager.InstanceIDType, Animator]" = {}
 hierarchies: "dict[InstanceManager.InstanceIDType, Hierarchy]" = {}
-component_lists: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]" = {
+
+component_list_map: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]" = {
     ComponentType.TRANSFORM: transforms,
     ComponentType.COLLIDER: colliders,
     ComponentType.DRAWABLE: drawables,
@@ -41,14 +44,19 @@ component_lists: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]
 def register(
     instance_id: "InstanceManager.InstanceIDType", type: ComponentType, component
 ):
-    component_lists[type][instance_id] = component
+    component_list_map[type][instance_id] = component
     Console.log(f"Registered component {type.name} for instance {instance_id}")
 
 
-def unregister(instance_id: "InstanceManager.InstanceIDType"):
-    for component_list in component_lists.values():
-        if instance_id in component_list:
-            component_list[instance_id].destroy()
-            del component_list[instance_id]
+def unregister(instance_id: "InstanceManager.InstanceIDType", type: ComponentType):
+    component_list = component_list_map[type]
 
-    Console.log(f"Unregistered instance {instance_id} components")
+    if instance_id not in component_list:
+        Console.log(
+            f"Instance {instance_id} has no component {type.name}",
+            Console.LogType.ERROR,
+        )
+        return
+
+    del component_list[instance_id]
+    Console.log(f"Unregistered component {type.name} for instance {instance_id}")

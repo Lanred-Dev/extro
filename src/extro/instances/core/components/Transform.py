@@ -71,6 +71,7 @@ class Transform(Component):
         self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
 
     def destroy(self):
+        super().destroy()
         self.on_update.destroy()
 
     def translate(self, translation: Coord):

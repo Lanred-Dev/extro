@@ -46,6 +46,7 @@ class Collider(Component):
         self.on_collision_end = Signal()
 
     def destroy(self):
+        super().destroy()
         self.on_collision.destroy()
         self.on_collision_end.destroy()
 

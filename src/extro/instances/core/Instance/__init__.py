@@ -38,6 +38,10 @@ class Instance:
         self._components[component._key] = component
         self._janitor.add(component.destroy)
 
+    def remove_component(self, component: Any):
+        """Removes a component from the instance. Note that this does not destroy the component."""
+        del self._components[component._key]
+
     def get_component(self, name: str) -> Any | None:
         return self._components.get(name, None)
 

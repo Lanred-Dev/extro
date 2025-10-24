@@ -18,7 +18,7 @@ class PhysicsBody(Component):
         "_is_anchored",
         "_forces",
         "velocity",
-        "_type",
+        "_body_type",
     )
 
     _key = "physics_body"
@@ -29,7 +29,7 @@ class PhysicsBody(Component):
     _forces: list[tuple[Vector2, Vector2]]
     velocity: Vector2
     rotational_velocity: float
-    _type: PhysicsService.PhysicsBodyType
+    _body_type: PhysicsService.PhysicsBodyType
 
     def __init__(
         self,
@@ -37,7 +37,7 @@ class PhysicsBody(Component):
         mass: float,
         restitution: float = 0.2,
         is_anchored: bool = False,
-        type: PhysicsService.PhysicsBodyType = PhysicsService.PhysicsBodyType.DYNAMIC,
+        body_type: PhysicsService.PhysicsBodyType = PhysicsService.PhysicsBodyType.DYNAMIC,
     ):
         super().__init__(owner, ComponentManager.ComponentType.PHYSICS_BODY)
 
@@ -47,9 +47,10 @@ class PhysicsBody(Component):
         self._forces = []
         self.velocity = Vector2(0, 0)
         self.rotational_velocity = 0
-        self._type = type
+        self._body_type = body_type
 
     def destroy(self):
+        super().destroy()
         self._forces.clear()
 
     def apply_force(self, force: Vector2, point: Vector2 = Vector2(0.5, 0.5)):
@@ -65,8 +66,8 @@ class PhysicsBody(Component):
         self._forces.append((force, point))
 
     @property
-    def type(self) -> PhysicsService.PhysicsBodyType:
-        return self._type
+    def body_type(self) -> PhysicsService.PhysicsBodyType:
+        return self._body_type
 
     @property
     def mass(self) -> float:

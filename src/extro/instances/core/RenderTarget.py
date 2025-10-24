@@ -11,7 +11,6 @@ import extro.Console as Console
 if TYPE_CHECKING:
     from extro.instances.core.Instance import Instance
     import extro.internal.InstanceManager as InstanceManager
-    from extro.instances.core.components.Drawable import Drawable
 
 
 def is_instance_renderable(instance_id: "InstanceManager.InstanceIDType") -> bool:

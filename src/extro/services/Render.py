@@ -1,6 +1,5 @@
 import pyray
-from typing import TYPE_CHECKING
-from enum import IntFlag, auto, Enum
+from enum import auto, Enum
 
 from extro import Console
 

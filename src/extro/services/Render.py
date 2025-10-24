@@ -1,3 +1,5 @@
+"""Provides FPS management and access to render target types."""
+
 import pyray
 from enum import auto, Enum
 

@@ -1,3 +1,5 @@
+"""Provides physics-related constants and types."""
+
 from enum import auto, Enum
 
 dampening: float = 0.8

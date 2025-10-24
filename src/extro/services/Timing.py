@@ -1,3 +1,5 @@
+"""Provides timing-related events and delta time."""
+
 from extro.utils.Signal import Signal
 
 delta: float = 0

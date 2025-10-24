@@ -1,3 +1,5 @@
+"""Provides collision group management for collision and physics interactions."""
+
 import extro.Console as Console
 
 DEFAULT_COLLISION_GROUP: str = "d"

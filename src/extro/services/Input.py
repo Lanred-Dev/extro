@@ -1,3 +1,5 @@
+"""Provides input-related constants, types, events, and access to the input action system."""
+
 import pyray
 
 import extro.Console as Console
@@ -7,7 +9,6 @@ Key = InputSystem.Key
 Mouse = InputSystem.Mouse
 SubscriberType = InputSystem.SubscriberType
 on_event: InputSystem.InputSignal = InputSystem.on_event
-
 _actions: dict[str, int] = {}
 
 

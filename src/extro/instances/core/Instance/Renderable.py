@@ -8,6 +8,8 @@ from extro.instances.core.components.Hierarchy import Hierarchy
 
 
 class Renderable(Instance):
+    __slots__ = Instance.__slots__ + ("drawable", "transform", "hierarchy")
+
     drawable: "Drawable"
     transform: "Transform"
     hierarchy: "Hierarchy"

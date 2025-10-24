@@ -1,13 +1,11 @@
 from typing import TYPE_CHECKING
 
 from extro.instances.core.components.Component import Component
-from extro.shared.RGBAColorC import RGBAColor
 import extro.internal.ComponentManager as ComponentManager
 from extro.instances.core.Instance import Instance
 import extro.Console as Console
 
 if TYPE_CHECKING:
-    from extro.shared.types import EmptyFunction
     import extro.internal.InstanceManager as InstanceManager
 
 

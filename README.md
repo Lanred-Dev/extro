@@ -32,6 +32,8 @@ Examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examp
 
 \* Required only if building from source
 
+> **Note:** extro has only been tested on **Windows 11**. Other platforms may work but are currently unverified.
+
 ---
 
 ### Setup
@@ -65,7 +67,8 @@ pip install raylib
 
 ### Building native extensions
 
-Build the `nanobind` extensions by running the provided script:
+extro includes some C++ extensions using `nanobind`.
+You must build them before use:
 
 ```bash
 cmake -S . -B build

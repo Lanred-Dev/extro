@@ -123,11 +123,11 @@ nanobind::tuple doesCollide(nanobind::list instance1Vertices, nanobind::list ins
     if (dot(distance, smallestAxis) < 0)
         smallestAxis = nanobind::make_tuple(-nanobind::cast<float>(smallestAxis[0]), -nanobind::cast<float>(smallestAxis[1]));
 
-    // Compute the point at which the collision occurs
     float contact_x = nanobind::cast<float>(instance1Position[0]) + nanobind::cast<float>(smallestAxis[0]) * (minOverlap / 2);
     float contact_y = nanobind::cast<float>(instance1Position[1]) + nanobind::cast<float>(smallestAxis[1]) * (minOverlap / 2);
+    nanobind::tuple contact_point = nanobind::make_tuple(contact_x, contact_y);
 
-    return nanobind::make_tuple(true, smallestAxis, minOverlap, nanobind::make_tuple(contact_x, contact_y));
+    return nanobind::make_tuple(true, smallestAxis, minOverlap, contact_point);
 }
 
 NB_MODULE(CollisionMask, m)

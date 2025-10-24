@@ -1,13 +1,17 @@
 """Provides configuration for the game world, including the active camera and tile size."""
 
+from typing import TYPE_CHECKING
+
 import extro.Console as Console
-from extro.instances.core.Camera import Camera
 from extro.shared.Vector2C import Vector2
 
-_DEFAULT_CAMERA: Camera = Camera()
+if TYPE_CHECKING:
+    from extro.instances.core.Camera import Camera
+
+
 _DEFAULT_TILE_SIZE: Vector2 = Vector2(30, 30)
 
-camera: Camera = _DEFAULT_CAMERA
+camera: "Camera | None" = None
 tile_size: Vector2 = _DEFAULT_TILE_SIZE
 
 
@@ -33,7 +37,7 @@ def set_camera(new_camera: "Camera | None"):
     If None, then rendering will be centered on the origin of the world (0, 0).
     """
     global camera
-    camera = new_camera if new_camera else _DEFAULT_CAMERA
+    camera = new_camera
     Console.log(
         f"World camera set to {new_camera if new_camera else "None"}",
         Console.LogType.DEBUG,

@@ -63,12 +63,15 @@ def render():
 
     pyray.begin_drawing()
     pyray.clear_background(pyray.BLACK)
-    pyray.begin_mode_2d(WorldService.camera._camera)
+
+    if WorldService.camera is not None:
+        pyray.begin_mode_2d(WorldService.camera._camera)
 
     for instance in render_order[0]:
         draw_render_target(instance)
 
-    pyray.end_mode_2d()
+    if WorldService.camera is not None:
+        pyray.end_mode_2d()
 
     for instance in render_order[1]:
         draw_render_target(instance)

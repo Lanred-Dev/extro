@@ -93,11 +93,10 @@ def update():
     for instance_id, transform in transforms:
         hierarchy = ComponentManager.hierarchies.get(instance_id)
 
-        if not hierarchy:
-            continue
-
-        if not transform.has_flag(TransformDirtyFlags.SIZE) and not transform.has_flag(
-            TransformDirtyFlags.POSITION
+        if (
+            not hierarchy
+            or not transform.has_flag(TransformDirtyFlags.SIZE)
+            and not transform.has_flag(TransformDirtyFlags.POSITION)
         ):
             continue
 

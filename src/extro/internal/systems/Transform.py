@@ -110,7 +110,7 @@ def update():
             child_transform._flags |= transform._flags
 
     for instance_id, transform in transforms:
-        if transform._flags == 0:
+        if transform.is_empty():
             continue
 
         hierarchy = ComponentManager.hierarchies.get(instance_id)

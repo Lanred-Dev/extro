@@ -21,14 +21,12 @@ class AnimatedSprite(Sprite):
             source_size=frame_size,
         )
 
-        self.add_component(
-            "animator",
-            Animator(
-                self.id,
-                texture_source=self._texture_source,
-                frame_duration=frame_duration,
-                is_active=is_active,
-                frame_count=frame_count,
-            ),
+        animator: Animator = Animator(
+            self._id,
+            texture_source=self._texture_source,
+            frame_duration=frame_duration,
+            is_active=is_active,
+            frame_count=frame_count,
         )
-        self.animator = self.get_component_unsafe("animator")
+        self.add_component(animator)
+        self.animator = animator

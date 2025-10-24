@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING
 import pyray
-from enum import IntFlag, auto, Enum
+from enum import IntFlag, auto
 
 from extro.internal.utils.InstanceRegistry import InstanceRegistry
 import extro.services.Timing as TimingService
 import extro.services.World as WorldService
 import extro.Console as Console
+import extro.services.Render as RenderService
 import extro.internal.InstanceManager as InstanceManager
 
 if TYPE_CHECKING:
@@ -21,11 +22,6 @@ class DrawableDirtyFlags(IntFlag):
 class RenderTargetDirtyFlags(IntFlag):
     ZINDEX = auto()
     RENDER_ORDER = auto()
-
-
-class RenderTargetType(Enum):
-    INDEPENDENT = auto()
-    WORLD = auto()
 
 
 render_targets: InstanceRegistry = InstanceRegistry(
@@ -98,7 +94,7 @@ def recalculate_render_order():
     for target in sorted_targets:
         (
             render_order[0]
-            if target._type == RenderTargetType.WORLD
+            if target._type == RenderService.RenderTargetType.WORLD
             else render_order[1]
         ).append(target)
 

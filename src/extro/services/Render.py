@@ -1,12 +1,15 @@
 import pyray
 from typing import TYPE_CHECKING
+from enum import IntFlag, auto, Enum
 
 from extro import Console
 
-if TYPE_CHECKING:
-    from extro.internal.systems.Render import RenderTargetType
-
 fps: int = 60
+
+
+class RenderTargetType(Enum):
+    INDEPENDENT = auto()
+    WORLD = auto()
 
 
 def set_fps(new_fps: int):

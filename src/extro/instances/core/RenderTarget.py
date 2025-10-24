@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 from extro.instances.core.Instance import Instance
 from extro.internal.utils.BitMask import BitMask
 import extro.internal.systems.Render as RenderSystem
+import extro.services.Render as RenderService
 from extro.internal.utils.InstanceRegistry import InstanceRegistry
 import extro.internal.InstanceManager as InstanceManager
 import extro.internal.ComponentManager as ComponentManager
@@ -34,13 +35,13 @@ class RenderTarget(Instance):
     is_visible: bool
     _zindex: int
     _instances: InstanceRegistry
-    _type: RenderSystem.RenderTargetType
+    _type: RenderService.RenderTargetType
     bitmask: BitMask
     _render_order: "list[InstanceManager.InstanceIDType]"
 
     def __init__(
         self,
-        type: RenderSystem.RenderTargetType,
+        type: RenderService.RenderTargetType,
         zindex: int = 0,
         is_visible: bool = True,
     ):

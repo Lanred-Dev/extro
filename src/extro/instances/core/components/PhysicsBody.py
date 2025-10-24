@@ -13,16 +13,19 @@ if TYPE_CHECKING:
 
 class PhysicsBody(Component):
     __slots__ = Component.__slots__ + (
+        "restitution",
         "_mass",
         "_inverse_mass",
         "_is_anchored",
         "_forces",
         "velocity",
         "_body_type",
+        "rotational_velocity",
     )
 
     _key = "physics_body"
 
+    restitution: float
     _mass: float
     _inverse_mass: float
     _is_anchored: bool

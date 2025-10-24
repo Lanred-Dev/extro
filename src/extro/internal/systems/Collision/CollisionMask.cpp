@@ -106,7 +106,7 @@ nanobind::tuple doesCollide(nanobind::list instance1Vertices, nanobind::list ins
 
         if (!(std::get<0>(projection1) <= std::get<1>(projection2) && std::get<0>(projection2) <= std::get<1>(projection1)))
         {
-            return nanobind::make_tuple(false, nanobind::make_tuple(0.0, 0.0), 0.0);
+            return nanobind::make_tuple(false, nanobind::make_tuple(0.0, 0.0), 0.0, nanobind::make_tuple(0.0, 0.0));
         }
 
         overlap = std::min(std::get<1>(projection1), std::get<1>(projection2)) - std::max(std::get<0>(projection1), std::get<0>(projection2));

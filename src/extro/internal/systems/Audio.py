@@ -1,10 +1,19 @@
 import pyray
 from enum import IntFlag, auto
+from typing import TYPE_CHECKING
 
 import extro.internal.ComponentManager as ComponentManager
 import extro.services.Audio as AudioService
+import extro.services.World as WorldService
+from extro.shared.Vector2C import Vector2
+
+if TYPE_CHECKING:
+    from extro.internal.systems.Transform import Transform
 
 pyray.init_audio_device()
+
+AUDIO_DROPOFF_DISTANCE: float = 1000.0
+AUDIO_DROPOFF_RATE: float = 1.0
 
 
 class AudioSourceDirtyFlags(IntFlag):
@@ -14,8 +23,11 @@ class AudioSourceDirtyFlags(IntFlag):
 
 
 def update():
-    for source in ComponentManager.audio_sources.values():
-        # Cant just return because if its a stream it still has to be played/updated
+    camera_position: Vector2 = (
+        WorldService.camera.position if WorldService.camera else Vector2(0, 0)
+    )
+
+    for instance_id, source in ComponentManager.audio_sources.items():
         if not source.is_empty():
             if source.has_flag(AudioSourceDirtyFlags.VOLUME):
                 source._actual_volume = source._volume * AudioService.global_volume
@@ -35,6 +47,27 @@ def update():
                     pyray.set_sound_pitch(source._audio, source._pitch)
 
         if source._is_playing:
+            if source._behavior == AudioService.AudioSourceBehaviorType.SPATIAL:
+                transform: "Transform | None" = ComponentManager.transforms.get(
+                    instance_id
+                )
+
+                if transform:
+                    initial_volume: float = source._actual_volume
+                    distance: float = (
+                        camera_position - transform._position
+                    ).magnitude()
+                    dropoff_volume: float = max(
+                        1 - (distance / AUDIO_DROPOFF_DISTANCE) * AUDIO_DROPOFF_RATE, 0
+                    )
+                    final_volume: float = initial_volume * dropoff_volume
+
+                    if initial_volume != final_volume:
+                        if source._source_type == AudioService.AudioSourceType.STREAM:
+                            pyray.set_music_volume(source._audio, final_volume)
+                        else:
+                            pyray.set_sound_volume(source._audio, final_volume)
+
             just_finished: bool = False
 
             if source.source_type == AudioService.AudioSourceType.STREAM:

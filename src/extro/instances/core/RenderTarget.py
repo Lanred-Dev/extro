@@ -12,13 +12,16 @@ import extro.Console as Console
 if TYPE_CHECKING:
     from extro.instances.core.Instance import Instance
     import extro.internal.InstanceManager as InstanceManager
+    from extro.instances.core.components.Hierarchy import Hierarchy
 
 
-def is_instance_renderable(instance_id: "InstanceManager.InstanceIDType") -> bool:
+def is_instance_valid(instance_id: "InstanceManager.InstanceIDType") -> bool:
     instance = InstanceManager.instances[instance_id]
+
     return (
         instance.get_component("drawable") is not None
         and instance.get_component("transform") is not None
+        and instance.get_component("hierarchy") is not None
     )
 
 
@@ -49,7 +52,7 @@ class RenderTarget(Instance):
 
         self._instances = InstanceRegistry(
             f"RenderTarget({self._id})",
-            preregister_check=is_instance_renderable,
+            preregister_check=is_instance_valid,
             on_list_change=lambda: self.bitmask.add_flag(
                 RenderSystem.RenderTargetDirtyFlags.RENDER_ORDER
             ),
@@ -68,8 +71,16 @@ class RenderTarget(Instance):
     def add(self, instance: "Instance"):
         self._instances.register(instance._id)
 
+        hierarchy: "Hierarchy | None" = instance.get_component("hierarchy")
+        if hierarchy and instance._id in self._instances.instances:
+            hierarchy._render_target = self._id
+
     def remove(self, instance: "Instance"):
         self._instances.unregister(instance._id)
+
+        hierarchy: "Hierarchy | None" = instance.get_component("hierarchy")
+        if hierarchy and instance._id not in self._instances.instances:
+            hierarchy._render_target = None
 
     def add_component(self, component: Any):
         Console.log("`RenderTarget` cannot have components", Console.LogType.ERROR)

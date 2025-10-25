@@ -21,6 +21,7 @@ class Hierarchy(Component):
     _owner: "InstanceManager.InstanceIDType"
     _parent: "InstanceManager.InstanceIDType | None"
     _children: "list[InstanceManager.InstanceIDType]"
+    _render_target: "InstanceManager.InstanceIDType | None"
 
     def __init__(
         self,
@@ -32,6 +33,7 @@ class Hierarchy(Component):
         self._owner = owner
         self._children = []
         self.parent = parent
+        self._render_target = None
 
     @property
     def parent(self) -> "InstanceManager.InstanceIDType | None":

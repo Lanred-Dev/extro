@@ -14,6 +14,7 @@ class Hierarchy(Component):
         "_owner",
         "_parent",
         "_children",
+        "_render_target",
     )
 
     _key = "hierarchy"

@@ -8,6 +8,7 @@ import pyray
 pyray.set_trace_log_level(pyray.TraceLogLevel.LOG_NONE)
 
 import extro.Console as Console
+import extro.Profiler as Profiler
 import extro.Window as Window
 import extro.internal.Engine as Engine
 import extro.assets.__assets__ as Assets
@@ -36,4 +37,5 @@ __all__ = [
     "Instances",
     "Assets",
     "Animation",
+    "Profiler",
 ]

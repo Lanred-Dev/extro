@@ -4,7 +4,6 @@ Public facing API for the extro game engine.
 
 import pyray
 
-# pyray logs arent needed
 pyray.set_trace_log_level(pyray.TraceLogLevel.LOG_NONE)
 
 import extro.Console as Console
@@ -18,7 +17,6 @@ import extro.services.__services__ as Services
 import extro.instances.__instances__ as Instances
 import extro.animation.__animation__ as Animation
 
-# API Wrappers for convenience
 quit = Engine.quit
 start = Engine.start
 

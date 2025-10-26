@@ -74,7 +74,6 @@ def update():
                 pyray.update_music_stream(source._audio)
         else:
             if source.has_flag(AudioSourceDirtyFlags.IS_PLAYING):
-                print(source._actual_volume)
                 pyray.play_sound(source._audio)
                 source.remove_flag(AudioSourceDirtyFlags.IS_PLAYING)
             elif pyray.is_sound_playing(source._audio) == False:

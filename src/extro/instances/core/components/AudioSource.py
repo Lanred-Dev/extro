@@ -5,7 +5,6 @@ from extro.instances.core.components.Component import Component
 import extro.internal.ComponentManager as ComponentManager
 import extro.internal.systems.Audio as AudioSystem
 import extro.services.Audio as AudioService
-import extro.internal.services.FileCache as FileCacheService
 from extro.utils.Signal import Signal
 
 if TYPE_CHECKING:
@@ -71,7 +70,7 @@ class AudioSource(Component):
         if self._source_type == AudioService.AudioSourceType.STREAM:
             self._audio = pyray.load_music_stream(self._audio_file)
         else:
-            self._audio = FileCacheService.audio_cache.load(self._audio_file)
+            self._audio = pyray.load_sound(self._audio_file)
 
         self.add_flag(AudioSystem.AudioSourceDirtyFlags.VOLUME)
         self.add_flag(AudioSystem.AudioSourceDirtyFlags.PITCH)
@@ -81,7 +80,6 @@ class AudioSource(Component):
             pyray.unload_music_stream(self._audio)
         else:
             pyray.unload_sound(self._audio)
-            FileCacheService.audio_cache.unload(self._audio_file)
 
     @property
     def source_type(self) -> AudioService.AudioSourceType:

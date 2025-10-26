@@ -57,10 +57,6 @@ class Cache(Generic[CacheFileType, FileType]):
             del self._users_map[path]
 
 
-audio_cache = Cache[pyray.Wave, pyray.Sound](
-    pyray.load_wave, pyray.unload_wave, pyray.load_sound_from_wave
-)
-
 texture_cache = Cache[pyray.Texture, pyray.Texture](
     pyray.load_texture, pyray.unload_texture
 )

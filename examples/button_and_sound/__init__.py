@@ -1,7 +1,14 @@
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("Click the button :)")
+extro.Window.set_title("Button = sound effect")
+
+coin_sound = extro.Instances.audio.EffectAudio(
+    audio_file="examples/button_and_sound/coin_sfx.mp3",
+    volume=0.5,
+    pitch=1.0,
+    behavior=extro.Services.AudioService.AudioSourceBehaviorType.NON_SPATIAL,
+)
 
 layer = extro.Instances.ui.Layer()
 button = extro.Instances.ui.Button(
@@ -10,7 +17,7 @@ button = extro.Instances.ui.Button(
     position=extro.Coord(0.5, 0.5, extro.CoordType.NORMALIZED),
     anchor=extro.Vector2(0.5, 0.5),
 )
-button.on_click.connect(lambda: print("Button clicked!"))
+button.on_click.connect(lambda: coin_sound.source.play())
 layer.add(button)
 
 text = extro.Instances.ui.Text(

@@ -28,16 +28,32 @@ def update():
     )
 
     for instance_id, source in ComponentManager.audio_sources.items():
+        if not source._is_playing:
+            continue
+
+        if source._behavior == AudioService.AudioSourceBehaviorType.SPATIAL:
+            transform: "Transform | None" = ComponentManager.transforms.get(instance_id)
+
+            if transform:
+                initial_volume: float = source._volume
+                distance: float = (camera_position - transform._position).magnitude()
+                dropoff_volume: float = max(
+                    1 - (distance / AUDIO_DROPOFF_DISTANCE) * AUDIO_DROPOFF_RATE, 0
+                )
+                final_volume: float = initial_volume * dropoff_volume
+
+                if initial_volume != final_volume:
+                    source._actual_volume = final_volume
+                    source.add_flag(AudioSourceDirtyFlags.VOLUME)
+
         if not source.is_empty():
             if source.has_flag(AudioSourceDirtyFlags.VOLUME):
-                source._actual_volume = source._volume * AudioService.global_volume
                 source.remove_flag(AudioSourceDirtyFlags.VOLUME)
 
                 if source._source_type == AudioService.AudioSourceType.STREAM:
                     pyray.set_music_volume(source._audio, source._actual_volume)
                 else:
                     pyray.set_sound_volume(source._audio, source._actual_volume)
-
             if source.has_flag(AudioSourceDirtyFlags.PITCH):
                 source.remove_flag(AudioSourceDirtyFlags.PITCH)
 
@@ -46,52 +62,30 @@ def update():
                 else:
                     pyray.set_sound_pitch(source._audio, source._pitch)
 
-        if source._is_playing:
-            if source._behavior == AudioService.AudioSourceBehaviorType.SPATIAL:
-                transform: "Transform | None" = ComponentManager.transforms.get(
-                    instance_id
-                )
+        just_finished: bool = False
 
-                if transform:
-                    initial_volume: float = source._actual_volume
-                    distance: float = (
-                        camera_position - transform._position
-                    ).magnitude()
-                    dropoff_volume: float = max(
-                        1 - (distance / AUDIO_DROPOFF_DISTANCE) * AUDIO_DROPOFF_RATE, 0
-                    )
-                    final_volume: float = initial_volume * dropoff_volume
-
-                    if initial_volume != final_volume:
-                        if source._source_type == AudioService.AudioSourceType.STREAM:
-                            pyray.set_music_volume(source._audio, final_volume)
-                        else:
-                            pyray.set_sound_volume(source._audio, final_volume)
-
-            just_finished: bool = False
-
-            if source.source_type == AudioService.AudioSourceType.STREAM:
-                if source.has_flag(AudioSourceDirtyFlags.IS_PLAYING):
-                    pyray.play_music_stream(source._audio)
-                    source.remove_flag(AudioSourceDirtyFlags.IS_PLAYING)
-                else:
-                    pyray.update_music_stream(source._audio)
-
-                    if pyray.is_music_stream_playing(source._audio) == False:
-                        just_finished = True
+        if source.source_type == AudioService.AudioSourceType.STREAM:
+            if source.has_flag(AudioSourceDirtyFlags.IS_PLAYING):
+                pyray.play_music_stream(source._audio)
+                source.remove_flag(AudioSourceDirtyFlags.IS_PLAYING)
+            elif pyray.is_music_stream_playing(source._audio) == False:
+                just_finished = True
             else:
-                if source.has_flag(AudioSourceDirtyFlags.IS_PLAYING):
-                    pyray.play_sound(source._audio)
-                    source.remove_flag(AudioSourceDirtyFlags.IS_PLAYING)
-                elif pyray.is_sound_playing(source._audio) == False:
-                    just_finished = True
+                pyray.update_music_stream(source._audio)
+        else:
+            if source.has_flag(AudioSourceDirtyFlags.IS_PLAYING):
+                print(source._actual_volume)
+                pyray.play_sound(source._audio)
+                source.remove_flag(AudioSourceDirtyFlags.IS_PLAYING)
+            elif pyray.is_sound_playing(source._audio) == False:
+                just_finished = True
 
-            if just_finished:
-                source._is_playing = False
-                source.on_finish.fire()
+        if just_finished:
+            source._is_playing = False
+            source.on_finish.fire()
 
-                if source.remove_on_finish:
-                    source.destroy()
+            if source.remove_on_finish:
+                source.destroy()
 
 
 def quit():

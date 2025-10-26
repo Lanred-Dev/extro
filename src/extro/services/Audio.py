@@ -1,10 +1,8 @@
 from enum import Enum, auto
-
-import extro.internal.systems.Audio as AudioSystem
-import extro.internal.ComponentManager as ComponentManager
+import pyray
 
 
-global_volume: float = 0.0
+global_volume: float = 1.0
 
 
 class AudioSourceType(Enum):
@@ -21,9 +19,7 @@ def set_global_volume(volume: float):
     """Sets the global volume for all audio sources."""
     global global_volume
     global_volume = max(0.0, min(1.0, volume))
-
-    for source in ComponentManager.audio_sources.values():
-        source.add_flag(AudioSystem.AudioSourceDirtyFlags.VOLUME)
+    pyray.set_master_volume(global_volume)
 
 
 __all__ = [

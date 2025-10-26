@@ -82,9 +82,13 @@ def update():
 
 
 def resolve_collisions(
-    collisions_data: "dict[CollisionSystem.Collision, tuple[tuple[float, float], float]]",
+    collisions_data: "CollisionSystem.CollisionsData",
 ):
-    for (instance1_id, instance2_id), (normal, penetration) in collisions_data.items():
+    for (instance1_id, instance2_id), (
+        normal,
+        penetration,
+        contact_point,
+    ) in collisions_data.items():
         if penetration <= PENETRATION_SLOP:
             continue
 
@@ -106,41 +110,35 @@ def resolve_collisions(
         correction_x: float = normal[0] * penetration
         correction_y: float = normal[1] * penetration
 
-        if (
+        is_instance1_dynamic: bool = (
             not instance1_physics_body._is_anchored
-            and instance1_physics_body._type == PhysicsService.PhysicsBodyType.DYNAMIC
-        ):
-            mass_correction = instance1_physics_body._inverse_mass / total_inverse_mass
+            and instance1_physics_body._body_type
+            == PhysicsService.PhysicsBodyType.DYNAMIC
+        )
+        is_instance2_dynamic: bool = (
+            not instance2_physics_body._is_anchored
+            and instance2_physics_body._body_type
+            == PhysicsService.PhysicsBodyType.DYNAMIC
+        )
+
+        # Its only worth calculating the impulse if at least one body is dynamic
+        if is_instance1_dynamic or is_instance2_dynamic:
+            relative_velocity: Vector2 = (
+                instance2_physics_body.velocity - instance1_physics_body.velocity
+            )
+
+        if is_instance1_dynamic:
+            mass_correction: float = (
+                instance1_physics_body._inverse_mass / total_inverse_mass
+            )
             instance1_transform.position.absolute_x += correction_x * mass_correction
             instance1_transform.position.absolute_y += correction_y * mass_correction
             instance1_transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
 
-        if (
-            not instance2_physics_body._is_anchored
-            and instance2_physics_body._type == PhysicsService.PhysicsBodyType.DYNAMIC
-        ):
-            mass_correction = instance2_physics_body._inverse_mass / total_inverse_mass
+        if is_instance2_dynamic:
+            mass_correction: float = (
+                instance2_physics_body._inverse_mass / total_inverse_mass
+            )
             instance2_transform.position.absolute_x -= correction_x * mass_correction
             instance2_transform.position.absolute_y -= correction_y * mass_correction
             instance2_transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
-
-        instance1_size_half: Vector2 = Vector2(
-            instance1_transform._actual_size[0] / 2,
-            instance1_transform._actual_size[1] / 2,
-        )
-        instance2_size_half: Vector2 = Vector2(
-            instance2_transform._actual_size[0] / 2,
-            instance2_transform._actual_size[1] / 2,
-        )
-        contact_point_x: float = (
-            instance1_transform._actual_position[0]
-            + instance1_transform._actual_size[0] / 2
-            + instance2_transform._actual_position[0]
-            + instance2_transform._actual_size[0] / 2
-        ) / 2
-        contact_point_y: float = (
-            instance1_transform._actual_position[1]
-            + instance1_transform._actual_size[1] / 2
-            + instance2_transform._actual_position[1]
-            + instance2_transform._actual_size[1] / 2
-        ) / 2

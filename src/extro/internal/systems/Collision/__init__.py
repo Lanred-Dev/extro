@@ -13,6 +13,10 @@ if TYPE_CHECKING:
     Collision = tuple[int, int]
     GridCell = tuple[int, int]
 
+    CollisionsData = dict[
+        Collision, tuple[tuple[float, float], float, tuple[float, float]]
+    ]
+
 
 CELL_SIZE: int = 60
 
@@ -60,7 +64,7 @@ def update():
 
     old_collisions = collisions[:]
     collisions.clear()
-    collisions_data: "dict[Collision, tuple[tuple[float, float], float]]" = {}
+    collisions_data: "CollisionsData" = {}
 
     for cell_instances in grid.values():
         for instance1_index, instance1_id in enumerate(cell_instances):
@@ -75,13 +79,15 @@ def update():
                 ):
                     continue
 
-                [does_collide, normal, penetration] = CollisionMask.does_collide(
-                    instance1_collider._vertices,
-                    instance1_collider._axes,
-                    ComponentManager.transforms[instance1_id]._actual_position,
-                    instance2_collider._vertices,
-                    instance2_collider._axes,
-                    ComponentManager.transforms[instance2_id]._actual_position,
+                does_collide, normal, penetration, contact_point = (
+                    CollisionMask.does_collide(
+                        instance1_collider._vertices,
+                        instance1_collider._axes,
+                        ComponentManager.transforms[instance1_id]._actual_position,
+                        instance2_collider._vertices,
+                        instance2_collider._axes,
+                        ComponentManager.transforms[instance2_id]._actual_position,
+                    )
                 )
 
                 if not does_collide:
@@ -97,7 +103,7 @@ def update():
                     continue
 
                 collisions.append(collision)
-                collisions_data[collision] = (normal, penetration)
+                collisions_data[collision] = (normal, penetration, contact_point)
 
                 if collision not in old_collisions and collision in collisions:
                     instance1_collider.on_collision.fire(instance1_collider)

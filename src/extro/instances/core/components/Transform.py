@@ -49,7 +49,7 @@ class Transform(Component):
         owner: "InstanceManager.InstanceIDType",
         position: Coord,
         size: Coord,
-        rotation: int = 0,
+        rotation: float = 0,
         scale: Vector2 = Vector2(1, 1),
         anchor: Vector2 = Vector2(0, 0),
     ):

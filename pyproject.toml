@@ -16,12 +16,13 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "nanobind>=2.9.2",
+    "build",
 ]
 
 [tool.scikit-build]
 build-dir = "build"
 wheel.expand-macos-universal-tags = true
-cmake.verbose = true
+build.verbose = true
 cmake.build-type = "Release"
 
 [tool.setuptools]

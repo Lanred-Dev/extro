@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
 
 def run_system(update: "EmptyFunction", system_name: str):
-    """Run the system and log its execution time to the profiler."""
     started = time.time()
     update()
     Profiler._add_update(system_name, time.time() - started)

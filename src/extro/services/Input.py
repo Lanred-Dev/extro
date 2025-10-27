@@ -1,14 +1,19 @@
 """Provides input-related constants, types, events, and access to the input action system."""
 
 import pyray
+from typing import TYPE_CHECKING
 
 import extro.Console as Console
 import extro.internal.systems.Input as InputSystem
+
+if TYPE_CHECKING:
+    from extro.shared.Vector2C import Vector2
 
 Key = InputSystem.Key
 Mouse = InputSystem.Mouse
 SubscriberType = InputSystem.SubscriberType
 on_event: InputSystem.InputSignal = InputSystem.on_event
+mouse_position: "Vector2" = InputSystem.mouse_position
 _actions: dict[str, int] = {}
 
 
@@ -74,4 +79,6 @@ __all__ = [
     "register_action",
     "unregister_action",
     "get_action",
+    "set_action",
+    "mouse_position",
 ]

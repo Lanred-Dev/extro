@@ -12,7 +12,11 @@ if TYPE_CHECKING:
     import extro.internal.systems.Collision as CollisionSystem
 
 FORCE_MAGNITUDE_THRESHOLD: float = 0.01
+PENETRATION_CORRECTION: float = 0.8
 PENETRATION_SLOP: float = 0.05
+IMPULSE_EPSILON: float = 0.001
+DEFAULT_RESTITUTION: float = 0.5
+IMPULSE_SCALER: float = 1.5
 
 
 class PhysicsBodyDirtyFlags(IntFlag):
@@ -85,19 +89,21 @@ def resolve_collisions(
     collisions_data: "CollisionSystem.CollisionsData",
 ):
     for (instance1_id, instance2_id), (
-        normal,
         penetration,
+        collision_normal,
         contact_point,
     ) in collisions_data.items():
         if penetration <= PENETRATION_SLOP:
             continue
 
-        penetration -= PENETRATION_SLOP
+        instance1_physics_body = ComponentManager.physics_bodies.get(instance1_id)
+        instance2_physics_body = ComponentManager.physics_bodies.get(instance2_id)
+
+        if not instance1_physics_body or not instance2_physics_body:
+            continue
 
         instance1_transform = ComponentManager.transforms[instance1_id]
         instance2_transform = ComponentManager.transforms[instance2_id]
-        instance1_physics_body = ComponentManager.physics_bodies[instance1_id]
-        instance2_physics_body = ComponentManager.physics_bodies[instance2_id]
 
         total_inverse_mass: float = (
             instance1_physics_body._inverse_mass + instance2_physics_body._inverse_mass
@@ -106,9 +112,9 @@ def resolve_collisions(
         if total_inverse_mass == 0:
             return
 
-        penetration -= PENETRATION_SLOP
-        correction_x: float = normal[0] * penetration
-        correction_y: float = normal[1] * penetration
+        penetration *= PENETRATION_CORRECTION
+        correction_x: float = collision_normal[0] * penetration
+        correction_y: float = collision_normal[1] * penetration
 
         is_instance1_dynamic: bool = (
             not instance1_physics_body._is_anchored
@@ -121,24 +127,129 @@ def resolve_collisions(
             == PhysicsService.PhysicsBodyType.DYNAMIC
         )
 
-        # Its only worth calculating the impulse if at least one body is dynamic
-        if is_instance1_dynamic or is_instance2_dynamic:
-            relative_velocity: Vector2 = (
-                instance2_physics_body.velocity - instance1_physics_body.velocity
-            )
-
         if is_instance1_dynamic:
             mass_correction: float = (
                 instance1_physics_body._inverse_mass / total_inverse_mass
             )
-            instance1_transform.position.absolute_x += correction_x * mass_correction
-            instance1_transform.position.absolute_y += correction_y * mass_correction
+            instance1_transform._position.absolute_x -= correction_x * mass_correction
+            instance1_transform._position.absolute_y -= correction_y * mass_correction
             instance1_transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
 
         if is_instance2_dynamic:
             mass_correction: float = (
                 instance2_physics_body._inverse_mass / total_inverse_mass
             )
-            instance2_transform.position.absolute_x -= correction_x * mass_correction
-            instance2_transform.position.absolute_y -= correction_y * mass_correction
+            instance2_transform._position.absolute_x += correction_x * mass_correction
+            instance2_transform._position.absolute_y += correction_y * mass_correction
             instance2_transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
+
+        # Its only worth calculating the impulse if at least one body is dynamic
+        if is_instance1_dynamic or is_instance2_dynamic:
+            instance1_lever_arm: Vector2 = Vector2(
+                contact_point[0]
+                - (
+                    instance1_transform._bounding[0]
+                    + instance1_transform._bounding[2] / 2
+                ),
+                contact_point[1]
+                - (
+                    instance1_transform._bounding[1]
+                    + instance1_transform._bounding[3] / 2
+                ),
+            )
+            instance2_lever_arm: Vector2 = Vector2(
+                contact_point[0]
+                - (
+                    instance2_transform._bounding[0]
+                    + instance2_transform._bounding[2] / 2
+                ),
+                contact_point[1]
+                - (
+                    instance2_transform._bounding[1]
+                    + instance2_transform._bounding[3] / 2
+                ),
+            )
+            relative_velocity: Vector2 = (
+                instance2_physics_body.velocity
+                + Vector2(
+                    -instance2_lever_arm.y * instance2_physics_body.rotational_velocity,
+                    instance2_lever_arm.x * instance2_physics_body.rotational_velocity,
+                )
+            ) - (
+                instance1_physics_body.velocity
+                + Vector2(
+                    -instance1_lever_arm.y * instance1_physics_body.rotational_velocity,
+                    instance1_lever_arm.x * instance1_physics_body.rotational_velocity,
+                )
+            )
+            collision_normal_vector: Vector2 = Vector2(
+                collision_normal[0], collision_normal[1]
+            )
+            velocity_along_normal: float = relative_velocity.dot(
+                collision_normal_vector
+            )
+
+            if velocity_along_normal < -IMPULSE_EPSILON:
+                restitution: float = min(
+                    instance1_physics_body.restitution,
+                    instance2_physics_body.restitution,
+                )
+                instance1_inertia: float = (
+                    (1 / 12)
+                    * instance1_physics_body._mass
+                    * (
+                        instance1_transform._bounding[2] ** 2
+                        + instance1_transform._bounding[3] ** 2
+                    )
+                )
+                instance2_inertia: float = (
+                    (1 / 12)
+                    * instance2_physics_body._mass
+                    * (
+                        instance2_transform._bounding[2] ** 2
+                        + instance2_transform._bounding[3] ** 2
+                    )
+                )
+                impulse_magnitude: float = (
+                    (-(1 + restitution) * velocity_along_normal)
+                    / (
+                        total_inverse_mass
+                        + (
+                            instance1_lever_arm.x * collision_normal[1]
+                            - instance1_lever_arm.y * collision_normal[0]
+                        )
+                        ** 2
+                        / instance1_inertia
+                        + (
+                            instance2_lever_arm.x * collision_normal[1]
+                            - instance2_lever_arm.y * collision_normal[0]
+                        )
+                        ** 2
+                        / instance2_inertia
+                    )
+                ) * IMPULSE_SCALER
+                impulse: Vector2 = collision_normal_vector * impulse_magnitude
+
+                if is_instance1_dynamic:
+                    instance1_physics_body.velocity -= (
+                        impulse / instance1_physics_body._mass
+                    )
+                    instance1_physics_body.rotational_velocity -= (
+                        impulse_magnitude
+                        * (
+                            instance1_lever_arm.x * collision_normal[1]
+                            - instance1_lever_arm.y * collision_normal[0]
+                        )
+                    ) / instance1_inertia
+
+                if is_instance2_dynamic:
+                    instance2_physics_body.velocity += (
+                        impulse / instance2_physics_body._mass
+                    )
+                    instance2_physics_body.rotational_velocity += (
+                        impulse_magnitude
+                        * (
+                            instance2_lever_arm.x * collision_normal[1]
+                            - instance2_lever_arm.y * collision_normal[0]
+                        )
+                    ) / instance2_inertia

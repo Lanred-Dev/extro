@@ -67,8 +67,8 @@ nanobind::list computeAxes(nanobind::list vertices)
     {
         nanobind::tuple vertex1 = vertices[index];
         nanobind::tuple vertex2 = vertices[(index + 1) % vertices.size()];
-        float axisX = nanobind::cast<float>(-(vertex1[0] - vertex2[0]));
-        float axisY = nanobind::cast<float>(vertex1[1] - vertex2[1]);
+        float axisX = nanobind::cast<float>(vertex2[0] - vertex1[0]);
+        float axisY = nanobind::cast<float>(vertex2[1] - vertex1[1]);
         float axisLength = std::hypot(axisX, axisY);
 
         if (axisLength == 0)
@@ -76,7 +76,7 @@ nanobind::list computeAxes(nanobind::list vertices)
 
         axisX /= axisLength;
         axisY /= axisLength;
-        axes.append(nanobind::make_tuple(axisX, axisY));
+        axes.append(nanobind::make_tuple(axisY, -axisX));
     }
 
     return axes;
@@ -106,7 +106,8 @@ nanobind::tuple doesCollide(nanobind::list instance1Vertices, nanobind::list ins
 
         if (!(std::get<0>(projection1) <= std::get<1>(projection2) && std::get<0>(projection2) <= std::get<1>(projection1)))
         {
-            return nanobind::make_tuple(false, nanobind::make_tuple(0.0, 0.0), 0.0, nanobind::make_tuple(0.0, 0.0));
+            nanobind::tuple emptyTuple = nanobind::make_tuple(0.0, 0.0);
+            return nanobind::make_tuple(false, emptyTuple, 0.0, emptyTuple, emptyTuple);
         }
 
         overlap = std::min(std::get<1>(projection1), std::get<1>(projection2)) - std::max(std::get<0>(projection1), std::get<0>(projection2));
@@ -118,16 +119,23 @@ nanobind::tuple doesCollide(nanobind::list instance1Vertices, nanobind::list ins
         }
     }
 
-    nanobind::tuple distance = nanobind::make_tuple(instance1Position[0] - instance2Position[0], instance1Position[1] - instance2Position[1]);
+    nanobind::tuple distance = nanobind::make_tuple(instance2Position[0] - instance1Position[0], instance2Position[1] - instance1Position[1]);
 
     if (dot(distance, smallestAxis) < 0)
         smallestAxis = nanobind::make_tuple(-nanobind::cast<float>(smallestAxis[0]), -nanobind::cast<float>(smallestAxis[1]));
 
-    float contact_x = nanobind::cast<float>(instance1Position[0]) + nanobind::cast<float>(smallestAxis[0]) * (minOverlap / 2);
-    float contact_y = nanobind::cast<float>(instance1Position[1]) + nanobind::cast<float>(smallestAxis[1]) * (minOverlap / 2);
-    nanobind::tuple contact_point = nanobind::make_tuple(contact_x, contact_y);
+    float collisionNormalX = nanobind::cast<float>(smallestAxis[0]);
+    float collisionNormalY = nanobind::cast<float>(smallestAxis[1]);
+    float normalLength = std::sqrt(collisionNormalX * collisionNormalX + collisionNormalY * collisionNormalY);
+    collisionNormalX /= normalLength;
+    collisionNormalY /= normalLength;
+    nanobind::tuple collisionNormal = nanobind::make_tuple(collisionNormalX, collisionNormalY);
 
-    return nanobind::make_tuple(true, smallestAxis, minOverlap, contact_point);
+    float contactX = nanobind::cast<float>(instance1Position[0]) + nanobind::cast<float>(smallestAxis[0]) * (minOverlap / 2);
+    float contactY = nanobind::cast<float>(instance1Position[1]) + nanobind::cast<float>(smallestAxis[1]) * (minOverlap / 2);
+    nanobind::tuple contactPoint = nanobind::make_tuple(contactX, contactY);
+
+    return nanobind::make_tuple(true, smallestAxis, minOverlap, collisionNormal, contactPoint);
 }
 
 NB_MODULE(CollisionMask, m)

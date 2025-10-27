@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     GridCell = tuple[int, int]
 
     CollisionsData = dict[
-        Collision, tuple[tuple[float, float], float, tuple[float, float]]
+        Collision, tuple[float, tuple[float, float], tuple[float, float]]
     ]
 
 
@@ -79,7 +79,7 @@ def update():
                 ):
                     continue
 
-                does_collide, normal, penetration, contact_point = (
+                does_collide, normal, penetration, collision_normal, contact_point = (
                     CollisionMask.does_collide(
                         instance1_collider._vertices,
                         instance1_collider._axes,
@@ -103,11 +103,19 @@ def update():
                     continue
 
                 collisions.append(collision)
-                collisions_data[collision] = (normal, penetration, contact_point)
+                collisions_data[collision] = (
+                    penetration,
+                    collision_normal,
+                    contact_point,
+                )
 
                 if collision not in old_collisions and collision in collisions:
-                    instance1_collider.on_collision.fire(instance1_collider)
-                    instance2_collider.on_collision.fire(instance2_collider)
+                    instance1_collider.on_collision.fire(
+                        instance1_collider, normal, penetration
+                    )
+                    instance2_collider.on_collision.fire(
+                        instance2_collider, normal, penetration
+                    )
 
     # Fire collision end events
     for collision in old_collisions:

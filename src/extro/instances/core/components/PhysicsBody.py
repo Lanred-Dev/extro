@@ -38,7 +38,7 @@ class PhysicsBody(Component):
         self,
         owner: "InstanceManager.InstanceIDType",
         mass: float,
-        restitution: float = 0.2,
+        restitution: float = PhysicsSystem.DEFAULT_RESTITUTION,
         is_anchored: bool = False,
         body_type: PhysicsService.PhysicsBodyType = PhysicsService.PhysicsBodyType.DYNAMIC,
     ):

@@ -25,6 +25,13 @@ def set_title(title: str):
     pyray.set_window_title(title)
 
 
+def set_icon(image_path: str):
+    """Set the window icon."""
+    image = pyray.load_image(image_path)
+    pyray.set_window_icon(image)
+    pyray.unload_image(image)
+
+
 def set_size(new_size: Vector2):
     """Set the window size."""
     global size
@@ -64,6 +71,7 @@ __all__ = [
     "is_fullscreen",
     "set_title",
     "set_size",
+    "set_icon",
     "toggle_fullscreen",
     "close",
 ]

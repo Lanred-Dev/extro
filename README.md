@@ -1,6 +1,6 @@
 # extro
 
-A 2D game engine written in Python, using pyray (Raylib) for rendering.
+A 2D game engine written in Python that uses Pyray (Raylib) as its backend.
 
 ---
 

@@ -2,7 +2,7 @@
 
 import extro.Console as Console
 
-DEFAULT_COLLISION_GROUP: str = "d"
+DEFAULT_COLLISION_GROUP: str = "default"
 
 _collision_matrix: dict[str, dict[str, bool]] = {DEFAULT_COLLISION_GROUP: {}}
 

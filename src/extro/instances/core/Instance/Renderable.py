@@ -23,11 +23,17 @@ class Renderable(Instance):
         is_visible: bool = True,
         anchor: Vector2 = Vector2(0, 0),
         scale: Vector2 = Vector2(1, 1),
+        rotation: float = 0,
     ):
         super().__init__()
 
         transform: Transform = Transform(
-            self._id, position=position, size=size, anchor=anchor, scale=scale
+            self._id,
+            position=position,
+            size=size,
+            anchor=anchor,
+            scale=scale,
+            rotation=rotation,
         )
         self.add_component(transform)
         self.transform = transform

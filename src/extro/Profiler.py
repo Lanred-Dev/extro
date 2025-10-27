@@ -33,7 +33,7 @@ def get_stats() -> dict[str, float]:
     stats = {
         name: _get_average_of_list(durations) for name, durations in _updates.items()
     }
-    stats["frame"] = sum(stats.values())
+    stats["total"] = sum(stats.values())
     return stats
 
 

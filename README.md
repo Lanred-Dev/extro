@@ -71,9 +71,9 @@ pip install --upgrade build
 python -m build
 ```
 
-### Building native extensions separately from wheel
+### Building C++ extensions separately from the wheel
 
-If you want to build the C++ extensions separately from the Python wheel, you can do so using CMake and nanobind.
+If you want to build the C++ extensions separately from the `.whl`, you can do so using CMake and nanobind.
 
 1. Install nanobind:
 

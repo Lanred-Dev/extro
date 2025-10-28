@@ -18,12 +18,13 @@ A 2D game engine written in Python that uses Pyray (Raylib) as its backend.
 
 Code examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examples)
 
-<div style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <video src="media/animated_sprite.mp4" height="200" controls></video>
-    <video src="media/button_and_sound.mp4" height="200" controls></video>
-    <video src="media/sin.mp4" height="200" controls></video>
-    <video src="media/tween.mp4" height="200" controls></video>
-</div>
+[▶ Button with Sound](media/button_and_sound.mp4)
+
+![Animated Sprite](media/animated_sprite.gif)
+
+![Sin Wave](media/sin.gif)
+
+![Tween](media/tween.gif)
 
 ### Requirements
 

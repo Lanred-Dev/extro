@@ -2,8 +2,6 @@
 
 A 2D game engine written in Python that uses Pyray (Raylib) as its backend.
 
----
-
 ### Features
 
 - Instance and scene management
@@ -16,13 +14,16 @@ A 2D game engine written in Python that uses Pyray (Raylib) as its backend.
 - Utility classes (timeouts, janitor, signals, etc.)
 - Built-in 2D camera support
 
----
-
 ### Examples
 
-Examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examples)
+Code examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examples)
 
----
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <video src="media/animated_sprite.mp4" height="200" controls></video>
+    <video src="media/button_and_sound.mp4" height="200" controls></video>
+    <video src="media/sin.mp4" height="200" controls></video>
+    <video src="media/tween.mp4" height="200" controls></video>
+</div>
 
 ### Requirements
 
@@ -33,8 +34,6 @@ Examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examp
 \* Required only if building from source
 
 > **Note:** extro has only been tested on **Windows 11**. Other platforms may work but are currently unverified.
-
----
 
 ### Setup
 
@@ -63,25 +62,28 @@ python -m venv .venv
 pip install raylib
 ```
 
----
-
-### Building native extensions
-
-extro includes some C++ extensions using `nanobind`.
-You must build them before use:
-
-```bash
-cmake -S . -B build
-cmake --build build --config Release
-```
-
----
-
 ### Building the wheel
 
 To create a distributable `.whl` file:
 
 ```bash
-pip install --upgrade pip setuptools wheel build nanobind scikit-build
+pip install --upgrade build
 python -m build
+```
+
+### Building native extensions separately from wheel
+
+If you want to build the C++ extensions separately from the Python wheel, you can do so using CMake and nanobind.
+
+1. Install nanobind:
+
+```bash
+pip install nanobind
+```
+
+2. Then build using CMake:
+
+```bash
+cmake -S . -B build
+cmake --build build --config Release
 ```

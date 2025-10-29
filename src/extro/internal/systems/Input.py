@@ -76,6 +76,17 @@ class Keyboard(IntEnum):
     CTRL = pyray.KeyboardKey.KEY_LEFT_CONTROL
     ALT = pyray.KeyboardKey.KEY_LEFT_ALT
 
+    COMMA = pyray.KeyboardKey.KEY_COMMA
+    PERIOD = pyray.KeyboardKey.KEY_PERIOD
+    SEMICOLON = pyray.KeyboardKey.KEY_SEMICOLON
+    APOSTROPHE = pyray.KeyboardKey.KEY_APOSTROPHE
+    SLASH = pyray.KeyboardKey.KEY_SLASH
+    BACKSLASH = pyray.KeyboardKey.KEY_BACKSLASH
+    LEFT_BRACKET = pyray.KeyboardKey.KEY_LEFT_BRACKET
+    RIGHT_BRACKET = pyray.KeyboardKey.KEY_RIGHT_BRACKET
+    MINUS = pyray.KeyboardKey.KEY_MINUS
+    EQUALS = pyray.KeyboardKey.KEY_EQUAL
+
 
 class KeyboardModifiers(IntEnum):
     SHIFT = pyray.KeyboardKey.KEY_LEFT_SHIFT

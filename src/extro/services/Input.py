@@ -1,5 +1,6 @@
 """Provides input-related constants, types, events, and access to the input action system."""
 
+from unittest import case
 import pyray
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,38 @@ input_captured_by: "InstanceManager.InstanceID | None" = InputSystem.input_captu
 request_keyboard_capture = InputSystem.request_keyboard_capture
 release_keyboard_capture = InputSystem.release_keyboard_capture
 _actions: dict[str, int] = {}
+_uppercase_map: dict[Keyboard, str] = {
+    Keyboard.ONE: "!",
+    Keyboard.TWO: "@",
+    Keyboard.THREE: "#",
+    Keyboard.FOUR: "$",
+    Keyboard.FIVE: "%",
+    Keyboard.SIX: "^",
+    Keyboard.SEVEN: "&",
+    Keyboard.EIGHT: "*",
+    Keyboard.NINE: "(",
+    Keyboard.ZERO: ")",
+    Keyboard.MINUS: "_",
+    Keyboard.EQUALS: "+",
+    Keyboard.LEFT_BRACKET: "{",
+    Keyboard.RIGHT_BRACKET: "}",
+    Keyboard.SEMICOLON: ":",
+    Keyboard.APOSTROPHE: '"',
+    Keyboard.SLASH: "?",
+    Keyboard.BACKSLASH: "|",
+}
+_number_keys: list[Keyboard] = [
+    Keyboard.ONE,
+    Keyboard.TWO,
+    Keyboard.THREE,
+    Keyboard.FOUR,
+    Keyboard.FIVE,
+    Keyboard.SIX,
+    Keyboard.SEVEN,
+    Keyboard.EIGHT,
+    Keyboard.NINE,
+    Keyboard.ZERO,
+]
 
 
 def register_action(id: str, input: int):
@@ -81,12 +114,41 @@ def keycode_to_character(
     match input:
         case Keyboard.SPACE:
             return " "
-        case Keyboard.ENTER | Keyboard.ESCAPE | Keyboard.BACKSPACE | Keyboard.SHIFT:
+        case (
+            Keyboard.ENTER
+            | Keyboard.ESCAPE
+            | Keyboard.BACKSPACE
+            | Keyboard.SHIFT
+            | Keyboard.CTRL
+            | Keyboard.ALT
+            | Keyboard.TAB
+            | Keyboard.F1
+            | Keyboard.F2
+            | Keyboard.F3
+            | Keyboard.F4
+            | Keyboard.F5
+            | Keyboard.F6
+            | Keyboard.F7
+            | Keyboard.F8
+            | Keyboard.F9
+            | Keyboard.F10
+            | Keyboard.F11
+            | Keyboard.F12
+        ):
             return None
         case _:
+            is_shift_pressed: bool = (
+                modifiers is not None and KeyboardModifiers.SHIFT in modifiers
+            )
+
+            if is_shift_pressed and input in _uppercase_map:
+                return _uppercase_map[input]
+            elif input in _number_keys:
+                return chr(input.value)
+
             character: str = chr(input.value)
 
-            if modifiers and Keyboard.SHIFT in modifiers:
+            if is_shift_pressed:
                 character = character.upper()
             else:
                 character = character.lower()

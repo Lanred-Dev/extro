@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from enum import Enum, auto, IntFlag
 
-from extro.shared.Coord import CoordType
+from extro.shared.Coord import Coord
 import extro.internal.systems.Collision as CollisionSystem
 import extro.internal.ComponentManager as ComponentManager
 
@@ -30,7 +30,7 @@ def recalculate_position(
     new_y: float = 0
 
     match transform._position.type:
-        case CoordType.RELATIVE if hierarchy and hierarchy._parent is not None:
+        case Coord.CoordType.RELATIVE if hierarchy and hierarchy._parent is not None:
             parent_x, parent_y, parent_width, parent_height = (
                 ComponentManager.transforms[hierarchy._parent]._bounding
             )
@@ -71,7 +71,7 @@ def recalculate_size(
     new_y = transform._size.absolute_y * transform._scale.y
 
     if (
-        transform._size.type == CoordType.RELATIVE
+        transform._size.type == Coord.CoordType.RELATIVE
         and hierarchy
         and hierarchy._parent is not None
     ):

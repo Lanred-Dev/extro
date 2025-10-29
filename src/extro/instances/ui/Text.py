@@ -4,7 +4,7 @@ from extro.instances.core.Instance.UI import UIInstance
 from extro.instances.ui.Font import Font
 from extro.assets.Fonts import Arial
 import extro.internal.systems.UI as UISystem
-from extro.shared.Coord import Coord, CoordType
+from extro.shared.Coord import Coord
 
 
 class Text(UIInstance):
@@ -28,7 +28,7 @@ class Text(UIInstance):
         self,
         text: str,
         font_size: int,
-        size: Coord = Coord(0, 0, CoordType.ABSOLUTE),
+        size: Coord = Coord(0, 0, Coord.CoordType.ABSOLUTE),
         font: Font = Arial,
         character_spacing: int = 1,
         scale_size_to_font: bool = False,

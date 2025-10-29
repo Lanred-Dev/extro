@@ -3,15 +3,12 @@ from extro.shared.Vector2C import Vector2
 import extro.services.Screen as ScreenService
 
 
-class CoordType(Enum):
-    NORMALIZED = 0
-    ABSOLUTE = 1
-    WORLD = 2
-    RELATIVE = 3
-
-
 class Coord(Vector2):
-    CoordType = CoordType
+    class CoordType(Enum):
+        NORMALIZED = 0
+        ABSOLUTE = 1
+        WORLD = 2
+        RELATIVE = 3
 
     __slots__ = (
         "_x",
@@ -41,11 +38,11 @@ class Coord(Vector2):
         self._y = new_y
 
         match self._type:
-            case CoordType.NORMALIZED:
+            case self.CoordType.NORMALIZED:
                 self._absolute_x, self._absolute_y = (
                     ScreenService.normalized_to_absolute_coords(new_x, new_y)
                 )
-            case CoordType.WORLD:
+            case self.CoordType.WORLD:
                 self._absolute_x, self._absolute_y = (
                     ScreenService.world_to_absolute_coords(new_x, new_y)
                 )
@@ -58,11 +55,11 @@ class Coord(Vector2):
         self._absolute_y = new_y
 
         match self._type:
-            case CoordType.NORMALIZED:
+            case self.CoordType.NORMALIZED:
                 self._x, self._y = ScreenService.absolute_to_normalized_coords(
                     new_x, new_y
                 )
-            case CoordType.WORLD:
+            case self.CoordType.WORLD:
                 self._x, self._y = ScreenService.absolute_to_world_coords(new_x, new_y)
             case _:
                 self._x = new_x

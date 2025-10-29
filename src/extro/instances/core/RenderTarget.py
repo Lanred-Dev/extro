@@ -75,6 +75,10 @@ class RenderTarget(Instance):
         if hierarchy and instance._id in self._instances.instances:
             hierarchy._render_target = self._id
 
+            for child_id in hierarchy.children:
+                child_instance: "Instance" = InstanceManager.instances[child_id]  # type: ignore
+                self.add(child_instance)
+
     def remove(self, instance: "Instance"):
         self._instances.unregister(instance._id)
 

@@ -12,7 +12,7 @@ import extro.internal.systems.Input as InputSystem
 from extro.shared.Coord import Coord, CoordType
 
 if TYPE_CHECKING:
-    from extro.instances.ui.Button import Button
+    from extro.instances.core.Instance.UI.Clickable import Clickable
     from extro.instances.ui.Text import Text
     from extro.shared.Vector2C import Vector2
     import extro.internal.InstanceManager as InstanceManager
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class UIInstanceType(Enum):
-    BUTTON = auto()
+    CLICKABLE = auto()
     TEXT = auto()
 
 
@@ -48,10 +48,10 @@ def recompute_type_map():
 
 
 def handle_click(_, mouse_position: "Vector2"):
-    clicked_buttons: "list[tuple[Button, int]]" = []
+    clicked_instances: "list[tuple[Clickable, int]]" = []
     highest_zindex: float = -math.inf
 
-    for instance_id in type_map[UIInstanceType.BUTTON][:]:
+    for instance_id in type_map[UIInstanceType.CLICKABLE][:]:
         transform = ComponentManager.transforms[instance_id]
         drawable = ComponentManager.drawables[instance_id]
 
@@ -64,15 +64,15 @@ def handle_click(_, mouse_position: "Vector2"):
 
         highest_zindex = max(highest_zindex, drawable._zindex)
 
-        for button in clicked_buttons[:]:
+        for button in clicked_instances[:]:
             if button[1] < highest_zindex:
-                clicked_buttons.remove(button)
+                clicked_instances.remove(button)
 
-        instance: "Button" = InstanceManager.instances[instance_id]  # type: ignore
-        clicked_buttons.append((instance, drawable._zindex))
+        instance: "Clickable" = InstanceManager.instances[instance_id]  # type: ignore
+        clicked_instances.append((instance, drawable._zindex))
 
-    for button in clicked_buttons:
-        button[0].on_click.fire()
+    for instance, _ in clicked_instances:
+        instance.on_click.fire()
 
 
 @functools.lru_cache(maxsize=32)

@@ -6,6 +6,8 @@ from extro.instances.core.components.Animator import Animator
 
 
 class AnimatedSprite(Sprite):
+    __slots__ = Sprite.__slots__ + ("animator",)
+
     animator: "Animator"
 
     def __init__(

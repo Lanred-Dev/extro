@@ -7,6 +7,7 @@ from extro.shared.Vector2C import Vector2
 
 if TYPE_CHECKING:
     from extro.shared.types import EmptyFunction
+    import extro.internal.InstanceManager as InstanceManager
 
 
 class Key(IntEnum):
@@ -89,6 +90,7 @@ active_inputs: dict[int, bool] = {
 }
 old_active_inputs: dict[int, bool] = active_inputs.copy()
 input_usage_map: dict[int, int] = {}
+input_captured_by: "InstanceManager.InstanceID | None" = None
 
 
 class SubscriberType(IntEnum):
@@ -153,7 +155,7 @@ class InputSignal(Signal):
         ]
         del self._subscriber_type_map[connection_id]
 
-    def fire_subscribers_with_filter(self, type: SubscriberType, input: int, *args):
+    def _fire_subscribers_with_filter(self, type: SubscriberType, input: int, *args):
         for connection_id, inputs in self._subscriber_input_map[type].items():
             if inputs is None or input in inputs:
                 self._subscribers[connection_id](input, *args)
@@ -170,7 +172,7 @@ def update():
     if new_mouse_x != mouse_position.x or new_mouse_y != mouse_position.y:
         mouse_position.x = new_mouse_x
         mouse_position.y = new_mouse_y
-        on_event.fire_subscribers_with_filter(
+        on_event._fire_subscribers_with_filter(
             SubscriberType.ACTIVE, Mouse.MOVE, mouse_position
         )
 
@@ -183,13 +185,28 @@ def update():
         args = (mouse_position,) if input in Mouse else ()
 
         if active_inputs[input]:
-            on_event.fire_subscribers_with_filter(SubscriberType.ACTIVE, input, *args)
+            on_event._fire_subscribers_with_filter(SubscriberType.ACTIVE, input, *args)
 
             if not old_active_inputs[input]:
-                on_event.fire_subscribers_with_filter(
+                on_event._fire_subscribers_with_filter(
                     SubscriberType.PRESS, input, *args
                 )
         elif not active_inputs[input] and old_active_inputs[input]:
-            on_event.fire_subscribers_with_filter(SubscriberType.RELEASE, input, *args)
+            on_event._fire_subscribers_with_filter(SubscriberType.RELEASE, input, *args)
 
         old_active_inputs[input] = active_inputs[input]
+
+
+def request_keyboard_capture(instance_id: "InstanceManager.InstanceID") -> bool:
+    global input_captured_by
+
+    if input_captured_by is not None:
+        return False
+
+    input_captured_by = instance_id
+    return True
+
+
+def release_keyboard_capture():
+    global input_captured_by
+    input_captured_by = None

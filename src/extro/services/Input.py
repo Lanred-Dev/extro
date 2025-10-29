@@ -8,12 +8,16 @@ import extro.internal.systems.Input as InputSystem
 
 if TYPE_CHECKING:
     from extro.shared.Vector2C import Vector2
+    import extro.internal.InstanceManager as InstanceManager
 
 Key = InputSystem.Key
 Mouse = InputSystem.Mouse
 SubscriberType = InputSystem.SubscriberType
 on_event: InputSystem.InputSignal = InputSystem.on_event
 mouse_position: "Vector2" = InputSystem.mouse_position
+input_captured_by: "InstanceManager.InstanceID | None" = InputSystem.input_captured_by
+request_keyboard_capture = InputSystem.request_keyboard_capture
+release_keyboard_capture = InputSystem.release_keyboard_capture
 _actions: dict[str, int] = {}
 
 
@@ -81,4 +85,7 @@ __all__ = [
     "get_action",
     "set_action",
     "mouse_position",
+    "input_captured_by",
+    "request_keyboard_capture",
+    "release_keyboard_capture",
 ]

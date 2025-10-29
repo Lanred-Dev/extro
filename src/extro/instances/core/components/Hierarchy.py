@@ -66,7 +66,7 @@ class Hierarchy(Component):
     def children(self) -> "list[InstanceManager.InstanceID]":
         return self._children
 
-    def addChild(self, child: Instance):
+    def add_child(self, child: Instance):
         if child._id not in ComponentManager.hierarchies:
             Console.log(
                 f"Cannot add child instance {child._id} as it has no Hierarchy component",
@@ -83,7 +83,7 @@ class Hierarchy(Component):
         self._children.append(child._id)
         ComponentManager.hierarchies[child._id]._parent = self._owner
 
-    def removeChild(self, child: Instance):
+    def remove_child(self, child: Instance):
         if child._id not in self._children:
             Console.log(
                 f"Cannot remove child instance {child._id} as it is not a child of owner {self._owner}",

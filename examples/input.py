@@ -11,6 +11,7 @@ input = extro.Instances.ui.TextInput(
     position=extro.Coord(0.5, 0.5, extro.Coord.CoordType.NORMALIZED),
     anchor=extro.Vector2(0.5, 0.5),
     color=extro.RGBAColor(0, 0, 255),
+    placeholder="Type here...",
 )
 layer.add(input)
 

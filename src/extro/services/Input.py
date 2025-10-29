@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from extro.shared.Vector2C import Vector2
     import extro.internal.InstanceManager as InstanceManager
 
-Key = InputSystem.Key
+Keyboard = InputSystem.Keyboard
 Mouse = InputSystem.Mouse
 SubscriberType = InputSystem.SubscriberType
 on_event: InputSystem.InputSignal = InputSystem.on_event
@@ -69,12 +69,12 @@ def set_mouse_visibility(is_visible: bool):
     Console.log(f"Mouse visibility set to {is_visible}", Console.LogType.DEBUG)
 
 
-def is_input_active(input: InputSystem.Key | InputSystem.Mouse) -> bool:
+def is_input_active(input: InputSystem.Keyboard | InputSystem.Mouse) -> bool:
     return InputSystem.active_inputs[input]
 
 
 __all__ = [
-    "Key",
+    "Keyboard",
     "Mouse",
     "SubscriberType",
     "on_event",

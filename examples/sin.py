@@ -48,22 +48,22 @@ def increment_frequency(increment: float):
 extro.Services.InputService.on_event.connect(
     lambda _: increment_amplitude(10),
     extro.Services.InputService.SubscriberType.PRESS,
-    extro.Services.InputService.Key.E,
+    extro.Services.InputService.Keyboard.E,
 )
 extro.Services.InputService.on_event.connect(
     lambda _: increment_amplitude(-10),
     extro.Services.InputService.SubscriberType.PRESS,
-    extro.Services.InputService.Key.Q,
+    extro.Services.InputService.Keyboard.Q,
 )
 extro.Services.InputService.on_event.connect(
     lambda _: increment_frequency(0.01),
     extro.Services.InputService.SubscriberType.PRESS,
-    extro.Services.InputService.Key.W,
+    extro.Services.InputService.Keyboard.W,
 )
 extro.Services.InputService.on_event.connect(
     lambda _: increment_frequency(-0.01),
     extro.Services.InputService.SubscriberType.PRESS,
-    extro.Services.InputService.Key.S,
+    extro.Services.InputService.Keyboard.S,
 )
 
 extro.Engine.start()

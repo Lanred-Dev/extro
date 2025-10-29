@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
 
 
-class Key(IntEnum):
+class Keyboard(IntEnum):
     A = pyray.KeyboardKey.KEY_A
     B = pyray.KeyboardKey.KEY_B
     C = pyray.KeyboardKey.KEY_C
@@ -86,11 +86,13 @@ class Mouse(IntEnum):
 
 mouse_position: Vector2 = Vector2(0, 0)
 active_inputs: dict[int, bool] = {
-    key: False for key in [key for key in Key] + [Mouse.LEFT, Mouse.RIGHT, Mouse.MIDDLE]
+    key: False
+    for key in [key for key in Keyboard] + [Mouse.LEFT, Mouse.RIGHT, Mouse.MIDDLE]
 }
 old_active_inputs: dict[int, bool] = active_inputs.copy()
 input_usage_map: dict[int, int] = {}
 input_captured_by: "InstanceManager.InstanceID | None" = None
+all_inputs: tuple[Keyboard | Mouse] = tuple(key for key in Keyboard) + (Mouse.LEFT, Mouse.RIGHT, Mouse.MIDDLE)  # type: ignore
 
 
 class SubscriberType(IntEnum):
@@ -102,7 +104,7 @@ class SubscriberType(IntEnum):
 class InputSignal(Signal):
     __slots__ = Signal.__slots__ + ("_subscriber_input_map", "_subscriber_type_map")
 
-    _subscriber_input_map: dict[SubscriberType, dict[str, tuple[Key | Mouse] | None]]
+    _subscriber_input_map: dict[SubscriberType, dict[str, tuple[Keyboard | Mouse]]]
     _subscriber_type_map: dict[str, SubscriberType]
 
     def __init__(self):
@@ -115,36 +117,32 @@ class InputSignal(Signal):
         self,
         callback: "EmptyFunction",
         type: SubscriberType = SubscriberType.PRESS,
-        inputs: Key | Mouse | tuple[Key | Mouse] | None = None,
+        inputs: Keyboard | Mouse | tuple[Keyboard | Mouse] | None = None,
     ) -> str:
         connection_id = super().connect(callback)
 
-        inputs = (
+        actual_inputs: tuple[Keyboard | Mouse] = (
             inputs
             if isinstance(inputs, tuple)
-            else (inputs,) if inputs is not None else None
+            else (inputs,) if inputs is not None else all_inputs
         )
         self._subscriber_type_map[connection_id] = type
-        self._subscriber_input_map[type][connection_id] = inputs
+        self._subscriber_input_map[type][connection_id] = actual_inputs
 
-        if inputs:
-            for input in inputs:
-                if input not in input_usage_map:
-                    input_usage_map[input] = 0
+        for input in actual_inputs:
+            if input not in input_usage_map:
+                input_usage_map[input] = 0
 
-                input_usage_map[input] += 1
+            input_usage_map[input] += 1
 
         return connection_id
 
     def disconnect(self, connection_id: str):
         super().disconnect(connection_id)
 
-        for input in (
-            self._subscriber_input_map[self._subscriber_type_map[connection_id]][
-                connection_id
-            ]
-            or ()
-        ):
+        for input in self._subscriber_input_map[
+            self._subscriber_type_map[connection_id]
+        ][connection_id]:
             input_usage_map[input] -= 1
 
             if input_usage_map[input] <= 0:
@@ -156,9 +154,11 @@ class InputSignal(Signal):
         del self._subscriber_type_map[connection_id]
 
     def _fire_subscribers_with_filter(self, type: SubscriberType, input: int, *args):
-        for connection_id, inputs in self._subscriber_input_map[type].items():
-            if inputs is None or input in inputs:
-                self._subscribers[connection_id](input, *args)
+        for connection_id, inputs in self._subscriber_input_map[type].copy().items():
+            if input not in inputs or connection_id not in self._subscribers:
+                continue
+
+            self._subscribers[connection_id](input, *args)
 
 
 on_event: InputSignal = InputSignal()
@@ -176,10 +176,10 @@ def update():
             SubscriberType.ACTIVE, Mouse.MOVE, mouse_position
         )
 
-    for input in input_usage_map.keys():
+    for input in input_usage_map.copy():
         active_inputs[input] = (
             pyray.is_key_down(input)
-            if input in Key
+            if input in Keyboard
             else pyray.is_mouse_button_down(input)
         )
         args = (mouse_position,) if input in Mouse else ()

@@ -69,6 +69,11 @@ def handle_click(_, mouse_position: "Vector2"):
         clicked_instance = InstanceManager.instances[instance_id]  # type: ignore
 
     if clicked_instance is None:
+        if focused_instance is not None:
+            previous_focused: "Clickable" = InstanceManager.instances[focused_instance]  # type: ignore
+            previous_focused.on_focus_lost.fire()
+            focused_instance = None
+
         return
 
     clicked_instance.on_click.fire(mouse_position)

@@ -7,8 +7,8 @@ extro.Window.set_title("Animated sin wave")
 scene = extro.Instances.world.Scene()
 
 rect = extro.Instances.world.Rectangle(
-    position=extro.Coord(0, 0, extro.CoordType.ABSOLUTE),
-    size=extro.Coord(15, 15, extro.CoordType.ABSOLUTE),
+    position=extro.Coord(0, 0, extro.Coord.CoordType.ABSOLUTE),
+    size=extro.Coord(15, 15, extro.Coord.CoordType.ABSOLUTE),
     color=extro.RGBAColor(255, 0, 0),
 )
 scene.add(rect)
@@ -27,7 +27,7 @@ def next_frame():
         current_x += 60 * extro.Services.TimingService.delta
 
     y: float = math.sin(current_x * frequency) * amplitude + (extro.Window.size.y / 2)
-    rect.transform.position = extro.Coord(current_x, y, extro.CoordType.ABSOLUTE)
+    rect.transform.position = extro.Coord(current_x, y, extro.Coord.CoordType.ABSOLUTE)
 
 
 extro.Services.TimingService.on_pre_render.connect(next_frame)

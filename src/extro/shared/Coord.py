@@ -11,6 +11,8 @@ class CoordType(Enum):
 
 
 class Coord(Vector2):
+    CoordType = CoordType
+
     __slots__ = (
         "_x",
         "_y",

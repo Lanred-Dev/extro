@@ -12,7 +12,7 @@ def clamp(value, min_value, max_value):
 
 
 position_x, position_y = extro.Services.ScreenService.random_absolute_coords()
-size = extro.Coord(2, 2, extro.CoordType.WORLD)
+size = extro.Coord(2, 2, extro.Coord.CoordType.WORLD)
 rect = extro.Instances.world.Rectangle(
     position=extro.Coord(
         clamp(
@@ -25,7 +25,7 @@ rect = extro.Instances.world.Rectangle(
             0,
             extro.Window.size.y - size.absolute_y,
         ),
-        extro.CoordType.ABSOLUTE,
+        extro.Coord.CoordType.ABSOLUTE,
     ),
     size=size,
     color=extro.RGBAColor(255, 0, 0),

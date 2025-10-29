@@ -10,9 +10,9 @@ rect = extro.Instances.world.Rectangle(
     position=extro.Coord(
         0,
         0,
-        extro.CoordType.ABSOLUTE,
+        extro.Coord.CoordType.ABSOLUTE,
     ),
-    size=extro.Coord(2, 2, extro.CoordType.WORLD),
+    size=extro.Coord(2, 2, extro.Coord.CoordType.WORLD),
     color=extro.RGBAColor(255, 0, 0),
 )
 scene.add(rect)
@@ -32,7 +32,7 @@ def on_update():
     rect.transform.position = extro.Coord(
         clamp(tween.value.x, 0, extro.Window.size.x - rect.transform.size.absolute_x),
         clamp(tween.value.y, 0, extro.Window.size.y - rect.transform.size.absolute_y),
-        extro.CoordType.ABSOLUTE,
+        extro.Coord.CoordType.ABSOLUTE,
     )
 
 

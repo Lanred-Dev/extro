@@ -13,8 +13,8 @@ coin_sound = extro.Instances.audio.EffectAudio(
 layer = extro.Instances.ui.Layer()
 button = extro.Instances.ui.Button(
     color=extro.RGBAColor(0, 0, 255),
-    size=extro.Coord(0.2, 0.1, extro.CoordType.NORMALIZED),
-    position=extro.Coord(0.5, 0.5, extro.CoordType.NORMALIZED),
+    size=extro.Coord(0.2, 0.1, extro.Coord.CoordType.NORMALIZED),
+    position=extro.Coord(0.5, 0.5, extro.Coord.CoordType.NORMALIZED),
     anchor=extro.Vector2(0.5, 0.5),
 )
 button.on_click.connect(lambda: coin_sound.source.play())
@@ -26,7 +26,7 @@ text = extro.Instances.ui.Text(
     font_size=20,
     character_spacing=2,
     color=extro.RGBAColor(255, 255, 255),
-    position=extro.Coord(0.5, 0.5, extro.CoordType.RELATIVE),
+    position=extro.Coord(0.5, 0.5, extro.Coord.CoordType.RELATIVE),
     anchor=extro.Vector2(0.5, 0.5),
     scale_size_to_font=True,
 )

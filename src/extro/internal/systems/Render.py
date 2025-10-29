@@ -107,8 +107,8 @@ def recalculate_render_order():
 
 
 def calculate_render_order(
-    targets: "list[InstanceManager.InstanceIDType]",
-) -> "list[InstanceManager.InstanceIDType]":
+    targets: "list[InstanceManager.InstanceID]",
+) -> "list[InstanceManager.InstanceID]":
     instances = [InstanceManager.instances[target] for target in targets]
     return [
         instance.id

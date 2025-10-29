@@ -24,15 +24,15 @@ class ComponentType(Enum):
     AUDIO_SOURCE = auto()
 
 
-transforms: "dict[InstanceManager.InstanceIDType, Transform]" = {}
-colliders: "dict[InstanceManager.InstanceIDType, Collider]" = {}
-drawables: "dict[InstanceManager.InstanceIDType, Drawable]" = {}
-physics_bodies: "dict[InstanceManager.InstanceIDType, PhysicsBody]" = {}
-animators: "dict[InstanceManager.InstanceIDType, Animator]" = {}
-hierarchies: "dict[InstanceManager.InstanceIDType, Hierarchy]" = {}
-audio_sources: "dict[InstanceManager.InstanceIDType, AudioSource]" = {}
+transforms: "dict[InstanceManager.InstanceID, Transform]" = {}
+colliders: "dict[InstanceManager.InstanceID, Collider]" = {}
+drawables: "dict[InstanceManager.InstanceID, Drawable]" = {}
+physics_bodies: "dict[InstanceManager.InstanceID, PhysicsBody]" = {}
+animators: "dict[InstanceManager.InstanceID, Animator]" = {}
+hierarchies: "dict[InstanceManager.InstanceID, Hierarchy]" = {}
+audio_sources: "dict[InstanceManager.InstanceID, AudioSource]" = {}
 
-component_list_map: "dict[ComponentType, dict[InstanceManager.InstanceIDType, Any]]" = {
+component_list_map: "dict[ComponentType, dict[InstanceManager.InstanceID, Any]]" = {
     ComponentType.TRANSFORM: transforms,
     ComponentType.COLLIDER: colliders,
     ComponentType.DRAWABLE: drawables,
@@ -43,14 +43,12 @@ component_list_map: "dict[ComponentType, dict[InstanceManager.InstanceIDType, An
 }
 
 
-def register(
-    instance_id: "InstanceManager.InstanceIDType", type: ComponentType, component
-):
+def register(instance_id: "InstanceManager.InstanceID", type: ComponentType, component):
     component_list_map[type][instance_id] = component
     Console.log(f"Registered component {type.name} for instance {instance_id}")
 
 
-def unregister(instance_id: "InstanceManager.InstanceIDType", type: ComponentType):
+def unregister(instance_id: "InstanceManager.InstanceID", type: ComponentType):
     component_list = component_list_map[type]
 
     if instance_id not in component_list:

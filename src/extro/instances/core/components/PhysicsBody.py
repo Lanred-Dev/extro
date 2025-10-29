@@ -36,7 +36,7 @@ class PhysicsBody(Component):
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         mass: float,
         restitution: float = PhysicsSystem.DEFAULT_RESTITUTION,
         is_anchored: bool = False,

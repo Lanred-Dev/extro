@@ -26,7 +26,7 @@ class Drawable(Component):
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         render_command: "EmptyFunction",
         color: RGBAColor = RGBAColor(255, 255, 255),
         zindex: int = 0,

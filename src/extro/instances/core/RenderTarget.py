@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from extro.instances.core.components.Hierarchy import Hierarchy
 
 
-def is_instance_valid(instance_id: "InstanceManager.InstanceIDType") -> bool:
+def is_instance_valid(instance_id: "InstanceManager.InstanceID") -> bool:
     instance = InstanceManager.instances[instance_id]
 
     return (
@@ -40,7 +40,7 @@ class RenderTarget(Instance):
     _instances: InstanceRegistry
     _type: RenderService.RenderTargetType
     bitmask: BitMask
-    _render_order: "list[InstanceManager.InstanceIDType]"
+    _render_order: "list[InstanceManager.InstanceID]"
 
     def __init__(
         self,

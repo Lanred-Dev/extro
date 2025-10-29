@@ -28,11 +28,11 @@ class Animator(Component):
     _last_frame_at: float
     _frame_count: int
     _is_active: bool
-    _owner: "InstanceManager.InstanceIDType"
+    _owner: "InstanceManager.InstanceID"
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         texture_source: pyray.Rectangle,
         frame_duration: float,
         is_active: bool,

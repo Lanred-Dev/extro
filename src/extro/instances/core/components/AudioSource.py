@@ -40,7 +40,7 @@ class AudioSource(Component):
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         audio_file: str,
         volume: float = 1.0,
         pitch: float = 1.0,

@@ -6,13 +6,13 @@ if TYPE_CHECKING:
     from extro.shared.types import EmptyFunction
     import extro.internal.InstanceManager as InstanceManager
 
-    PreRegisterCheck = Callable[[InstanceManager.InstanceIDType], bool]
+    PreRegisterCheck = Callable[[InstanceManager.InstanceID], bool]
 
 
 class InstanceRegistry:
     __slots__ = ("instances", "_name", "_preregister_check", "_on_list_change")
 
-    instances: "list[InstanceManager.InstanceIDType]"
+    instances: "list[InstanceManager.InstanceID]"
     _name: str
     _preregister_check: "PreRegisterCheck | None"
     _on_list_change: "EmptyFunction"
@@ -28,7 +28,7 @@ class InstanceRegistry:
         self._on_list_change = on_list_change
         self._preregister_check = preregister_check
 
-    def register(self, instance_id: "InstanceManager.InstanceIDType"):
+    def register(self, instance_id: "InstanceManager.InstanceID"):
         if instance_id in self.instances:
             Console.log(
                 f"{self._name} already has instance {instance_id} registered",
@@ -45,7 +45,7 @@ class InstanceRegistry:
         self.instances.append(instance_id)
         self._on_list_change()
 
-    def unregister(self, instance_id: "InstanceManager.InstanceIDType"):
+    def unregister(self, instance_id: "InstanceManager.InstanceID"):
         if instance_id not in self.instances:
             Console.log(
                 f"{self._name} does not have instance {instance_id} registered",

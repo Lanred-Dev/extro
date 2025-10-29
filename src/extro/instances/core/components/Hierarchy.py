@@ -19,14 +19,14 @@ class Hierarchy(Component):
 
     _key = "hierarchy"
 
-    _owner: "InstanceManager.InstanceIDType"
-    _parent: "InstanceManager.InstanceIDType | None"
-    _children: "list[InstanceManager.InstanceIDType]"
-    _render_target: "InstanceManager.InstanceIDType | None"
+    _owner: "InstanceManager.InstanceID"
+    _parent: "InstanceManager.InstanceID | None"
+    _children: "list[InstanceManager.InstanceID]"
+    _render_target: "InstanceManager.InstanceID | None"
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         parent: Instance | None = None,
     ):
         super().__init__(owner, ComponentManager.ComponentType.HIERARCHY)
@@ -37,7 +37,7 @@ class Hierarchy(Component):
         self._render_target = None
 
     @property
-    def parent(self) -> "InstanceManager.InstanceIDType | None":
+    def parent(self) -> "InstanceManager.InstanceID | None":
         return self._parent
 
     @parent.setter
@@ -63,7 +63,7 @@ class Hierarchy(Component):
         ComponentManager.hierarchies[parent._id]._children.append(self._owner)
 
     @property
-    def children(self) -> "list[InstanceManager.InstanceIDType]":
+    def children(self) -> "list[InstanceManager.InstanceID]":
         return self._children
 
     def addChild(self, child: Instance):

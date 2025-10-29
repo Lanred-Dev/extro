@@ -33,7 +33,7 @@ class Collider(Component):
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         is_collidable: bool = True,
         collision_group: str = CollisionGroupService.DEFAULT_COLLISION_GROUP,
     ):

@@ -6,19 +6,19 @@ import extro.Console as Console
 if TYPE_CHECKING:
     from extro.instances.core.Instance import Instance
 
-    InstanceIDType = int
+    InstanceID = int
 
-instances: "dict[InstanceIDType, Instance]" = {}
+instances: "dict[InstanceID, Instance]" = {}
 
 
 def register(instance: "Instance"):
-    id: "InstanceIDType" = IdentityService.generate_ordered_numeric_id()
+    id: "InstanceID" = IdentityService.generate_ordered_numeric_id()
     instance._id = id
     instances[id] = instance
     Console.log(f"Registered instance {id}")
 
 
-def unregister(instance_id: "InstanceIDType"):
+def unregister(instance_id: "InstanceID"):
     global instances
 
     if instance_id not in instances:

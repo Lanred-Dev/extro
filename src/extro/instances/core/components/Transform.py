@@ -39,14 +39,14 @@ class Transform(Component):
     _bounding: tuple[float, float, float, float]
     _actual_position: tuple[float, float]
     _actual_size: tuple[float, float]
-    _parent: "InstanceManager.InstanceIDType | None"
-    _children: "list[InstanceManager.InstanceIDType]"
+    _parent: "InstanceManager.InstanceID | None"
+    _children: "list[InstanceManager.InstanceID]"
 
     on_update: Signal
 
     def __init__(
         self,
-        owner: "InstanceManager.InstanceIDType",
+        owner: "InstanceManager.InstanceID",
         position: Coord,
         size: Coord,
         rotation: float = 0,
@@ -88,7 +88,7 @@ class Transform(Component):
             and point.y <= y + height
         )
 
-    def add_child(self, instance_id: "InstanceManager.InstanceIDType"):
+    def add_child(self, instance_id: "InstanceManager.InstanceID"):
         if instance_id in self._children:
             return
 

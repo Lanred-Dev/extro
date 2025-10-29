@@ -31,7 +31,7 @@ class TextDirtyFlags(IntFlag):
 instances: InstanceRegistry = InstanceRegistry(
     "UI System", on_list_change=lambda: recompute_type_map()
 )
-type_map: "dict[UIInstanceType, list[InstanceManager.InstanceIDType]]" = {
+type_map: "dict[UIInstanceType, list[InstanceManager.InstanceID]]" = {
     type: [] for type in UIInstanceType
 }
 

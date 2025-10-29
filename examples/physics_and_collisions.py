@@ -7,8 +7,8 @@ extro.Window.set_title("Square.")
 scene = extro.Instances.world.Scene()
 
 rect1 = extro.Instances.world.Rectangle(
-    position=extro.Coord(100, 100, extro.CoordType.ABSOLUTE),
-    size=extro.Coord(2, 2, extro.CoordType.WORLD),
+    position=extro.Coord(100, 100, extro.Coord.CoordType.ABSOLUTE),
+    size=extro.Coord(2, 2, extro.Coord.CoordType.WORLD),
     color=extro.RGBAColor(255, 0, 0),
 )
 physics_body1 = extro.Instances.components.PhysicsBody(
@@ -26,8 +26,8 @@ scene.add(rect1)
 physics_body1.apply_force(extro.Vector2(100, 100), extro.Vector2(1, 0))
 
 rect2 = extro.Instances.world.Rectangle(
-    position=extro.Coord(300, 300, extro.CoordType.ABSOLUTE),
-    size=extro.Coord(100, 100, extro.CoordType.ABSOLUTE),
+    position=extro.Coord(300, 300, extro.Coord.CoordType.ABSOLUTE),
+    size=extro.Coord(100, 100, extro.Coord.CoordType.ABSOLUTE),
     color=extro.RGBAColor(0, 255, 0),
 )
 physics_body2 = extro.Instances.components.PhysicsBody(

@@ -36,6 +36,34 @@ Code examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/
 
 > **Note:** extro has only been tested on **Windows 11**. Other platforms may work but are currently unverified.
 
+### Installation
+
+You can install **extro** directly from the latest release on GitHub:
+
+```bash
+pip install https://github.com/Lanred-Dev/extro/releases/download/<tag>/<file>.whl
+```
+
+> Replace `<tag>` and `<file>` with the version and filename from the [latest release](https://github.com/Lanred-Dev/extro/releases).
+
+For example:
+
+```bash
+pip install https://github.com/Lanred-Dev/extro/releases/download/v0.10.0-alpha/extro-0.10.0a0-cp314-cp314-win_amd64.whl
+```
+
+#### Alternative: Install from source
+
+If you prefer to build from source:
+
+```bash
+git clone https://github.com/Lanred-Dev/extro.git
+cd extro
+pip install .
+```
+
+This automatically builds and installs the Python package (and its C++ extensions if needed).
+
 ### Setup
 
 1. Clone this repository

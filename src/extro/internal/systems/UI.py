@@ -9,7 +9,7 @@ import extro.internal.InstanceManager as InstanceManager
 import extro.internal.ComponentManager as ComponentManager
 from extro.internal.utils.InstanceRegistry import InstanceRegistry
 import extro.internal.systems.Input as InputSystem
-from extro.shared.Coord import Coord, CoordType
+from extro.shared.Coord import Coord
 
 if TYPE_CHECKING:
     from extro.instances.core.Instance.UI.Clickable import Clickable
@@ -34,6 +34,7 @@ instances: InstanceRegistry = InstanceRegistry(
 type_map: "dict[UIInstanceType, list[InstanceManager.InstanceID]]" = {
     type: [] for type in UIInstanceType
 }
+focused_instance: "InstanceManager.InstanceID | None" = None
 
 
 def recompute_type_map():
@@ -48,7 +49,9 @@ def recompute_type_map():
 
 
 def handle_click(_, mouse_position: "Vector2"):
-    clicked_instances: "list[tuple[Clickable, int]]" = []
+    global focused_instance
+
+    clicked_instance: "Clickable | None" = None
     highest_zindex: float = -math.inf
 
     for instance_id in type_map[UIInstanceType.CLICKABLE][:]:
@@ -62,17 +65,21 @@ def handle_click(_, mouse_position: "Vector2"):
         ):
             continue
 
-        highest_zindex = max(highest_zindex, drawable._zindex)
+        highest_zindex = drawable._zindex
+        clicked_instance = InstanceManager.instances[instance_id]  # type: ignore
 
-        for button in clicked_instances[:]:
-            if button[1] < highest_zindex:
-                clicked_instances.remove(button)
+    if clicked_instance is None:
+        return
 
-        instance: "Clickable" = InstanceManager.instances[instance_id]  # type: ignore
-        clicked_instances.append((instance, drawable._zindex))
+    clicked_instance.on_click.fire(mouse_position)
 
-    for instance, _ in clicked_instances:
-        instance.on_click.fire()
+    if focused_instance is not None and focused_instance != clicked_instance._id:
+        previous_focused: "Clickable" = InstanceManager.instances[focused_instance]  # type: ignore
+        previous_focused.on_focus_lost.fire()
+
+    if focused_instance != clicked_instance._id:
+        clicked_instance.on_focus.fire()
+        focused_instance = clicked_instance._id
 
 
 @functools.lru_cache(maxsize=32)
@@ -102,7 +109,7 @@ def update():
             instance.character_spacing,
         )
         transform = ComponentManager.transforms[instance_id]
-        transform.size = Coord(size_x, size_y, CoordType.ABSOLUTE)
+        transform.size = Coord(size_x, size_y, Coord.CoordType.ABSOLUTE)
         instance._is_font_size_dirty = False
 
 

@@ -3,6 +3,7 @@ import pyray
 from extro.instances.core.Instance.UI.Clickable import Clickable
 from extro.utils.Signal import Signal
 import extro.internal.systems.Input as InputSystem
+import extro.services.Input as InputService
 from extro.instances.ui.Text import Text
 from extro.assets.Fonts import Arial
 from extro.instances.ui.Font import Font
@@ -89,7 +90,7 @@ class TextInput(Clickable):
         InputSystem.on_event.disconnect(self._on_event_connection_id)  # type: ignore
         self._on_event_connection_id = None
 
-    def _on_input(self, input: InputSystem.Keyboard | InputSystem.Mouse, *_):
+    def _on_input(self, input: InputSystem.Keyboard, *_):
         if input not in InputSystem.Keyboard:
             return
 
@@ -103,12 +104,17 @@ class TextInput(Clickable):
             case InputSystem.Keyboard.SHIFT:
                 return
             case _:
-                character: str = chr(input.value)
-
-                if InputSystem.active_inputs[InputSystem.Keyboard.SHIFT]:
-                    self.value += character.upper()
-                else:
-                    self.value += character.lower()
+                self.value += (
+                    InputService.keycode_to_character(
+                        input,
+                        (
+                            (InputSystem.KeyboardModifiers.SHIFT,)
+                            if InputSystem.active_inputs[InputSystem.Keyboard.SHIFT]
+                            else None
+                        ),
+                    )
+                    or ""
+                )
 
         self._update_label()
         self.on_input.fire(self.value)

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
 
 Keyboard = InputSystem.Keyboard
+KeyboardModifiers = InputSystem.KeyboardModifiers
 Mouse = InputSystem.Mouse
 SubscriberType = InputSystem.SubscriberType
 on_event: InputSystem.InputSignal = InputSystem.on_event
@@ -69,8 +70,28 @@ def set_mouse_visibility(is_visible: bool):
     Console.log(f"Mouse visibility set to {is_visible}", Console.LogType.DEBUG)
 
 
-def is_input_active(input: InputSystem.Keyboard | InputSystem.Mouse) -> bool:
+def is_input_active(input: Keyboard | Mouse) -> bool:
     return InputSystem.active_inputs[input]
+
+
+def keycode_to_character(
+    input: Keyboard, modifiers: tuple[KeyboardModifiers] | None = None
+) -> str | None:
+    """Converts a Keyboard input to its corresponding character, if applicable."""
+    match input:
+        case Keyboard.SPACE:
+            return " "
+        case Keyboard.ENTER | Keyboard.ESCAPE | Keyboard.BACKSPACE | Keyboard.SHIFT:
+            return None
+        case _:
+            character: str = chr(input.value)
+
+            if modifiers and Keyboard.SHIFT in modifiers:
+                character = character.upper()
+            else:
+                character = character.lower()
+
+            return character
 
 
 __all__ = [
@@ -88,4 +109,5 @@ __all__ = [
     "input_captured_by",
     "request_keyboard_capture",
     "release_keyboard_capture",
+    "keycode_to_character",
 ]

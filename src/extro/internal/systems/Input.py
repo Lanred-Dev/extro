@@ -77,6 +77,12 @@ class Keyboard(IntEnum):
     ALT = pyray.KeyboardKey.KEY_LEFT_ALT
 
 
+class KeyboardModifiers(IntEnum):
+    SHIFT = pyray.KeyboardKey.KEY_LEFT_SHIFT
+    CTRL = pyray.KeyboardKey.KEY_LEFT_CONTROL
+    ALT = pyray.KeyboardKey.KEY_LEFT_ALT
+
+
 class Mouse(IntEnum):
     LEFT = pyray.MouseButton.MOUSE_BUTTON_LEFT
     RIGHT = pyray.MouseButton.MOUSE_BUTTON_RIGHT

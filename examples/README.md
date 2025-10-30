@@ -23,3 +23,9 @@
 [View Code](./tween.py)
 
 ![Tween](../media/tween.gif)
+
+### Text Input
+
+[View Code](./input.py)
+
+![Input](../media/input.gif)

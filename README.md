@@ -20,7 +20,7 @@ Examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examp
 
 ### Requirements
 
-- Python 3.13.2 (or newer)
+- Python 3.14.0 (or newer)
 - CMake 3.15 (or newer) \*
 - C++23 (or newer) compiler \*
 

@@ -1,10 +1,14 @@
+"""
+The audio in this example is from https://pixabay.com/sound-effects/coin-257878
+"""
+
 import extro
 
 extro.Services.RenderService.set_fps(60)
 extro.Window.set_title("Button = sound effect")
 
 coin_sound = extro.Instances.audio.EffectAudio(
-    audio_file="examples/button_and_sound/coin_sfx.mp3",
+    audio_file="examples/button_and_sound/sound.mp3",
     volume=0.5,
     pitch=1.0,
     behavior=extro.Services.AudioService.AudioSourceBehaviorType.NON_SPATIAL,

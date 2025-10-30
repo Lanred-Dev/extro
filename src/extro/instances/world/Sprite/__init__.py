@@ -11,12 +11,14 @@ class Sprite(Renderable):
         "_image_file",
         "_texture",
         "_texture_source",
+        "_source_position",
         "_use_texture_for_source_size",
     )
 
     _image_file: str
     _texture: pyray.Texture
     _texture_source: pyray.Rectangle
+    _source_position: Vector2
     _use_texture_for_source_size: bool
 
     def __init__(

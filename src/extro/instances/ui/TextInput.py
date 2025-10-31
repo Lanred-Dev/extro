@@ -66,8 +66,8 @@ class TextInput(Clickable):
             character_spacing=character_spacing,
             scale_size_to_font=True,
             size=size,
-            anchor=Vector2(0, 0.5),
-            position=Coord(0, 0.5, Coord.CoordType.RELATIVE),
+            anchor=Vector2(0, 0),
+            position=Coord(0, 0, Coord.CoordType.RELATIVE),
             color=text_color,
             zindex=self.drawable._zindex + 1,
         )

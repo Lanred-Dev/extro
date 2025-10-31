@@ -22,7 +22,7 @@ class TextInput(Clickable):
         "value",
         "placeholder",
         "_on_event_connections",
-        "_label",
+        "label",
         "_last_backspace_at",
         "_started_holding_backspace_at",
     )
@@ -32,7 +32,7 @@ class TextInput(Clickable):
     on_input: Signal
     _is_active: bool
     _on_event_connections: list[str] | None
-    _label: Text
+    label: Text
     _last_backspace_at: float
     _started_holding_backspace_at: float | None
 
@@ -59,7 +59,7 @@ class TextInput(Clickable):
         self.on_input = Signal()
         self._janitor.add(self.on_input)
 
-        self._label = Text(
+        self.label = Text(
             text="",
             font_size=font_size,
             font=font,
@@ -71,8 +71,8 @@ class TextInput(Clickable):
             color=text_color,
             zindex=self.drawable._zindex + 1,
         )
-        self.hierarchy.add_child(self._label)
-        self._janitor.add(self._label)
+        self.hierarchy.add_child(self.label)
+        self._janitor.add(self.label)
         self._update_label()
 
         self.on_focus_lost.connect(self._on_focus_lost)
@@ -160,7 +160,7 @@ class TextInput(Clickable):
         self.on_input.fire(self.value)
 
     def _update_label(self):
-        self._label.text = self.value if len(self.value) > 0 else self.placeholder
+        self.label.text = self.value if len(self.value) > 0 else self.placeholder
 
     def draw(self):
         pyray.draw_rectangle_pro(

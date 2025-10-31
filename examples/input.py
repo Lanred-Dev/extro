@@ -15,4 +15,7 @@ input = extro.Instances.ui.TextInput(
 )
 layer.add(input)
 
+input.label.transform.anchor = extro.Vector2(0, 0.5)
+input.label.transform.position = extro.Coord(0.05, 0.5, extro.Coord.CoordType.RELATIVE)
+
 extro.Engine.start()

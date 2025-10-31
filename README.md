@@ -30,7 +30,7 @@ Examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examp
 
 ### Installation
 
-You can install **extro** directly from the latest release on GitHub:
+You can install extro directly from the latest release on GitHub:
 
 ```bash
 pip install https://github.com/Lanred-Dev/extro/releases/download/<tag>/<file>.whl

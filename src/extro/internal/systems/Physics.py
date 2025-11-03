@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     import extro.internal.systems.Collision as CollisionSystem
 
 FORCE_MAGNITUDE_THRESHOLD: float = 0.01
-PENETRATION_CORRECTION: float = 0.8
+PENETRATION_CORRECTION: float = 1.0
 PENETRATION_SLOP: float = 0.05
 IMPULSE_EPSILON: float = 0.001
 DEFAULT_RESTITUTION: float = 0.5

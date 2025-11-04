@@ -3,9 +3,9 @@ import extro
 extro.Services.RenderService.set_fps(60)
 extro.Window.set_title("Text Input")
 
-layer = extro.Instances.ui.Layer()
+layer = extro.Instances.UI.Layer()
 
-input = extro.Instances.ui.TextInput(
+input = extro.Instances.UI.TextInput(
     font_size=20,
     size=extro.Coord(0.4, 0.1, extro.Coord.CoordType.NORMALIZED),
     position=extro.Coord(0.5, 0.5, extro.Coord.CoordType.NORMALIZED),

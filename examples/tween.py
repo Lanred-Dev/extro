@@ -4,9 +4,9 @@ extro.Services.RenderService.set_fps(60)
 extro.Services.WorldService.set_tile_size(50)
 extro.Window.set_title("Tweening... its so smooth")
 
-scene = extro.Instances.world.Scene()
+scene = extro.Instances.World.Scene()
 
-rect = extro.Instances.world.Rectangle(
+rect = extro.Instances.World.Rectangle(
     position=extro.Coord(
         0,
         0,

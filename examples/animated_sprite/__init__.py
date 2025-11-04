@@ -7,8 +7,8 @@ import extro
 extro.Services.RenderService.set_fps(60)
 extro.Window.set_title("Animated Sprite")
 
-scene = extro.Instances.world.Scene()
-sprite = extro.Instances.world.AnimatedSprite(
+scene = extro.Instances.World.Scene()
+sprite = extro.Instances.World.AnimatedSprite(
     image_file="examples/animated_sprite/sprite.png",
     frame_size=extro.Vector2(64, 64),
     frame_duration=0.125,

@@ -4,9 +4,9 @@ import extro
 extro.Services.RenderService.set_fps(60)
 extro.Window.set_title("Its so wavy!")
 
-scene = extro.Instances.world.Scene()
+scene = extro.Instances.World.Scene()
 
-rect = extro.Instances.world.Rectangle(
+rect = extro.Instances.World.Rectangle(
     position=extro.Coord(0, 0, extro.Coord.CoordType.ABSOLUTE),
     size=extro.Coord(15, 15, extro.Coord.CoordType.ABSOLUTE),
     color=extro.RGBAColor(255, 0, 0),

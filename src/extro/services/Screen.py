@@ -6,15 +6,13 @@ from extro.shared.Vector2C import Vector2
 import extro.services.World as WorldService
 import extro.Window as Window
 
-WindowSize: Vector2 = Window.size
-
 
 def normalized_to_absolute_coords(x: float, y: float) -> tuple[float, float]:
-    return (x * WindowSize.x, y * WindowSize.y)
+    return (x * Window.size.x, y * Window.size.y)
 
 
 def absolute_to_normalized_coords(x: float, y: float) -> tuple[float, float]:
-    return (x / WindowSize.x, y / WindowSize.y)
+    return (x / Window.size.x, y / Window.size.y)
 
 
 def world_to_absolute_coords(x: float, y: float) -> tuple[float, float]:
@@ -50,5 +48,4 @@ __all__ = [
     "absolute_to_world_coords",
     "random_coords_in_range",
     "random_absolute_coords",
-    "WindowSize",
 ]

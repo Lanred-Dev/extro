@@ -50,7 +50,7 @@ class Timeout(Instance):
             )
             return
 
-        self._elapsed = 0.0
+        self.elapsed = 0.0
         self.is_active = True
 
     def restart(self):

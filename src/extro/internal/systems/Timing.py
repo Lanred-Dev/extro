@@ -17,11 +17,11 @@ def update():
     for instance_id in timeouts.instances[:]:
         instance: "Timeout" = InstanceManager.instances[instance_id]  # type: ignore
 
-        if not instance._is_running:
+        if not instance.is_active:
             continue
 
         instance._elapsed += TimingService.delta
 
         if instance._elapsed >= instance.delay:
-            instance._is_running = False
+            instance.is_active = False
             instance.on_finish.fire()

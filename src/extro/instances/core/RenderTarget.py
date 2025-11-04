@@ -66,6 +66,12 @@ class RenderTarget(Instance):
         RenderSystem.render_targets.register(self._id)
 
     def destroy(self):
+        super().destroy()
+
+        for instance_id in self._instances.instances[:]:
+            instance: "Instance" = InstanceManager.instances[instance_id]  # type: ignore
+            self.remove(instance)
+
         RenderSystem.render_targets.unregister(self._id)
 
     def add(self, instance: "Instance"):

@@ -21,13 +21,13 @@ class Timeout(Instance):
     __slots__ = (
         "delay",
         "on_finish",
-        "_is_running",
+        "is_active",
         "_elapsed",
     )
 
     delay: float
     on_finish: Signal
-    _is_running: bool
+    is_active: bool
     _elapsed: float
 
     def __init__(self, delay: float):
@@ -36,35 +36,35 @@ class Timeout(Instance):
         self.delay = delay
         self.on_finish = Signal()
         self._janitor.add(self.on_finish)
-        self._is_running = False
+        self.is_active = False
         self._elapsed = 0.0
 
         TimingSystem.timeouts.register(self._id)
         self._janitor.add(TimingSystem.timeouts.unregister, self._id)
 
     def start(self):
-        if self._is_running:
+        if self.is_active:
             Console.log(
-                f"Cannot start timeout {self._id} because its already running",
+                f"Cannot start timeout {self._id} because its already active",
                 Console.LogType.WARNING,
             )
             return
 
         self._elapsed = 0.0
-        self._is_running = True
+        self.is_active = True
 
     def restart(self):
-        if self._is_running:
+        if self.is_active:
             self.cancel()
 
         self.start()
 
     def cancel(self):
-        if not self._is_running:
+        if not self.is_active:
             Console.log(
-                f"Cannot cancel timeout {self._id} because its not running",
+                f"Cannot cancel timeout {self._id} because its not active",
                 Console.LogType.WARNING,
             )
             return
 
-        self._is_running = False
+        self.is_active = False

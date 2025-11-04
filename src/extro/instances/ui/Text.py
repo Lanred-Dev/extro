@@ -31,7 +31,7 @@ class Text(UIInstance):
         size: Coord = Coord(0, 0, Coord.CoordType.ABSOLUTE),
         font: Font = Arial,
         character_spacing: int = 1,
-        scale_size_to_font: bool = False,
+        scale_size_to_font: bool = True,
         **kwargs,
     ):
         super().__init__(type=UISystem.UIInstanceType.TEXT, size=size, **kwargs)

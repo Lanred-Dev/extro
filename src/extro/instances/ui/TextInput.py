@@ -64,7 +64,6 @@ class TextInput(Clickable):
             font_size=font_size,
             font=font,
             character_spacing=character_spacing,
-            scale_size_to_font=True,
             size=size,
             anchor=Vector2(0, 0),
             position=Coord(0, 0, Coord.CoordType.RELATIVE),

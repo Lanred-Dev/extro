@@ -32,7 +32,6 @@ text = extro.Instances.ui.Text(
     color=extro.RGBAColor(255, 255, 255),
     position=extro.Coord(0.5, 0.5, extro.Coord.CoordType.RELATIVE),
     anchor=extro.Vector2(0.5, 0.5),
-    scale_size_to_font=True,
 )
 layer.add(text)
 text.hierarchy.parent = button

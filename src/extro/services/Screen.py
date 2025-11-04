@@ -20,7 +20,17 @@ def world_to_absolute_coords(x: float, y: float) -> tuple[float, float]:
 
 
 def absolute_to_world_coords(x: float, y: float) -> tuple[float, float]:
-    return (x / WorldService.tile_size.x, y / WorldService.tile_size.y)
+    camera_x, camera_y = (
+        (WorldService.camera.position.x, WorldService.camera.position.y)
+        if WorldService.camera
+        else (0, 0)
+    )
+    camera_zoom = WorldService.camera.zoom if WorldService.camera else 1.0
+
+    return (
+        (x / camera_zoom + camera_x) / WorldService.tile_size.x,
+        (y / camera_zoom + camera_y) / WorldService.tile_size.y,
+    )
 
 
 def random_coords_in_range(start: Vector2, end: Vector2) -> tuple[float, float]:

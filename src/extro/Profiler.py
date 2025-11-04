@@ -1,7 +1,6 @@
 import pyray
 
 from extro.assets.Fonts import Arial
-import extro.Window as Window
 
 is_enabled: bool = True
 _updates: dict[str, list[float]] = {}

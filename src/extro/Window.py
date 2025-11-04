@@ -11,6 +11,7 @@ title: str = "extro"
 size: Vector2 = Vector2(500, 500)
 is_fullscreen: bool = False
 on_resize: Signal = Signal()
+on_move: Signal = Signal()
 
 # Window configuration
 pyray.set_config_flags(pyray.ConfigFlags.FLAG_MSAA_4X_HINT)
@@ -39,6 +40,12 @@ def set_size(new_size: Vector2):
     size.y = new_size.y
     pyray.set_window_size(int(new_size.x), int(new_size.y))
     on_resize.fire(new_size)
+
+
+def set_position(x: int, y: int):
+    """Set the window position on the screen."""
+    pyray.set_window_position(x, y)
+    on_move.fire(Vector2(x, y))
 
 
 def toggle_fullscreen():

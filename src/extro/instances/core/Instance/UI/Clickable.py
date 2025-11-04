@@ -4,11 +4,17 @@ import extro.internal.systems.UI as UISystem
 
 
 class Clickable(UIInstance):
-    __slots__ = UIInstance.__slots__ + ("on_click", "on_focus", "on_focus_lost")
+    __slots__ = UIInstance.__slots__ + (
+        "on_click",
+        "on_focus",
+        "on_focus_lost",
+        "is_active",
+    )
 
     on_click: Signal
     on_focus: Signal
     on_focus_lost: Signal
+    is_active: bool = True
 
     def __init__(self, **kwargs):
         super().__init__(type=UISystem.UIInstanceType.CLICKABLE, **kwargs)

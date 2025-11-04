@@ -56,6 +56,11 @@ def handle_click(_, mouse_position: "Vector2"):
     highest_zindex: float = -math.inf
 
     for instance_id in type_map[UIInstanceType.CLICKABLE][:]:
+        instance: "Clickable" = InstanceManager.instances[instance_id]  # type: ignore
+
+        if not instance.is_active:
+            continue
+
         transform = ComponentManager.transforms[instance_id]
         drawable = ComponentManager.drawables[instance_id]
 
@@ -67,7 +72,7 @@ def handle_click(_, mouse_position: "Vector2"):
             continue
 
         highest_zindex = drawable._zindex
-        clicked_instance = InstanceManager.instances[instance_id]  # type: ignore
+        clicked_instance = instance
 
     if clicked_instance is None:
         if focused_instance is not None:

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 import math
 import pyray
 from enum import Enum, auto, IntFlag
@@ -10,6 +10,7 @@ import extro.internal.ComponentManager as ComponentManager
 from extro.internal.utils.InstanceRegistry import InstanceRegistry
 import extro.internal.systems.Input as InputSystem
 from extro.shared.Coord import Coord
+from extro.instances.core.RenderTarget import RenderTarget
 
 if TYPE_CHECKING:
     from extro.instances.core.Instance.UI.Clickable import Clickable
@@ -59,6 +60,16 @@ def handle_click(_, mouse_position: "Vector2"):
         instance: "Clickable" = InstanceManager.instances[instance_id]  # type: ignore
 
         if not instance.is_active:
+            continue
+
+        hierarchy = ComponentManager.hierarchies[instance_id]
+
+        if (
+            hierarchy._render_target is None
+            or not cast(
+                RenderTarget, InstanceManager.instances[hierarchy._render_target]
+            ).is_visible
+        ):
             continue
 
         transform = ComponentManager.transforms[instance_id]

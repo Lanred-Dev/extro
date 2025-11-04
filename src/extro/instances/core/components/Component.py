@@ -21,6 +21,7 @@ class Component(BitMask):
         super().__init__()
 
         self._owner = owner
+        self._type = type
         ComponentManager.register(owner, type, self)
 
     def destroy(self):

@@ -51,7 +51,7 @@ def set_position(x: int, y: int):
     pyray.set_window_position(x, y)
 
 
-def get_window_position() -> Vector2:
+def get_position() -> Vector2:
     """Get the current window position on the screen."""
     position = pyray.get_window_position()
     return Vector2(position.x, position.y)

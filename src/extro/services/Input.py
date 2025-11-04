@@ -94,6 +94,17 @@ def get_action(id: str) -> int | None:
     return _actions.get(id, None)
 
 
+def is_action_active(id: str) -> bool:
+    """Returns whether the input action is currently active."""
+    input = get_action(id)
+
+    if input is None:
+        Console.log(f"Input action {id} is not registered", Console.LogType.WARNING)
+        return False
+
+    return InputSystem.active_inputs.get(input, False)
+
+
 def set_mouse_visibility(is_visible: bool):
     if is_visible:
         pyray.show_cursor()

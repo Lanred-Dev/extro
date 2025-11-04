@@ -7,6 +7,7 @@ import extro.Console as Console
 
 if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
+    from extro.instances.core.RenderTarget import RenderTarget
 
 
 class Hierarchy(Component):
@@ -41,6 +42,10 @@ class Hierarchy(Component):
 
         for child_id in self._children[:]:
             InstanceManager.instances[child_id].destroy()
+
+        if self._render_target:
+            render_target: "RenderTarget" = InstanceManager.instances[self._render_target]  # type: ignore
+            render_target.remove(InstanceManager.instances[self._owner])
 
     @property
     def parent(self) -> "InstanceManager.InstanceID | None":

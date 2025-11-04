@@ -134,3 +134,16 @@ def update():
         collider = ComponentManager.colliders.get(instance_id)
         if collider:
             CollisionSystem.on_transform_change(collider, transform)
+
+
+def recalculate_normalized_coords():
+    for transform in ComponentManager.transforms.values():
+        if transform._position.type == Coord.CoordType.NORMALIZED:
+            transform._position._set_using_normalized(
+                transform._position.x, transform._position.y
+            )
+            transform.add_flag(TransformDirtyFlags.POSITION)
+
+        if transform._size.type == Coord.CoordType.NORMALIZED:
+            transform._size._set_using_normalized(transform._size.x, transform._size.y)
+            transform.add_flag(TransformDirtyFlags.SIZE)

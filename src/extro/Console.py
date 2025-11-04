@@ -30,7 +30,7 @@ is_visible: bool = False
 is_enabled: bool = True
 last_frame_at: float = time.perf_counter()
 max_log_count: int = 25
-log_priority: LogPriority = LogPriority.DEBUG
+log_priority: LogPriority = LogPriority.CUSTOM
 
 
 def _trim_logs():

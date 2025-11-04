@@ -28,7 +28,7 @@ def update():
 
     decay: float = max(1 - (PhysicsService.dampening * TimingService.delta), 0)
 
-    for instance_id, physics_body in ComponentManager.physics_bodies.items():
+    for instance_id, physics_body in ComponentManager.physics_bodies.copy().items():
         if physics_body.has_flag(PhysicsBodyDirtyFlags.MASS):
             physics_body._inverse_mass = (
                 1 / physics_body._mass if not physics_body._is_anchored else 0
@@ -99,7 +99,12 @@ def resolve_collisions(
         instance1_physics_body = ComponentManager.physics_bodies.get(instance1_id)
         instance2_physics_body = ComponentManager.physics_bodies.get(instance2_id)
 
-        if not instance1_physics_body or not instance2_physics_body:
+        if (
+            not instance1_physics_body
+            or not instance2_physics_body
+            or instance1_physics_body._flags != 0
+            or instance2_physics_body._flags != 0
+        ):
             continue
 
         instance1_transform = ComponentManager.transforms[instance1_id]

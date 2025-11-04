@@ -205,6 +205,9 @@ def update():
         )
 
     for input in input_usage_map.copy():
+        if input == Mouse.MOVE:
+            continue
+
         active_inputs[input] = (
             pyray.is_key_down(input)
             if input in Keyboard

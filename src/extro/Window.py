@@ -11,7 +11,6 @@ title: str = "extro"
 size: Vector2 = Vector2(500, 500)
 is_fullscreen: bool = False
 on_resize: Signal = Signal()
-on_move: Signal = Signal()
 
 # Window configuration
 pyray.set_config_flags(pyray.ConfigFlags.FLAG_MSAA_4X_HINT)
@@ -36,8 +35,10 @@ def set_icon(image_path: str):
 def set_size(new_size: Vector2):
     """Set the window size."""
     global size
-    size.x = new_size.x
-    size.y = new_size.y
+
+    # Copying the new size to avoid external mutations
+    size = new_size.copy()
+
     pyray.set_window_size(int(new_size.x), int(new_size.y))
     on_resize.fire(new_size)
 
@@ -45,7 +46,12 @@ def set_size(new_size: Vector2):
 def set_position(x: int, y: int):
     """Set the window position on the screen."""
     pyray.set_window_position(x, y)
-    on_move.fire(Vector2(x, y))
+
+
+def get_window_position() -> Vector2:
+    """Get the current window position on the screen."""
+    position = pyray.get_window_position()
+    return Vector2(position.x, position.y)
 
 
 def toggle_fullscreen():

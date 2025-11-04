@@ -65,7 +65,7 @@ def register_action(id: str, input: Keyboard | Mouse):
 
     _actions[id] = input
     InputSystem.add_input_usage(input)
-    Console.log(f"Registered input action {id} with {input}", Console.LogType.DEBUG)
+    Console.log(f"Registered input action {id} as {input.name}", Console.LogType.DEBUG)
 
 
 def unregister_action(id: str):
@@ -88,7 +88,7 @@ def set_action(id: str, input: Keyboard | Mouse):
         return
 
     _actions[id] = input
-    Console.log(f"Set input action {id} to {input}", Console.LogType.DEBUG)
+    Console.log(f"Set input action {id} to {input.name}", Console.LogType.DEBUG)
 
 
 def get_action(id: str) -> Keyboard | Mouse | None:

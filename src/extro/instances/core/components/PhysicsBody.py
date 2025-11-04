@@ -91,5 +91,6 @@ class PhysicsBody(Component):
         self.add_flag(PhysicsSystem.PhysicsBodyDirtyFlags.MASS)
 
         if is_anchored:
-            self._actual_velocity = Vector2(0, 0)
+            self.velocity = Vector2(0, 0)
+            self.rotational_velocity = 0
             self._forces.clear()

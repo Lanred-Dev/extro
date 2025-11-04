@@ -64,9 +64,7 @@ class PhysicsBody(Component):
             )
             return
 
-        point.x -= 0.5
-        point.y -= 0.5
-        self._forces.append((force, point))
+        self._forces.append((force.copy(), Vector2(point.x - 0.5, point.y - 0.5)))
 
     @property
     def body_type(self) -> PhysicsService.PhysicsBodyType:

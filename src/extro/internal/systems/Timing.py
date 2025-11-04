@@ -20,8 +20,8 @@ def update():
         if not instance.is_active:
             continue
 
-        instance._elapsed += TimingService.delta
+        instance.elapsed += TimingService.delta
 
-        if instance._elapsed >= instance.delay:
+        if instance.elapsed >= instance.delay:
             instance.is_active = False
             instance.on_finish.fire()

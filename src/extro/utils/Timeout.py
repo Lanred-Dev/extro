@@ -22,13 +22,13 @@ class Timeout(Instance):
         "delay",
         "on_finish",
         "is_active",
-        "_elapsed",
+        "elapsed",
     )
 
     delay: float
     on_finish: Signal
     is_active: bool
-    _elapsed: float
+    elapsed: float
 
     def __init__(self, delay: float):
         super().__init__()
@@ -37,7 +37,7 @@ class Timeout(Instance):
         self.on_finish = Signal()
         self._janitor.add(self.on_finish)
         self.is_active = False
-        self._elapsed = 0.0
+        self.elapsed = 0.0
 
         TimingSystem.timeouts.register(self._id)
         self._janitor.add(TimingSystem.timeouts.unregister, self._id)

@@ -36,13 +36,13 @@ extro.Services.TimingService.on_pre_render.connect(next_frame)
 def increment_amplitude(increment: int):
     global amplitude
     amplitude += increment
-    extro.Console.log(f"Amplitude: {amplitude}")
+    extro.Console.log(f"Amplitude: {amplitude}", extro.Console.LogType.CUSTOM)
 
 
 def increment_frequency(increment: float):
     global frequency
     frequency += increment
-    extro.Console.log(f"Frequency: {frequency}")
+    extro.Console.log(f"Frequency: {frequency}", extro.Console.LogType.CUSTOM)
 
 
 extro.Services.InputService.on_event.connect(

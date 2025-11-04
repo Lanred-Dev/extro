@@ -14,11 +14,12 @@ class Clickable(UIInstance):
     on_click: Signal
     on_focus: Signal
     on_focus_lost: Signal
-    is_active: bool = True
+    is_active: bool
 
-    def __init__(self, **kwargs):
+    def __init__(self, is_active: bool = True, **kwargs):
         super().__init__(type=UISystem.UIInstanceType.CLICKABLE, **kwargs)
 
+        self.is_active = is_active
         self.on_click = Signal()
         self._janitor.add(self.on_click)
         self.on_focus = Signal()

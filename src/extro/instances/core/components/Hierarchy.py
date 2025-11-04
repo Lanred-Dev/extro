@@ -36,6 +36,12 @@ class Hierarchy(Component):
         self.parent = parent
         self._render_target = None
 
+    def destroy(self):
+        super().destroy()
+
+        for child_id in self._children[:]:
+            InstanceManager.instances[child_id].destroy()
+
     @property
     def parent(self) -> "InstanceManager.InstanceID | None":
         return self._parent

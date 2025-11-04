@@ -22,8 +22,8 @@ def unregister(instance_id: "InstanceID"):
     global instances
 
     if instance_id not in instances:
-        Console.log(f"{instance_id} is not an instance", Console.LogType.ERROR)
+        Console.log(f"Instance {instance_id} is not an instance", Console.LogType.ERROR)
         return
 
     del instances[instance_id]
-    Console.log(f"{instance_id} is no longer an instance", Console.LogType.DEBUG)
+    Console.log(f"Instance {instance_id} has been unregistered", Console.LogType.DEBUG)

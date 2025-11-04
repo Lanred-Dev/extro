@@ -44,12 +44,12 @@ class PhysicsBody(Component):
     ):
         super().__init__(owner, ComponentManager.ComponentType.PHYSICS_BODY)
 
-        self.mass = mass
-        self.restitution = restitution
-        self.is_anchored = is_anchored
         self._forces = []
         self.velocity = Vector2(0, 0)
         self.rotational_velocity = 0
+        self.mass = mass
+        self.restitution = restitution
+        self.is_anchored = is_anchored
         self._body_type = body_type
 
     def destroy(self):

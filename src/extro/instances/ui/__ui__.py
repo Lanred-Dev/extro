@@ -4,6 +4,7 @@ from extro.instances.ui.Button import Button
 from extro.instances.ui.Text import Text
 from extro.instances.ui.TextInput import TextInput
 from extro.instances.ui.Image import Image
+from extro.instances.ui.Frame import Frame
 
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "Text",
     "TextInput",
     "Image",
+    "Frame",
 ]

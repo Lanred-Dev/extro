@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "extro"
-version = "0.10.0-alpha"
+version = "0.11.0-alpha"
 description = "A 2D game engine for Python, using Raylib for rendering."
 authors = [{ name = "Landon Redmond" }]
 readme = "README.md"

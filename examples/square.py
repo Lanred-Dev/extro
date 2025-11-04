@@ -1,7 +1,6 @@
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Services.WorldService.set_tile_size(50)
 extro.Window.set_title("Square.")
 
 scene = extro.Instances.World.Scene()

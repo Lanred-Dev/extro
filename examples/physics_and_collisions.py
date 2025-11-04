@@ -1,7 +1,6 @@
 import extro
 
 extro.Services.RenderService.set_fps(144)
-extro.Services.WorldService.set_tile_size(25)
 extro.Window.set_title("They bounce off each other!")
 
 scene = extro.Instances.World.Scene()

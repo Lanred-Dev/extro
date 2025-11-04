@@ -112,6 +112,23 @@ input_captured_by: "InstanceManager.InstanceID | None" = None
 all_inputs: tuple[Keyboard | Mouse] = tuple(key for key in Keyboard) + (Mouse.LEFT, Mouse.RIGHT, Mouse.MIDDLE)  # type: ignore
 
 
+def add_input_usage(input: Keyboard | Mouse):
+    if input not in input_usage_map:
+        input_usage_map[input] = 0
+
+    input_usage_map[input] += 1
+
+
+def remove_input_usage(input: Keyboard | Mouse):
+    if input not in input_usage_map:
+        return
+
+    input_usage_map[input] -= 1
+
+    if input_usage_map[input] <= 0:
+        del input_usage_map[input]
+
+
 class SubscriberType(IntEnum):
     PRESS = 0
     RELEASE = 1
@@ -147,10 +164,7 @@ class InputSignal(Signal):
         self._subscriber_input_map[type][connection_id] = actual_inputs
 
         for input in actual_inputs:
-            if input not in input_usage_map:
-                input_usage_map[input] = 0
-
-            input_usage_map[input] += 1
+            add_input_usage(input)
 
         return connection_id
 
@@ -160,10 +174,7 @@ class InputSignal(Signal):
         for input in self._subscriber_input_map[
             self._subscriber_type_map[connection_id]
         ][connection_id]:
-            input_usage_map[input] -= 1
-
-            if input_usage_map[input] <= 0:
-                del input_usage_map[input]
+            remove_input_usage(input)
 
         del self._subscriber_input_map[self._subscriber_type_map[connection_id]][
             connection_id

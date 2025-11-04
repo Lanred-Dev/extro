@@ -20,7 +20,7 @@ mouse_position: "Vector2" = InputSystem.mouse_position
 input_captured_by: "InstanceManager.InstanceID | None" = InputSystem.input_captured_by
 request_keyboard_capture = InputSystem.request_keyboard_capture
 release_keyboard_capture = InputSystem.release_keyboard_capture
-_actions: dict[str, int] = {}
+_actions: dict[str, Keyboard | Mouse] = {}
 _uppercase_map: dict[Keyboard, str] = {
     Keyboard.ONE: "!",
     Keyboard.TWO: "@",
@@ -55,7 +55,7 @@ _number_keys: list[Keyboard] = [
 ]
 
 
-def register_action(id: str, input: int):
+def register_action(id: str, input: Keyboard | Mouse):
     if input in _actions.values():
         Console.log(f"Input {input} is already being used", Console.LogType.WARNING)
         return
@@ -64,6 +64,7 @@ def register_action(id: str, input: int):
         return
 
     _actions[id] = input
+    InputSystem.add_input_usage(input)
     Console.log(f"Registered input action {id} with {input}", Console.LogType.DEBUG)
 
 
@@ -72,11 +73,12 @@ def unregister_action(id: str):
         Console.log(f"Input action {id} is not registered", Console.LogType.WARNING)
         return
 
+    InputSystem.remove_input_usage(_actions[id])
     del _actions[id]
     Console.log(f"Unregistered input action {id}", Console.LogType.DEBUG)
 
 
-def set_action(id: str, input: int):
+def set_action(id: str, input: Keyboard | Mouse):
     # This is almost the same function as `register_action` but its intended to force the developer to have good code semantics
     if id not in _actions:
         Console.log(f"Input action {id} is not registered", Console.LogType.WARNING)
@@ -89,7 +91,7 @@ def set_action(id: str, input: int):
     Console.log(f"Set input action {id} to {input}", Console.LogType.DEBUG)
 
 
-def get_action(id: str) -> int | None:
+def get_action(id: str) -> Keyboard | Mouse | None:
     """Returns the value of the input action if it exists."""
     return _actions.get(id, None)
 

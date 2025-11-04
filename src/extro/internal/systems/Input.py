@@ -138,7 +138,7 @@ class SubscriberType(IntEnum):
 class InputSignal(Signal):
     __slots__ = Signal.__slots__ + ("_subscriber_input_map", "_subscriber_type_map")
 
-    _subscriber_input_map: dict[SubscriberType, dict[str, tuple[Keyboard | Mouse]]]
+    _subscriber_input_map: dict[SubscriberType, dict[str, tuple[Keyboard | Mouse, ...]]]
     _subscriber_type_map: dict[str, SubscriberType]
 
     def __init__(self):
@@ -151,11 +151,11 @@ class InputSignal(Signal):
         self,
         callback: "EmptyFunction",
         type: SubscriberType = SubscriberType.PRESS,
-        inputs: Keyboard | Mouse | tuple[Keyboard | Mouse] | None = None,
+        inputs: Keyboard | Mouse | tuple[Keyboard | Mouse, ...] | None = None,
     ) -> str:
         connection_id = super().connect(callback)
 
-        actual_inputs: tuple[Keyboard | Mouse] = (
+        actual_inputs: tuple[Keyboard | Mouse, ...] = (
             inputs
             if isinstance(inputs, tuple)
             else (inputs,) if inputs is not None else all_inputs

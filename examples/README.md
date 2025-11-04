@@ -38,4 +38,4 @@
 
 ### Camera Movement using Input Actions
 
-[View Code](./camera_with_actions.py)
+[View Code](./camera_movement.py)

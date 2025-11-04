@@ -34,12 +34,12 @@ def set_camera(new_camera: "Camera | None"):
     """
     Set the world's active camera. Rendering will follow this camera.
 
-    If None, then rendering will be centered on the origin of the world (0, 0).
+    If None, then the top-left corner will be (0, 0) in world coordinates.
     """
     global camera
     camera = new_camera
     Console.log(
-        f"World camera set to {new_camera if new_camera else "None"}",
+        f"World camera set to {"new camera" if new_camera else "None"}",
         Console.LogType.DEBUG,
     )
 

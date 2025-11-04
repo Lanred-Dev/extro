@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 
 class UIInstanceType(Enum):
+    GENERIC = auto()
     CLICKABLE = auto()
     TEXT = auto()
 

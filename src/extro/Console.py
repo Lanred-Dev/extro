@@ -11,6 +11,7 @@ import extro.Profiler as Profiler
 
 
 class LogPriority(Enum):
+    CUSTOM = 4
     DEBUG = 3
     WARNING = 2
     ERROR = 1
@@ -18,6 +19,7 @@ class LogPriority(Enum):
 
 
 class LogType(Enum):
+    CUSTOM = [LogPriority.CUSTOM, "Custom", RGBAColor(255, 255, 255)]
     DEBUG = [LogPriority.DEBUG, "Debug", RGBAColor(255, 255, 255)]
     WARNING = [LogPriority.WARNING, "Warning", RGBAColor(255, 255, 0)]
     ERROR = [LogPriority.ERROR, "Error", RGBAColor(255, 0, 0)]

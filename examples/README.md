@@ -35,3 +35,7 @@
 [View Code](./input.py)
 
 ![Input](../media/input.gif)
+
+### Camera Movement using Input Actions
+
+[View Code](./camera_with_actions.py)

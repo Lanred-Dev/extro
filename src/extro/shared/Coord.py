@@ -100,3 +100,6 @@ class Coord(Vector2):
     @y.setter
     def y(self, value: float):
         self._set_using_normalized(self._x, value)
+
+    def __repr__(self) -> str:
+        return f"Coord(x={self._x}, y={self._y}, type={self._type})"

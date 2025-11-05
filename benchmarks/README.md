@@ -32,9 +32,9 @@ A `benchmarker.py` module is provided to create custom benchmarks. Here’s how 
 import benchmarks.benchmarker as benchmarker
 ```
 
-> **Important:** You must import and start the benchmarker **before importing extro**.
+> **Important:** You must import the benchmarker **before importing extro**.
 
-2. **Start tracking** by calling `benchmarker.start_tracking()` with the desired output path and benchmark duration:
+2. Start tracking by calling `benchmarker.start_tracking()` with the desired output path and benchmark duration:
 
 ```python
 benchmarker.start_tracking("./path/to/benchmark", 15)  # duration in seconds

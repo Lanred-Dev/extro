@@ -17,6 +17,7 @@ dependencies = [
 dev = [
     "nanobind>=2.9.2",
     "build",
+    "matplotlib",
 ]
 
 [tool.scikit-build]

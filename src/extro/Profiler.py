@@ -43,6 +43,10 @@ def get_average_for_system(system_name: str) -> float:
     return _get_average_of_list(_updates[system_name])
 
 
+def get_fps() -> float:
+    return pyray.get_fps()
+
+
 def _draw():
     if not is_enabled:
         return

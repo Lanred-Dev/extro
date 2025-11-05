@@ -1,4 +1,4 @@
-# The order of these imports DOES matter. Loading extro can cause a big hang betwen the first and second frame.
+# The order of these imports DOES matter. Loading extro first can cause a big hang betwen the first and second frame.
 import time
 import matplotlib.pyplot as pyplot
 import psutil
@@ -8,6 +8,7 @@ import extro
 
 TIME_BETWEEN_CAPTURES: float = 0.02
 X_TICKS: range = range(40)
+Y_TICKS: range = range(20)
 
 started_capturing_at: float = 0
 last_capture_at: float = 0
@@ -29,6 +30,52 @@ def take_capture():
 
     captures[last_capture_at] = extro.Profiler.get_stats()
     fps_captures[last_capture_at] = extro.Profiler.get_fps()
+
+
+def generate_chart(
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    data: dict[str, dict[float, float]],
+    output_file: str,
+):
+    pyplot.figure(figsize=(14, 8))
+
+    for system, values in data.items():
+        times = list(values.keys())
+        values = list(values.values())
+        pyplot.plot(times, values, label=system, linewidth=2)
+
+    pyplot.title(title)
+    pyplot.xlabel(xlabel)
+    pyplot.ylabel(ylabel)
+    pyplot.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    pyplot.tight_layout()
+    pyplot.grid(True)
+    pyplot.xticks(
+        [
+            index * (max(captures.keys()) - started_capturing_at) / len(X_TICKS)
+            for index in X_TICKS
+        ],
+        [
+            f"{index * (max(captures.keys()) - started_capturing_at) / len(X_TICKS):.1f}"
+            for index in X_TICKS
+        ],
+    )
+    pyplot.yticks(
+        [
+            index
+            * max(value for system in data.values() for value in system.values())
+            / len(Y_TICKS)
+            for index in Y_TICKS
+        ],
+        [
+            f"{index * max(value for system in data.values() for value in system.values()) / len(Y_TICKS):.1f}"
+            for index in Y_TICKS
+        ],
+    )
+    pyplot.margins(x=0, y=0)
+    pyplot.savefig(output_file, dpi=400)
 
 
 def start_tracking(output_path: str, duration: float, info: dict[str, str] = {}):
@@ -59,65 +106,37 @@ def stop_tracking(output_path: str):
 
     print(f"Generating report at '{output_path}'...")
 
-    formatted: dict[str, tuple[list[float], list[float]]] = {}
+    formatted: dict[str, dict[float, float]] = {}
 
     for time, stats in captures.items():
         for system, response_time in stats.items():
+            if system == "total":
+                continue
+
             if system not in formatted:
-                formatted[system] = ([], [])
+                formatted[system] = {}
 
-            formatted[system][0].append(time - started_capturing_at)
-            formatted[system][1].append(response_time * 1000)
+            formatted[system][time - started_capturing_at] = response_time * 1000
 
-    pyplot.figure(1, (14, 8))
-
-    for system, (times, values) in formatted.items():
-        pyplot.plot(times, values, label=system, linewidth=2)
-
-    pyplot.title("System Response Times")
-    pyplot.xlabel("Time (s)")
-    pyplot.ylabel("Response Time (ms)")
-    pyplot.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-    pyplot.tight_layout()
-    pyplot.grid(True)
-    pyplot.xticks(
-        [
-            i * (max(captures.keys()) - started_capturing_at) / len(X_TICKS)
-            for i in X_TICKS
-        ],
-        [
-            f"{i * (max(captures.keys()) - started_capturing_at) / len(X_TICKS):.1f}"
-            for i in X_TICKS
-        ],
+    generate_chart(
+        "System Response Times Over Time",
+        "Time (s)",
+        "Response Time (ms)",
+        formatted,
+        f"{output_path}/system_response_times.png",
     )
-    pyplot.margins(x=0)
-    pyplot.savefig(f"{output_path}/system_response_times.png", dpi=400)
 
-    pyplot.figure(2, (14, 8))
-    pyplot.title("FPS Over Time")
-    pyplot.xlabel("Time (s)")
-    pyplot.ylabel("Frames Per Second (FPS)")
-    pyplot.plot(
-        [time - started_capturing_at for time in fps_captures.keys()],
-        list(fps_captures.values()),
-        label="FPS",
-        color="red",
-        linewidth=2,
+    generate_chart(
+        "FPS Over Time",
+        "Time (s)",
+        "Frames Per Second (FPS)",
+        {
+            "FPS": {
+                time - started_capturing_at: fps for time, fps in fps_captures.items()
+            }
+        },
+        f"{output_path}/fps.png",
     )
-    pyplot.xticks(
-        [
-            index * (max(fps_captures.keys()) - started_capturing_at) / len(X_TICKS)
-            for index in X_TICKS
-        ],
-        [
-            f"{index * (max(fps_captures.keys()) - started_capturing_at) / len(X_TICKS):.1f}"
-            for index in X_TICKS
-        ],
-    )
-    pyplot.tight_layout()
-    pyplot.grid(True)
-    pyplot.margins(x=0)
-    pyplot.savefig(f"{output_path}/fps.png", dpi=400)
 
     with open(f"{output_path}/report.md", "w") as report_file:
         benchmark_name: str = benchmark_info.get("name", "Benchmark")
@@ -142,8 +161,8 @@ def stop_tracking(output_path: str):
         average_fps = sum(fps_captures.values()) / len(fps_captures)
         report_file.write(f"\nAverage FPS: {average_fps:.2f}\n\n")
 
-        for system, (times, values) in formatted.items():
-            average_time = sum(values) / len(values)
+        for system, values in formatted.items():
+            average_time = sum(values.values()) / len(values)
             report_file.write(f"- {system}: {average_time:.2f} ms\n")
 
         report_file.write("\n")
@@ -156,6 +175,12 @@ def stop_tracking(output_path: str):
         report_file.write(
             f"- RAM: {psutil.virtual_memory().total / (1024 ** 3):.2f} GB\n"
         )
+
+        report_file.write("\n")
+
+        report_file.write("### Charts\n\n")
+        report_file.write("![System Response Times](system_response_times.png)\n\n")
+        report_file.write("![FPS](fps.png)\n\n")
 
     print("Done generating report.")
     print("Quitting...")

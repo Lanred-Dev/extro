@@ -38,11 +38,11 @@ std::tuple<float, float> projectPolygon(nanobind::tuple axis, nanobind::list ver
     return std::make_tuple(min_dot, max_dot);
 }
 
-nanobind::list computeVertices(float size_x, float size_y, float position_x, float position_y, float rotation)
+nanobind::list computeVertices(float sizeX, float sizeY, float positionX, float positionY, float rotation)
 {
     rotation = rotation * (atan(1.0) * 4) / 180;
-    float halfWidth = size_x / 2;
-    float halfHeight = size_y / 2;
+    float halfWidth = sizeX / 2;
+    float halfHeight = sizeY / 2;
     std::vector<std::tuple<float, float>> local_vertices = {std::make_tuple(-halfWidth, -halfHeight), std::make_tuple(halfWidth, -halfHeight), std::make_tuple(halfWidth, halfHeight), std::make_tuple(-halfWidth, halfHeight)};
     float cos_rotation = std::cos(rotation);
     float sin_rotation = std::sin(rotation);
@@ -53,7 +53,7 @@ nanobind::list computeVertices(float size_x, float size_y, float position_x, flo
     {
         float vertex_x = std::get<0>(local_vertices[index]);
         float vertex_y = std::get<1>(local_vertices[index]);
-        vertices.append(nanobind::make_tuple(position_x + vertex_x * cos_rotation - vertex_y * sin_rotation, position_y + vertex_x * sin_rotation + vertex_y * cos_rotation));
+        vertices.append(nanobind::make_tuple(positionX + vertex_x * cos_rotation - vertex_y * sin_rotation, positionY + vertex_x * sin_rotation + vertex_y * cos_rotation));
     }
 
     return vertices;

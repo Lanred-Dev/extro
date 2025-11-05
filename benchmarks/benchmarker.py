@@ -6,7 +6,7 @@ import platform
 import wmi
 import extro
 
-TIME_BETWEEN_CAPTURES: float = 0.1
+TIME_BETWEEN_CAPTURES: float = 0.02
 X_TICKS: range = range(40)
 
 started_capturing_at: float = 0

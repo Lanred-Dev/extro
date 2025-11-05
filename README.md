@@ -16,7 +16,11 @@ A 2D game engine written in Python that uses Pyray (Raylib) as its backend.
 
 ### Examples
 
-Examples can be found [here](https://github.com/Lanred-Dev/extro/tree/main/examples)
+Examples can be found [here](./examples/README.md).
+
+### Benchmarks
+
+Benchmarks can be found [here](./benchmarks/README.md).
 
 ### Requirements
 

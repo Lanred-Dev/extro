@@ -1,6 +1,6 @@
 # Physics Benchmark Report
 
-This benchmark ran for 9.85 seconds and captured 362 data points.
+This benchmark ran for 9.83 seconds and captured 269 data points.
 
 ### Benchmark Information
 
@@ -9,18 +9,17 @@ This benchmark ran for 9.85 seconds and captured 362 data points.
 ### Average System Response Times
 
 
-Average FPS: 40.82
+Average FPS: 29.07
 
 - timing: 0.01 ms
-- input: 0.02 ms
-- transform: 5.45 ms
-- ui: 0.00 ms
-- collision: 9.65 ms
-- physics: 7.82 ms
+- input: 0.03 ms
+- transform: 7.31 ms
+- ui: 0.01 ms
+- collision: 15.87 ms
+- physics: 10.44 ms
 - animation: 0.02 ms
-- total: 24.76 ms
-- render: 1.79 ms
-- audio: 0.00 ms
+- render: 2.55 ms
+- audio: 0.01 ms
 
 ### System Specifications
 
@@ -28,3 +27,10 @@ Average FPS: 40.82
 - Processor: Intel64 Family 6 Model 170 Stepping 4, GenuineIntel
 - GPU: Intel(R) Arc(TM) Graphics
 - RAM: 15.46 GB
+
+### Charts
+
+![System Response Times](system_response_times.png)
+
+![FPS](fps.png)
+

@@ -159,7 +159,7 @@ def stop_tracking(output_path: str):
         report_file.write("### Average System Response Times\n\n")
 
         average_fps = sum(fps_captures.values()) / len(fps_captures)
-        report_file.write(f"\nAverage FPS: {average_fps:.2f}\n\n")
+        report_file.write(f"Average FPS: {average_fps:.2f}\n\n")
 
         for system, values in formatted.items():
             average_time = sum(values.values()) / len(values)

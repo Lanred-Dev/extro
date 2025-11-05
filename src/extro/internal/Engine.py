@@ -1,7 +1,7 @@
 import sys
 import pyray
 import time
-from typing import TYPE_CHECKING
+from typing import Callable, Any, TYPE_CHECKING
 
 import extro.internal.systems.Render as RenderSystem
 import extro.internal.systems.Input as InputSystem
@@ -16,13 +16,14 @@ import extro.Window as Window
 import extro.Profiler as Profiler
 
 if TYPE_CHECKING:
-    from extro.shared.types import EmptyFunction
+    AnyFunction = Callable[..., Any]
 
 
-def run_system(update: "EmptyFunction", system_name: str):
+def run_system(update: "AnyFunction", system_name: str, *args: Any) -> Any:
     started = time.time()
-    update()
+    result = update(*args)
     Profiler._add_update(system_name, time.time() - started)
+    return result
 
 
 def start():
@@ -34,8 +35,12 @@ def start():
         run_system(
             UISystem.update, "ui"
         )  # If any transform changes happen because of UI events, they will be applied next frame
-        run_system(CollisionSystem.update, "collision")
-        run_system(PhysicsSystem.update, "physics")
+
+        collisions_data: "CollisionSystem.CollisionsData" = run_system(
+            CollisionSystem.update, "collision"
+        )
+        run_system(PhysicsSystem.update, "physics", collisions_data)
+
         run_system(AnimationSystem.update, "animation")
         run_system(RenderSystem.render, "render")
         run_system(AudioSystem.update, "audio")

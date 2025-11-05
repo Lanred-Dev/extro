@@ -4,7 +4,7 @@ from enum import auto, IntFlag
 import extro.internal.ComponentManager as ComponentManager
 import extro.services.Physics as PhysicsService
 import extro.services.Timing as TimingService
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 import extro.internal.systems.Transform as TransformSystem
 
 
@@ -17,14 +17,18 @@ PENETRATION_SLOP: float = 0.05
 IMPULSE_EPSILON: float = 0.001
 DEFAULT_RESTITUTION: float = 0.5
 IMPULSE_SCALER: float = 1.5
+MOMENT_OF_INERTIA_CONSTANT: float = 1.0 / 12.0
 
 
 class PhysicsBodyDirtyFlags(IntFlag):
     MASS = auto()
 
 
-def update():
+def update(collisions_data: "CollisionSystem.CollisionsData"):
     TimingService.on_pre_physics.fire()
+
+    if len(collisions_data) > 0:
+        resolve_collisions(collisions_data)
 
     decay: float = max(1 - (PhysicsService.dampening * TimingService.delta), 0)
 
@@ -200,7 +204,7 @@ def resolve_collisions(
                     instance2_physics_body.restitution,
                 )
                 instance1_inertia: float = (
-                    (1 / 12)
+                    MOMENT_OF_INERTIA_CONSTANT
                     * instance1_physics_body._mass
                     * (
                         instance1_transform._bounding[2] ** 2
@@ -208,29 +212,27 @@ def resolve_collisions(
                     )
                 )
                 instance2_inertia: float = (
-                    (1 / 12)
+                    MOMENT_OF_INERTIA_CONSTANT
                     * instance2_physics_body._mass
                     * (
                         instance2_transform._bounding[2] ** 2
                         + instance2_transform._bounding[3] ** 2
                     )
                 )
+                instance1_angular_impulse: float = (
+                    instance1_lever_arm.x * collision_normal[1]
+                    - instance1_lever_arm.y * collision_normal[0]
+                )
+                instance2_angular_impulse: float = (
+                    instance2_lever_arm.x * collision_normal[1]
+                    - instance2_lever_arm.y * collision_normal[0]
+                )
                 impulse_magnitude: float = (
                     (-(1 + restitution) * velocity_along_normal)
                     / (
                         total_inverse_mass
-                        + (
-                            instance1_lever_arm.x * collision_normal[1]
-                            - instance1_lever_arm.y * collision_normal[0]
-                        )
-                        ** 2
-                        / instance1_inertia
-                        + (
-                            instance2_lever_arm.x * collision_normal[1]
-                            - instance2_lever_arm.y * collision_normal[0]
-                        )
-                        ** 2
-                        / instance2_inertia
+                        + instance1_angular_impulse**2 / instance1_inertia
+                        + instance2_angular_impulse**2 / instance2_inertia
                     )
                 ) * IMPULSE_SCALER
                 impulse: Vector2 = collision_normal_vector * impulse_magnitude
@@ -240,11 +242,7 @@ def resolve_collisions(
                         impulse / instance1_physics_body._mass
                     )
                     instance1_physics_body.rotational_velocity -= (
-                        impulse_magnitude
-                        * (
-                            instance1_lever_arm.x * collision_normal[1]
-                            - instance1_lever_arm.y * collision_normal[0]
-                        )
+                        impulse_magnitude * instance1_angular_impulse
                     ) / instance1_inertia
 
                 if is_instance2_dynamic:
@@ -252,9 +250,5 @@ def resolve_collisions(
                         impulse / instance2_physics_body._mass
                     )
                     instance2_physics_body.rotational_velocity += (
-                        impulse_magnitude
-                        * (
-                            instance2_lever_arm.x * collision_normal[1]
-                            - instance2_lever_arm.y * collision_normal[0]
-                        )
+                        impulse_magnitude * instance2_angular_impulse
                     ) / instance2_inertia

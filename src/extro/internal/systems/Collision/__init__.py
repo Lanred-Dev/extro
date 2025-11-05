@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 import extro.internal.InstanceManager as InstanceManager
-import extro.internal.systems.Physics as PhysicsSystem
 import extro.services.CollisionGroup as CollisionGroupService
 import extro.internal.systems.Collision.CollisionMask as CollisionMask
 import extro.internal.ComponentManager as ComponentManager
@@ -35,7 +34,7 @@ def on_transform_change(collider: "Collider", transform: "Transform"):
     collider._axes = CollisionMask.compute_axes(collider._vertices)
 
 
-def update():
+def update() -> "CollisionsData":
     global collisions
     grid: "dict[GridCell, list[int]]" = {}
 
@@ -133,5 +132,4 @@ def update():
         instance1.get_component_unsafe("collider").on_collision_end.fire(instance2)
         instance2.get_component_unsafe("collider").on_collision_end.fire(instance1)
 
-    if len(collisions_data) > 0:
-        PhysicsSystem.resolve_collisions(collisions_data)
+    return collisions_data

@@ -14,6 +14,7 @@ last_capture_at: float = 0
 captures: dict[float, dict[str, float]] = {}
 fps_captures: dict[float, float] = {}
 post_render_connection: str | None = None
+benchmark_info: dict[str, str] = {}
 
 
 def take_capture():
@@ -30,14 +31,14 @@ def take_capture():
     fps_captures[last_capture_at] = extro.Profiler.get_fps()
 
 
-def start_tracking(output_path: str, duration: float):
+def start_tracking(output_path: str, duration: float, info: dict[str, str] = {}):
     print("Benchmarking started...")
 
-    global post_render_connection, captures, started_capturing_at
-
-    started_capturing_at = time.perf_counter()
+    global post_render_connection, captures, started_capturing_at, benchmark_info
 
     captures = {}
+    benchmark_info = info
+    started_capturing_at = time.perf_counter()
     post_render_connection = extro.Services.TimingService.on_post_render.connect(
         lambda: take_capture()
     )
@@ -66,12 +67,12 @@ def stop_tracking(output_path: str):
                 formatted[system] = ([], [])
 
             formatted[system][0].append(time - started_capturing_at)
-            formatted[system][1].append(response_time)
+            formatted[system][1].append(response_time * 1000)
 
     pyplot.figure(1, (14, 8))
 
     for system, (times, values) in formatted.items():
-        pyplot.plot(times, values, label=system)
+        pyplot.plot(times, values, label=system, linewidth=2)
 
     pyplot.title("System Response Times")
     pyplot.xlabel("Time (s)")
@@ -89,6 +90,7 @@ def stop_tracking(output_path: str):
             for i in X_TICKS
         ],
     )
+    pyplot.margins(x=0)
     pyplot.savefig(f"{output_path}/system_response_times.png", dpi=400)
 
     pyplot.figure(2, (14, 8))
@@ -100,6 +102,7 @@ def stop_tracking(output_path: str):
         list(fps_captures.values()),
         label="FPS",
         color="red",
+        linewidth=2,
     )
     pyplot.xticks(
         [
@@ -113,23 +116,37 @@ def stop_tracking(output_path: str):
     )
     pyplot.tight_layout()
     pyplot.grid(True)
+    pyplot.margins(x=0)
     pyplot.savefig(f"{output_path}/fps.png", dpi=400)
 
     with open(f"{output_path}/report.md", "w") as report_file:
-        report_file.write("# Benchmark Report\n\n")
+        benchmark_name: str = benchmark_info.get("name", "Benchmark")
+        benchmark_info.pop("name", None)
+
+        report_file.write(f"# {benchmark_name} Report\n\n")
 
         report_file.write(
             f"This benchmark ran for {max(captures.keys()) - started_capturing_at:.2f} seconds and captured {len(captures)} data points.\n\n"
         )
 
-        report_file.write("### Average System Response Times\n\n")
+        if len(benchmark_info) > 0:
+            report_file.write("### Benchmark Information\n\n")
 
-        for system, (times, values) in formatted.items():
-            average_time = sum(values) / len(values)
-            report_file.write(f"- {system}: {average_time:.4f} ms\n")
+            for key, value in benchmark_info.items():
+                report_file.write(f"- {key}: {value}\n")
+
+            report_file.write("\n")
+
+        report_file.write("### Average System Response Times\n\n")
 
         average_fps = sum(fps_captures.values()) / len(fps_captures)
         report_file.write(f"\nAverage FPS: {average_fps:.2f}\n\n")
+
+        for system, (times, values) in formatted.items():
+            average_time = sum(values) / len(values)
+            report_file.write(f"- {system}: {average_time:.2f} ms\n")
+
+        report_file.write("\n")
 
         report_file.write("### System Specifications\n\n")
 

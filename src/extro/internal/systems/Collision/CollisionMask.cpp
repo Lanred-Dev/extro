@@ -19,23 +19,19 @@ std::tuple<float, float> projectPolygon(nanobind::tuple axis, nanobind::list ver
         dots[index] = dot(vertices[index], axis);
     }
 
-    float min_dot = dots[0];
-    float max_dot = dots[0];
+    float min = dots[0];
+    float max = dots[0];
 
     for (int index = 1; index < length; ++index)
     {
-        if (dots[index] < min_dot)
-        {
-            min_dot = dots[index];
-        }
+        if (dots[index] < min)
+            min = dots[index];
 
-        if (dots[index] > max_dot)
-        {
-            max_dot = dots[index];
-        }
+        if (dots[index] > max)
+            max = dots[index];
     }
 
-    return std::make_tuple(min_dot, max_dot);
+    return std::make_tuple(min, max);
 }
 
 nanobind::list computeVertices(float sizeX, float sizeY, float positionX, float positionY, float rotation)

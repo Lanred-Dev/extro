@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import extro.internal.ComponentManager as ComponentManager
 import extro.services.Audio as AudioService
 import extro.services.World as WorldService
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 
 if TYPE_CHECKING:
     from extro.internal.systems.Transform import Transform

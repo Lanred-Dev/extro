@@ -6,7 +6,7 @@ from enum import Enum
 
 import extro.Window as Window
 from extro.assets.Fonts import Arial
-from extro.shared.RGBAColorC import RGBAColor
+from extro.shared.RGBAColor import RGBAColor
 import extro.Profiler as Profiler
 
 

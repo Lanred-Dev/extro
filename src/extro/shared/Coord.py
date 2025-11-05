@@ -1,5 +1,5 @@
 from enum import Enum
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 import extro.services.Screen as ScreenService
 
 

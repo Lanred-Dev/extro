@@ -15,7 +15,7 @@ from extro.instances.core.RenderTarget import RenderTarget
 if TYPE_CHECKING:
     from extro.instances.core.Instance.UI.Clickable import Clickable
     from extro.instances.ui.Text import Text
-    from extro.shared.Vector2C import Vector2
+    from extro.shared.Vector2 import Vector2
     import extro.internal.InstanceManager as InstanceManager
     from extro.instances.core.Instance.UI import UIInstance
 

@@ -8,7 +8,7 @@ import extro.Console as Console
 import extro.internal.systems.Input as InputSystem
 
 if TYPE_CHECKING:
-    from extro.shared.Vector2C import Vector2
+    from extro.shared.Vector2 import Vector2
     import extro.internal.InstanceManager as InstanceManager
 
 Keyboard = InputSystem.Keyboard

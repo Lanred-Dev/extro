@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from extro.utils.Signal import Signal
 from extro.instances.core.components.Component import Component
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 from extro.shared.Coord import Coord
 import extro.Console as Console
 import extro.internal.systems.Transform as TransformSystem

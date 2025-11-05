@@ -18,7 +18,7 @@ struct RGBAColor
     }
 };
 
-NB_MODULE(RGBAColorC, m)
+NB_MODULE(RGBAColor, m)
 {
     nanobind::class_<RGBAColor>(m, "RGBAColor")
         .def(nanobind::init<>())

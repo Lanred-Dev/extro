@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 import pyray
 
 from extro.instances.core.components.Component import Component
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 import extro.internal.ComponentManager as ComponentManager
 import extro.internal.systems.Animation as AnimationSystem
 

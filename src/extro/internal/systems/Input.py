@@ -3,7 +3,7 @@ import pyray
 from enum import IntEnum
 
 from extro.utils.Signal import Signal
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 
 if TYPE_CHECKING:
     from extro.shared.types import EmptyFunction

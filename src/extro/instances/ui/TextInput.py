@@ -8,8 +8,8 @@ from extro.instances.ui.Text import Text
 from extro.assets.Fonts import Arial
 from extro.instances.ui.Font import Font
 from extro.shared.Coord import Coord
-from extro.shared.RGBAColorC import RGBAColor
-from extro.shared.Vector2C import Vector2
+from extro.shared.RGBAColor import RGBAColor
+from extro.shared.Vector2 import Vector2
 
 BACKSPACE_REPEAT_DEBOUNCE = 0.04
 BACKSPACE_REPEAT_START_DELAY = 0.25

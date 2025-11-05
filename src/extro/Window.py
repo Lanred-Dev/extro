@@ -2,7 +2,7 @@
 
 import pyray
 
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 from extro.utils.Signal import Signal
 import extro.internal.systems.Transform as TransformSystem
 

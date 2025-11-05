@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import extro.Console as Console
 from extro.instances.core.components.Component import Component
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 import extro.internal.systems.Physics as PhysicsSystem
 import extro.internal.ComponentManager as ComponentManager
 import extro.services.Physics as PhysicsService

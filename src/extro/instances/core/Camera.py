@@ -1,6 +1,6 @@
 import pyray
 
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 
 
 class Camera:

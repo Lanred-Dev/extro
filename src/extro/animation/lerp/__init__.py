@@ -3,8 +3,8 @@ from typing import TypeVar
 from extro.animation.lerp.number import lerpNumber
 from extro.animation.lerp.color import lerpColor
 from extro.animation.lerp.vector import lerpVector
-from extro.shared.Vector2C import Vector2
-from extro.shared.RGBAColorC import RGBAColor
+from extro.shared.Vector2 import Vector2
+from extro.shared.RGBAColor import RGBAColor
 
 LerpableType = TypeVar("LerpableType", float, int, Vector2, RGBAColor)
 

@@ -56,6 +56,6 @@ function(add_nanobind_module MODULE_NAME CPP_PATH)
         RUNTIME DESTINATION "extro/${PKG_REL_DIR}")
 endfunction()
 
-add_nanobind_module(Vector2C src/extro/shared/Vector2C.cpp)
-add_nanobind_module(RGBAColorC src/extro/shared/RGBAColorC.cpp)
+add_nanobind_module(Vector2 src/extro/shared/Vector2.cpp)
+add_nanobind_module(RGBAColor src/extro/shared/RGBAColor.cpp)
 add_nanobind_module(CollisionMask src/extro/internal/systems/Collision/CollisionMask.cpp)

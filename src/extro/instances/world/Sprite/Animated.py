@@ -1,7 +1,7 @@
 import pyray
 
 from extro.instances.world.Sprite import Sprite
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 from extro.instances.core.components.Animator import Animator
 
 

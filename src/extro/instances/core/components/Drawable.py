@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from extro.instances.core.components.Component import Component
-from extro.shared.RGBAColorC import RGBAColor
+from extro.shared.RGBAColor import RGBAColor
 import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:

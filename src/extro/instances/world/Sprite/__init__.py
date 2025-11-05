@@ -1,7 +1,7 @@
 import pyray
 
 from extro.instances.core.Instance.Renderable import Renderable
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 import extro.Console as Console
 import extro.internal.services.FileCache as FileCacheService
 

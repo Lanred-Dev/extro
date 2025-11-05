@@ -2,7 +2,7 @@
 
 import random
 
-from extro.shared.Vector2C import Vector2
+from extro.shared.Vector2 import Vector2
 import extro.services.World as WorldService
 import extro.Window as Window
 

@@ -1,5 +1,5 @@
 from extro.animation.lerp.number import lerpNumber
-from extro.shared.RGBAColorC import RGBAColor
+from extro.shared.RGBAColor import RGBAColor
 
 
 def linearize(value: float) -> float:

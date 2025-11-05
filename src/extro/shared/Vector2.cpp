@@ -126,7 +126,7 @@ struct Vector2
     }
 };
 
-NB_MODULE(Vector2C, m)
+NB_MODULE(Vector2, m)
 {
     nanobind::class_<Vector2>(m, "Vector2")
         .def(nanobind::init<>())

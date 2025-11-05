@@ -38,7 +38,7 @@ def _trim_logs():
     global logs
 
     for log in list(logs):
-        [priority, _, _] = log[0].value
+        priority, _, _ = log[0].value
 
         if priority.value > log_priority.value:
             logs.remove(log)

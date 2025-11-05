@@ -28,7 +28,7 @@ def take_capture():
 
     last_capture_at = now
 
-    captures[last_capture_at] = extro.Profiler.get_stats()
+    captures[last_capture_at] = extro.Profiler.get_averages()
     fps_captures[last_capture_at] = extro.Profiler.get_fps()
 
 

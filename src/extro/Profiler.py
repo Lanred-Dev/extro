@@ -28,7 +28,7 @@ def _add_update(system_name: str, duration: float):
     _updates[system_name] = _trim_list(_updates[system_name], 100)
 
 
-def get_stats() -> dict[str, float]:
+def get_averages() -> dict[str, float]:
     stats = {
         name: _get_average_of_list(durations) for name, durations in _updates.items()
     }
@@ -51,11 +51,11 @@ def _draw():
     if not is_enabled:
         return
 
-    stats = get_stats()
+    system_response_times = get_averages()
     stats_width: int = 0
     stats_height: int = 0
 
-    for name, value in stats.items():
+    for name, value in system_response_times.items():
         stat_text: str = f"{name}: {value * 1000:.2f} ms"
         stat_size: pyray.Vector2 = pyray.measure_text_ex(Arial(), stat_text, 20, 1)
         stats_width = max(stats_width, int(stat_size.x))
@@ -72,8 +72,7 @@ def _draw():
 
     current_y: int = 5
 
-    for name, value in stats.items():
-        stat_text: str = f"{name}: {value * 1000:.2f} ms"
+    for name, value in system_response_times.items():
         pyray.draw_text_ex(
             Arial(),
             f"{name}: {value * 1000:.2f} ms",
@@ -92,6 +91,6 @@ __all__ = [
     "is_enabled",
     "_add_update",
     "_draw",
-    "get_stats",
+    "get_averages",
     "get_average_for_system",
 ]

@@ -1,5 +1,6 @@
 import benchmarks.benchmarker as benchmarker
 import extro
+import random
 
 extro.Services.WorldService.set_tile_size(6)
 extro.Window.set_title("Physics Benchmark")
@@ -24,7 +25,7 @@ for index in range(NUMBER_OF_INSTANCES):
     position: extro.Coord = extro.Coord(
         0, 0.4 if index % 2 == 0 else 0.5, extro.Coord.CoordType.NORMALIZED
     )
-    position.absolute_x = size.absolute_x * (1.1 * column_index)
+    position.absolute_x = size.absolute_x * (1.3 * column_index)
 
     rect = extro.Instances.World.Rectangle(
         position=position,
@@ -44,7 +45,8 @@ for index in range(NUMBER_OF_INSTANCES):
     rect.add_component(collider)
     scene.add(rect)
     physics_body.apply_force(
-        extro.Vector2(10, 300 if index % 2 == 0 else -300), extro.Vector2(1, 0)
+        extro.Vector2(10, 300 if index % 2 == 0 else -300),
+        extro.Vector2(random.random(), random.random()),
     )
 
 extro.Engine.start()

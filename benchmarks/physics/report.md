@@ -1,6 +1,6 @@
 # Physics Benchmark Report
 
-This benchmark ran for 9.83 seconds and captured 269 data points.
+This benchmark ran for 9.82 seconds and captured 374 data points.
 
 ### Benchmark Information
 
@@ -8,17 +8,16 @@ This benchmark ran for 9.83 seconds and captured 269 data points.
 
 ### Average System Response Times
 
-
-Average FPS: 29.07
+Average FPS: 40.02
 
 - timing: 0.01 ms
 - input: 0.03 ms
-- transform: 7.31 ms
+- transform: 7.12 ms
 - ui: 0.01 ms
-- collision: 15.87 ms
-- physics: 10.44 ms
+- collision: 6.85 ms
+- physics: 10.50 ms
 - animation: 0.02 ms
-- render: 2.55 ms
+- render: 2.58 ms
 - audio: 0.01 ms
 
 ### System Specifications

@@ -1,5 +1,7 @@
 # Benchmarking
 
+These benchmarks are designed to stress-test the engine and measure its performance across various scenarios. Each benchmark targets a specific subsystem of the engine. The results of each benchmark can found in the corresponding benchmark folder.
+
 ### Setup
 
 The only requirement is installing the benchmarking dependencies:

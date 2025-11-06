@@ -6,7 +6,7 @@ extro.Services.WorldService.set_tile_size(6)
 extro.Window.set_title("Physics Benchmark")
 extro.Window.set_size(extro.Vector2(700, 700))
 
-NUMBER_OF_INSTANCES: int = 1000
+NUMBER_OF_INSTANCES: int = 2500
 
 benchmarker.start_tracking(
     "./benchmarks/physics",

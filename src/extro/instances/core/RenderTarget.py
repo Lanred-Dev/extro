@@ -6,7 +6,6 @@ import extro.internal.systems.Render as RenderSystem
 import extro.services.Render as RenderService
 from extro.internal.utils.InstanceRegistry import InstanceRegistry
 import extro.internal.InstanceManager as InstanceManager
-import extro.internal.ComponentManager as ComponentManager
 import extro.Console as Console
 
 if TYPE_CHECKING:
@@ -103,15 +102,6 @@ class RenderTarget(Instance):
     def get_component_unsafe(self, name: str) -> Any:
         Console.log("`RenderTarget` cannot have components", Console.LogType.ERROR)
         return
-
-    def draw(self):
-        for instance_id in self._render_order[:]:
-            drawable = ComponentManager.drawables[instance_id]
-
-            if not drawable.is_visible:
-                continue
-
-            drawable._render_command()
 
     @property
     def id(self) -> int:

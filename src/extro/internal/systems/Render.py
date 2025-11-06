@@ -8,6 +8,7 @@ import extro.services.World as WorldService
 import extro.Console as Console
 import extro.services.Render as RenderService
 import extro.internal.InstanceManager as InstanceManager
+import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
@@ -29,14 +30,19 @@ render_targets: InstanceRegistry = InstanceRegistry(
     on_list_change=lambda: recalculate_render_order(),
 )
 render_order: "list[list[RenderTarget]]" = [[], []]  # 0 = world, 1 = independent
-is_dirty: bool = False
 
 
 def draw_render_target(target: "RenderTarget"):
     if not target.is_visible:
         return
 
-    target.draw()
+    for instance_id in target._render_order[:]:
+        drawable = ComponentManager.drawables[instance_id]
+
+        if not drawable.is_visible:
+            continue
+
+        drawable._render_command()
 
 
 def render():

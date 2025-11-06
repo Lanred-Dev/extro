@@ -8,18 +8,18 @@ import extro
 
 TIME_BETWEEN_CAPTURES: float = 0.02
 X_TICKS: range = range(40)
-Y_TICKS: range = range(20)
+Y_TICKS: range = range(25)
 
 started_capturing_at: float = 0
 last_capture_at: float = 0
-captures: dict[float, dict[str, float]] = {}
+system_response_time_captures: dict[float, dict[str, float]] = {}
 fps_captures: dict[float, float] = {}
+hardware_usage_captures: dict[float, dict[str, float]] = {}
 post_render_connection: str | None = None
-benchmark_info: dict[str, str] = {}
 
 
 def take_capture():
-    global last_capture_at, captures, fps_captures
+    global last_capture_at, system_response_time_captures, fps_captures, hardware_usage_captures
 
     now: float = time.perf_counter()
 
@@ -28,20 +28,27 @@ def take_capture():
 
     last_capture_at = now
 
-    captures[last_capture_at] = extro.Profiler.get_averages()
+    system_response_time_captures[last_capture_at] = extro.Profiler.get_averages()
     fps_captures[last_capture_at] = extro.Profiler.get_fps()
+    hardware_usage_captures[last_capture_at] = {
+        "cpu": psutil.cpu_percent(),
+        "ram": psutil.virtual_memory().percent,
+    }
 
 
 def generate_chart(
     title: str,
     xlabel: str,
     ylabel: str,
-    data: dict[str, dict[float, float]],
+    data: dict[float, dict[str, float]],
     output_file: str,
+    multiplier: float = 1.0,
 ):
     pyplot.figure(figsize=(14, 8))
 
-    for system, values in data.items():
+    formatted_data = format_capture_data(data, multiplier)
+
+    for system, values in formatted_data.items():
         times = list(values.keys())
         values = list(values.values())
         pyplot.plot(times, values, label=system, linewidth=2)
@@ -54,48 +61,71 @@ def generate_chart(
     pyplot.grid(True)
     pyplot.xticks(
         [
-            index * (max(captures.keys()) - started_capturing_at) / len(X_TICKS)
+            index * (max(data.keys()) - started_capturing_at) / len(X_TICKS)
             for index in X_TICKS
         ],
         [
-            f"{index * (max(captures.keys()) - started_capturing_at) / len(X_TICKS):.1f}"
+            f"{index * (max(data.keys()) - started_capturing_at) / len(X_TICKS):.1f}"
             for index in X_TICKS
         ],
+        rotation=45,
     )
     pyplot.yticks(
         [
             index
-            * max(value for system in data.values() for value in system.values())
+            * max(
+                value for system in formatted_data.values() for value in system.values()
+            )
             / len(Y_TICKS)
             for index in Y_TICKS
         ],
         [
-            f"{index * max(value for system in data.values() for value in system.values()) / len(Y_TICKS):.1f}"
+            f"{index * max(value for system in formatted_data.values() for value in system.values()) / len(Y_TICKS):.1f}"
             for index in Y_TICKS
         ],
     )
-    pyplot.margins(x=0, y=0)
+    pyplot.margins(x=0, y=0.01)
     pyplot.savefig(output_file, dpi=400)
 
 
-def start_tracking(output_path: str, duration: float, info: dict[str, str] = {}):
+def format_capture_data(
+    data: dict[float, dict[str, float]],
+    multiplier: float = 1.0,
+) -> dict[str, dict[float, float]]:
+    formatted_data: dict[str, dict[float, float]] = {}
+
+    for time, values in data.items():
+        for key, value in values.items():
+            if key not in formatted_data:
+                formatted_data[key] = {}
+
+            formatted_data[key][time - started_capturing_at] = value * multiplier
+
+    return formatted_data
+
+
+def start_tracking(
+    output_path: str = "",
+    duration: float | None = None,
+    benchmark_info: dict[str, str] = {},
+):
     print("Benchmarking started...")
 
-    global post_render_connection, captures, started_capturing_at, benchmark_info
+    global post_render_connection, captures, started_capturing_at
 
     captures = {}
-    benchmark_info = info
     started_capturing_at = time.perf_counter()
     post_render_connection = extro.Services.TimingService.on_post_render.connect(
         lambda: take_capture()
     )
 
-    timeout = extro.Utils.Timeout(duration)
-    timeout.on_finish.connect(lambda: stop_tracking(output_path))
-    timeout.start()
+    if duration is not None:
+        timeout = extro.Utils.Timeout(duration)
+        timeout.on_finish.connect(lambda: stop_tracking(output_path, benchmark_info))
+        timeout.start()
 
 
-def stop_tracking(output_path: str):
+def stop_tracking(output_path: str, benchmark_info: dict[str, str]):
     print("Benchmarking complete. Cleaning up...")
 
     global post_render_connection
@@ -106,36 +136,34 @@ def stop_tracking(output_path: str):
 
     print(f"Generating report at '{output_path}'...")
 
-    formatted: dict[str, dict[float, float]] = {}
-
-    for time, stats in captures.items():
-        for system, response_time in stats.items():
-            if system == "total":
-                continue
-
-            if system not in formatted:
-                formatted[system] = {}
-
-            formatted[system][time - started_capturing_at] = response_time * 1000
-
     generate_chart(
         "System Response Times Over Time",
         "Time (s)",
         "Response Time (ms)",
-        formatted,
+        {
+            time: {
+                system: value for system, value in values.items() if system != "total"
+            }
+            for time, values in system_response_time_captures.items()
+        },
         f"{output_path}/system_response_times.png",
+        1000.0,
     )
 
     generate_chart(
         "FPS Over Time",
         "Time (s)",
         "Frames Per Second (FPS)",
-        {
-            "FPS": {
-                time - started_capturing_at: fps for time, fps in fps_captures.items()
-            }
-        },
+        {time: {"FPS": fps} for time, fps in fps_captures.items()},
         f"{output_path}/fps.png",
+    )
+
+    generate_chart(
+        "Hardware Usage Over Time",
+        "Time (s)",
+        "Usage (%)",
+        hardware_usage_captures,
+        f"{output_path}/hardware_usage.png",
     )
 
     with open(f"{output_path}/report.md", "w") as report_file:
@@ -145,7 +173,7 @@ def stop_tracking(output_path: str):
         report_file.write(f"# {benchmark_name} Report\n\n")
 
         report_file.write(
-            f"This benchmark ran for {max(captures.keys()) - started_capturing_at:.2f} seconds and captured {len(captures)} data points.\n\n"
+            f"This benchmark ran for {max(system_response_time_captures.keys()) - started_capturing_at:.2f} seconds and captured {len(system_response_time_captures)} data points.\n\n"
         )
 
         if len(benchmark_info) > 0:
@@ -161,7 +189,10 @@ def stop_tracking(output_path: str):
         average_fps = sum(fps_captures.values()) / len(fps_captures)
         report_file.write(f"Average FPS: {average_fps:.2f}\n\n")
 
-        for system, values in formatted.items():
+        for system, values in format_capture_data(
+            system_response_time_captures,
+            1000.0,
+        ).items():
             average_time = sum(values.values()) / len(values)
             report_file.write(f"- {system}: {average_time:.2f} ms\n")
 
@@ -181,6 +212,7 @@ def stop_tracking(output_path: str):
         report_file.write("### Charts\n\n")
         report_file.write("![System Response Times](system_response_times.png)\n\n")
         report_file.write("![FPS](fps.png)\n\n")
+        report_file.write("![Hardware Usage](hardware_usage.png)\n\n")
 
     print("Done generating report.")
     print("Quitting...")

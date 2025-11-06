@@ -80,9 +80,7 @@ class Sprite(Renderable):
     def image(self, image_file: str):
         self._image_file = image_file
         self._load_texture()
-        Console.log(
-            f"{self.id} image was changed to {image_file}", Console.LogType.DEBUG
-        )
+        Console.log(f"{self.id} image was changed to {image_file}")
 
     @property
     def source_position(self) -> Vector2:

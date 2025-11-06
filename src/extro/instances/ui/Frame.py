@@ -16,5 +16,5 @@ class Frame(UIInstance):
             (*self.transform._actual_position, *self.transform._actual_size),
             self.transform._position_offset,
             self.transform._rotation,
-            self.drawable.color.to_tuple(),
+            self.drawable.color.list,
         )

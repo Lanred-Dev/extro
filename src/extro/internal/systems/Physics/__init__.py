@@ -76,9 +76,9 @@ def update(collisions_data: "CollisionSystem.CollisionsData"):
             continue
         elif velocity_magnitude > FORCE_MAGNITUDE_THRESHOLD:
             physics_body.velocity *= decay
-            x, y = (physics_body.velocity * TimingService.delta).to_tuple()
-            transform.position.absolute_x += x
-            transform.position.absolute_y += y
+            vector: Vector2 = physics_body.velocity * TimingService.delta
+            transform.position.absolute_x += vector.x
+            transform.position.absolute_y += vector.y
             transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
 
         physics_body.rotational_velocity += (

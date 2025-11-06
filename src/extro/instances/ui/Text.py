@@ -52,7 +52,7 @@ class Text(UIInstance):
             self.transform._rotation,
             self._font_size,
             self.character_spacing,
-            self.drawable.color.to_tuple(),
+            self.drawable.color.list,
         )
 
     @property

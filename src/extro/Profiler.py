@@ -1,6 +1,10 @@
 import pyray
 
 from extro.assets.Fonts import Arial
+from extro.shared.RGBAColor import RGBAColor
+
+TEXT_COLOR: RGBAColor = RGBAColor(255, 255, 255)
+BACKGROUND_COLOR: RGBAColor = RGBAColor(0, 0, 0, 225)
 
 is_enabled: bool = True
 _updates: dict[str, list[float]] = {}
@@ -67,7 +71,7 @@ def _draw():
         0,
         stats_width,
         stats_height + 10,
-        (0, 0, 0, 255),
+        BACKGROUND_COLOR.list,
     )
 
     current_y: int = 5
@@ -82,7 +86,7 @@ def _draw():
             ),
             20,
             1,
-            (255, 255, 255, 255),
+            TEXT_COLOR.list,
         )
         current_y += 25
 

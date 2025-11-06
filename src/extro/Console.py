@@ -25,6 +25,9 @@ class LogType(Enum):
     ERROR = [LogPriority.ERROR, "Error", RGBAColor(255, 0, 0)]
 
 
+TEXT_COLOR: RGBAColor = RGBAColor(255, 255, 255)
+BACKGROUND_COLOR: RGBAColor = RGBAColor(0, 0, 0, 150)
+
 logs: list[tuple[LogType, str]] = []
 is_visible: bool = False
 is_enabled: bool = True
@@ -87,7 +90,7 @@ def _draw():
             (0, int(Window.size.y - ((index + 1) * 20))),
             20,
             1,
-            color.to_tuple(),
+            color.list,
         )
 
     # FPS counter
@@ -99,7 +102,7 @@ def _draw():
         0,
         int(fps_label_size.x) + 10,
         int(fps_label_size.y) + 10,
-        (0, 0, 0, 255),
+        BACKGROUND_COLOR.list,
     )
     pyray.draw_text_ex(
         Arial(),
@@ -107,7 +110,7 @@ def _draw():
         (fps_label_x, 5),
         20,
         1,
-        (255, 255, 255, 255),
+        TEXT_COLOR.list,
     )
 
     Profiler._draw()

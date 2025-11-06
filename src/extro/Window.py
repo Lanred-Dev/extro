@@ -4,7 +4,6 @@ import pyray
 
 from extro.shared.Vector2 import Vector2
 from extro.utils.Signal import Signal
-import extro.internal.systems.Transform as TransformSystem
 
 _PRIMARY_MONITOR_INDEX: int = pyray.get_current_monitor()
 
@@ -42,8 +41,6 @@ def set_size(new_size: Vector2):
 
     pyray.set_window_size(int(new_size.x), int(new_size.y))
     on_resize.fire(new_size)
-
-    TransformSystem.recalculate_normalized_coords()
 
 
 def set_position(x: int, y: int):

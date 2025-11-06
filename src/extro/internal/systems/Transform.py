@@ -1,5 +1,6 @@
 from enum import Enum, auto, IntFlag
 
+import extro.Window as Window
 from extro.shared.Coord import Coord
 import extro.internal.systems.Collision as CollisionSystem
 import extro.internal.ComponentManager as ComponentManager
@@ -125,3 +126,6 @@ def recalculate_normalized_coords():
         if transform._size.type == Coord.CoordType.NORMALIZED:
             transform._size._set_using_normalized(transform._size.x, transform._size.y)
             transform.add_flag(TransformDirtyFlags.SIZE)
+
+
+Window.on_resize.connect(recalculate_normalized_coords)

@@ -53,13 +53,9 @@ def is_collidable(collision_group1: str, collision_group2: str) -> bool:
     ):
         return False
 
-    collision_group1_collidable: bool = _collision_matrix[collision_group1].get(
+    return _collision_matrix[collision_group1].get(
         collision_group2, True
-    )
-    collision_group2_collidable: bool = _collision_matrix[collision_group2].get(
-        collision_group1, True
-    )
-    return collision_group1_collidable and collision_group2_collidable
+    ) and _collision_matrix[collision_group2].get(collision_group1, True)
 
 
 def is_group(group: str) -> bool:

@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from collections import defaultdict
 
 import extro.internal.InstanceManager as InstanceManager
 import extro.services.CollisionGroup as CollisionGroupService
@@ -10,7 +11,6 @@ if TYPE_CHECKING:
     from extro.instances.core.components.Transform import Transform
 
     Collision = tuple[int, int]
-    GridCell = tuple[int, int]
 
     CollisionsData = dict[
         Collision, tuple[float, tuple[float, float], tuple[float, float]]
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 CELL_SIZE: int = 60
 
-collisions: "list[Collision]" = []
+collisions: "set[Collision]" = set()
 old_collisions: "list[Collision]" = []
 
 
@@ -36,7 +36,7 @@ def on_transform_change(collider: "Collider", transform: "Transform"):
 
 def update() -> "CollisionsData":
     global collisions
-    grid: "dict[GridCell, list[int]]" = {}
+    grid: "dict[int, dict[int, list[int]]]" = defaultdict(lambda: defaultdict(list))
 
     for instance_id, collider in ComponentManager.colliders.items():
         if not collider.is_collidable:
@@ -54,32 +54,33 @@ def update() -> "CollisionsData":
 
         for x in range(cell_x, max_x + 1):
             for y in range(cell_y, max_y + 1):
-                cell: "GridCell" = (x, y)
+                grid[x][y].append(instance_id)
 
-                if cell not in grid:
-                    grid[cell] = []
-
-                grid[cell].append(instance_id)
-
-    old_collisions = collisions[:]
+    old_collisions = list(collisions)
     collisions.clear()
     collisions_data: "CollisionsData" = {}
 
-    for cell_instances in grid.values():
-        for instance1_index, instance1_id in enumerate(cell_instances):
-            instance1_collider = ComponentManager.colliders[instance1_id]
+    for y in grid.values():
+        for cell_instances in y.values():
+            for instance1_index, instance1_id in enumerate(cell_instances):
+                instance1_collider = ComponentManager.colliders[instance1_id]
 
-            for instance2_id in cell_instances[instance1_index + 1 :]:
-                instance2_collider = ComponentManager.colliders[instance2_id]
+                for instance2_id in cell_instances[instance1_index + 1 :]:
+                    instance2_collider = ComponentManager.colliders[instance2_id]
 
-                if not CollisionGroupService.is_collidable(
-                    instance1_collider._collision_group,
-                    instance2_collider._collision_group,
-                ):
-                    continue
+                    if not CollisionGroupService.is_collidable(
+                        instance1_collider._collision_group,
+                        instance2_collider._collision_group,
+                    ):
+                        continue
 
-                does_collide, normal, penetration, collision_normal, contact_point = (
-                    CollisionMask.does_collide(
+                    (
+                        does_collide,
+                        normal,
+                        penetration,
+                        collision_normal,
+                        contact_point,
+                    ) = CollisionMask.does_collide(
                         instance1_collider._vertices,
                         instance1_collider._axes,
                         ComponentManager.transforms[instance1_id]._actual_position,
@@ -87,34 +88,33 @@ def update() -> "CollisionsData":
                         instance2_collider._axes,
                         ComponentManager.transforms[instance2_id]._actual_position,
                     )
-                )
 
-                if not does_collide:
-                    continue
+                    if not does_collide:
+                        continue
 
-                # Prevent duplicate collision pairs, ex (A, B) and (B, A)
-                if instance1_id < instance2_id:
-                    collision = (instance1_id, instance2_id)
-                else:
-                    collision = (instance2_id, instance1_id)
+                    # Prevent duplicate collision pairs, ex (A, B) and (B, A)
+                    if instance1_id < instance2_id:
+                        collision = (instance1_id, instance2_id)
+                    else:
+                        collision = (instance2_id, instance1_id)
 
-                if collision in collisions:
-                    continue
+                    if collision in collisions:
+                        continue
 
-                collisions.append(collision)
-                collisions_data[collision] = (
-                    penetration,
-                    collision_normal,
-                    contact_point,
-                )
-
-                if collision not in old_collisions and collision in collisions:
-                    instance1_collider.on_collision.fire(
-                        instance1_collider, normal, penetration
+                    collisions.add(collision)
+                    collisions_data[collision] = (
+                        penetration,
+                        collision_normal,
+                        contact_point,
                     )
-                    instance2_collider.on_collision.fire(
-                        instance2_collider, normal, penetration
-                    )
+
+                    if collision not in old_collisions and collision in collisions:
+                        instance1_collider.on_collision.fire(
+                            instance1_collider, normal, penetration
+                        )
+                        instance2_collider.on_collision.fire(
+                            instance2_collider, normal, penetration
+                        )
 
     # Fire collision end events
     for collision in old_collisions:

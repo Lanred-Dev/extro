@@ -23,22 +23,24 @@ tweens: InstanceRegistry = InstanceRegistry(
 
 
 def update():
-    for tween_id in tweens.instances[:]:
-        tween: "Tween" = InstanceManager.instances[tween_id]  # type: ignore
+    for instance_id in tweens.instances[:]:
+        instance: "Tween" = InstanceManager.instances[instance_id]  # type: ignore
 
-        if not tween.is_playing:
+        if not instance._is_active:
             continue
 
-        tween._elapsed += TimingService.delta
-        tween.progress = tween.easing(min(tween._elapsed / tween.duration, 1))
-        tween.value = lerp(tween.start, tween.end, tween.progress)
-        tween.on_update.fire()
+        instance.elapsed += TimingService.delta
+        instance.progress = instance.easing(
+            min(instance.elapsed / instance.duration, 1)
+        )
+        instance.value = lerp(instance.start, instance.end, instance.progress)
+        instance.on_update.fire(instance.value)
 
-        if tween._elapsed >= tween.duration:
-            tween._is_playing = False
-            tween.progress = 1.0
-            tween.value = tween.end
-            tween.on_finish.fire()
+        if instance.elapsed >= instance.duration:
+            instance._is_active = False
+            instance.progress = 1.0
+            instance.value = instance.end
+            instance.on_finish.fire()
 
     now: float = pyray.get_time()
 

@@ -27,10 +27,10 @@ def clamp(value, min_value, max_value):
     return max(min_value, min(value, max_value))
 
 
-def on_update():
+def on_update(value: extro.Vector2):
     rect.transform.position = extro.Coord(
-        clamp(tween.value.x, 0, extro.Window.size.x - rect.transform.size.absolute_x),
-        clamp(tween.value.y, 0, extro.Window.size.y - rect.transform.size.absolute_y),
+        clamp(value.x, 0, extro.Window.size.x - rect.transform.size.absolute_x),
+        clamp(value.y, 0, extro.Window.size.y - rect.transform.size.absolute_y),
         extro.Coord.CoordType.ABSOLUTE,
     )
 

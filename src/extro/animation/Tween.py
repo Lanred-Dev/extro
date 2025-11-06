@@ -12,6 +12,19 @@ if TYPE_CHECKING:
 
 
 class Tween(Instance, Generic[LerpableType]):
+    __slots__ = Instance.__slots__ + (
+        "value",
+        "duration",
+        "easing",
+        "on_update",
+        "on_finish",
+        "progress",
+        "start",
+        "end",
+        "_is_active",
+        "elapsed",
+    )
+
     value: LerpableType
     duration: float
     easing: "EasingFunction"
@@ -20,8 +33,8 @@ class Tween(Instance, Generic[LerpableType]):
     progress: float
     start: LerpableType
     end: LerpableType
-    _is_playing: bool
-    _elapsed: float
+    _is_active: bool
+    elapsed: float
 
     def __init__(
         self,
@@ -36,8 +49,8 @@ class Tween(Instance, Generic[LerpableType]):
         self.end = end
         self.duration = duration
         self.easing = easing
-        self._is_playing = False
-        self._elapsed = 0.0
+        self._is_active = False
+        self.elapsed = 0.0
         self.progress = 0.0
 
         self.on_update = Signal()
@@ -49,7 +62,7 @@ class Tween(Instance, Generic[LerpableType]):
         self._janitor.add(AnimationSystem.tweens.unregister, self._id)
 
     def play(self, start: LerpableType | None = None, end: LerpableType | None = None):
-        if self._is_playing:
+        if self._is_active:
             Console.log(
                 f"Cannot play tween {self._id} because its already playing",
                 Console.LogType.WARNING,
@@ -62,26 +75,26 @@ class Tween(Instance, Generic[LerpableType]):
         if end is not None:
             self.end = end
 
-        self._elapsed = 0.0
+        self.elapsed = 0.0
         self.value = self.start
-        self._is_playing = True
+        self._is_active = True
 
     def restart(self):
-        if self._is_playing:
+        if self._is_active:
             self.cancel()
 
         self.play()
 
     def cancel(self):
-        if not self._is_playing:
+        if not self._is_active:
             Console.log(
                 f"Cannot cancel tween {self._id} because its not playing",
                 Console.LogType.WARNING,
             )
             return
 
-        self._is_playing = False
+        self._is_active = False
 
     @property
-    def is_playing(self) -> bool:
-        return self._is_playing
+    def is_active(self) -> bool:
+        return self._is_active

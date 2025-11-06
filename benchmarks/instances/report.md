@@ -1,24 +1,24 @@
-# Animation Benchmark Report
+# Instance Benchmark Report
 
-This benchmark ran for 5.88 seconds and captured 142 data points.
+This benchmark ran for 95.71 seconds and captured 944 data points.
 
 ### Benchmark Information
 
-- Number of Instances: 5000
+- Number of Instances: 50000
 
 ### Average System Response Times
 
-Average FPS: 29.00
+Average FPS: 18.25
 
-- timing: 0.01 ms
+- timing: 0.00 ms
 - input: 0.02 ms
-- transform: 17.09 ms
+- transform: 41.17 ms
 - ui: 0.00 ms
 - collision: 0.00 ms
-- physics: 0.00 ms
-- animation: 14.92 ms
-- total: 37.95 ms
-- render: 5.93 ms
+- physics: 0.01 ms
+- animation: 0.01 ms
+- total: 91.60 ms
+- render: 50.43 ms
 - audio: 0.01 ms
 
 ### System Specifications

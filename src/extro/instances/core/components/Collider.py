@@ -24,7 +24,7 @@ class Collider(Component):
     _key = "collider"
 
     is_collidable: bool
-    _collision_group: str
+    _collision_group: "CollisionGroupService.CollisionGroupID"
     _axes: "list[Vector2]"
     _vertices: "list[Vector2]"
 
@@ -52,7 +52,7 @@ class Collider(Component):
 
     @property
     def collision_group(self) -> str:
-        return self._collision_group
+        return CollisionGroupService.id_to_name(self._collision_group)
 
     @collision_group.setter
     def collision_group(self, collision_group: str):
@@ -63,4 +63,4 @@ class Collider(Component):
             )
             collision_group = CollisionGroupService.DEFAULT_COLLISION_GROUP
 
-        self._collision_group = collision_group
+        self._collision_group = CollisionGroupService.name_to_id(collision_group)

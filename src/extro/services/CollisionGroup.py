@@ -1,23 +1,46 @@
 """Provides collision group management for collision and physics interactions."""
 
+from typing import TYPE_CHECKING
+
 import extro.Console as Console
+import extro.internal.services.Identity as IdentityService
+
+if TYPE_CHECKING:
+    CollisionGroupID = int
 
 DEFAULT_COLLISION_GROUP: str = "default"
 
-_collision_matrix: dict[str, dict[str, bool]] = {DEFAULT_COLLISION_GROUP: {}}
+_id_map: "dict[str, CollisionGroupID]" = {
+    DEFAULT_COLLISION_GROUP: IdentityService.generate_ordered_numeric_id()
+}
+_collision_matrix: "dict[CollisionGroupID, dict[CollisionGroupID, bool]]" = {
+    _id_map[DEFAULT_COLLISION_GROUP]: {}
+}
 
 
-def create_collision_group(collision_group: str):
+def create_group(collision_group: str) -> CollisionGroupID | None:
     """Create a new collision group. By default, unless specified otherwise in `set_collidable`, all collision groups are collidable with each other."""
     if collision_group in _collision_matrix:
         Console.log(
             f"Collision group '{collision_group}' already exists",
             Console.LogType.WARNING,
         )
-        return
+        return None
 
-    _collision_matrix[collision_group] = {}
-    Console.log(f"Collision group '{collision_group}' created", Console.LogType.DEBUG)
+    id = IdentityService.generate_ordered_numeric_id()
+    _id_map[collision_group] = id
+    _collision_matrix[id] = {}
+    Console.log(f"Created collision group '{collision_group}' with id {id}")
+
+    # Need to set default collidability with existing groups
+    for other_id in _collision_matrix:
+        if other_id == id:
+            continue
+
+        _collision_matrix[id][other_id] = True
+        _collision_matrix[other_id][id] = True
+
+    return id
 
 
 def set_collidable(collision_group1: str, collision_group2: str, collidable: bool):
@@ -36,37 +59,45 @@ def set_collidable(collision_group1: str, collision_group2: str, collidable: boo
         )
         return
 
-    _collision_matrix[collision_group1][collision_group2] = collidable
-    _collision_matrix[collision_group2][collision_group1] = collidable
+    _collision_matrix[_id_map[collision_group1]][_id_map[collision_group2]] = collidable
+    _collision_matrix[_id_map[collision_group2]][_id_map[collision_group1]] = collidable
     Console.log(
         f"Collision group '{collision_group1}' is {'now' if collidable else 'no longer'} collidable with '{collision_group2}'",
-        Console.LogType.DEBUG,
     )
 
 
-def is_collidable(collision_group1: str, collision_group2: str) -> bool:
+def is_collidable(
+    collision_group1: CollisionGroupID, collision_group2: CollisionGroupID
+) -> bool:
     """Check if two collision groups are collidable with each other."""
-    # No error is thrown because if a collision group doesn't exist, it can't collide with anything. Im also lazy and dont feel like adding error handling here :)
-    if (
-        collision_group1 not in _collision_matrix
-        or collision_group2 not in _collision_matrix
-    ):
-        return False
-
-    return _collision_matrix[collision_group1].get(
-        collision_group2, True
-    ) and _collision_matrix[collision_group2].get(collision_group1, True)
+    return _collision_matrix[collision_group1][collision_group2]
 
 
 def is_group(group: str) -> bool:
     """Check if a collision group exists."""
-    return group in _collision_matrix
+    return group in _id_map
+
+
+def id_to_name(collision_group: CollisionGroupID) -> str:
+    """Convert a collision group ID to its corresponding name."""
+    for name, id in _id_map.items():
+        if id == collision_group:
+            return name
+
+    return ""
+
+
+def name_to_id(collision_group: str) -> CollisionGroupID:
+    """Convert a collision group name to its corresponding ID."""
+    return _id_map.get(collision_group, _id_map[DEFAULT_COLLISION_GROUP])
 
 
 __all__ = [
     "DEFAULT_COLLISION_GROUP",
-    "create_collision_group",
+    "create_group",
     "set_collidable",
     "is_collidable",
     "is_group",
+    "id_to_name",
+    "name_to_id",
 ]

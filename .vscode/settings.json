@@ -89,7 +89,8 @@
     "xtree": "cpp",
     "xutility": "cpp",
     "random": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "fstream": "cpp"
   },
   "python.REPL.enableREPLSmartSend": false
 }

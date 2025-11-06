@@ -1,0 +1,3 @@
+
+
+def solve_impulse(normal: tuple, contact_point: tuple, restitution: float, total_inverse_mass: float, instance1_bounding: list, instance1_velocity: tuple, is_instance1_dynamic: bool, instance1_rotational_velocity: float, instance1_mass: float, instance2_bounding: list, instance2_velocity: tuple, is_instance2_dynamic: bool, instance2_rotational_velocity: float, instance2_mass: float) -> tuple: ...

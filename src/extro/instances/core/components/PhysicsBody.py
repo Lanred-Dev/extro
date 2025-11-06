@@ -21,6 +21,7 @@ class PhysicsBody(Component):
         "velocity",
         "_body_type",
         "rotational_velocity",
+        "_is_dynamic",
     )
 
     _key = "physics_body"
@@ -33,6 +34,7 @@ class PhysicsBody(Component):
     velocity: Vector2
     rotational_velocity: float
     _body_type: PhysicsService.PhysicsBodyType
+    _is_dynamic: bool
 
     def __init__(
         self,
@@ -49,8 +51,8 @@ class PhysicsBody(Component):
         self.rotational_velocity = 0
         self.mass = mass
         self.restitution = restitution
-        self.is_anchored = is_anchored
         self._body_type = body_type
+        self.is_anchored = is_anchored
 
     def destroy(self):
         super().destroy()
@@ -92,3 +94,7 @@ class PhysicsBody(Component):
             self.velocity = Vector2(0, 0)
             self.rotational_velocity = 0
             self._forces.clear()
+
+    @property
+    def is_dynamic(self) -> bool:
+        return self._is_dynamic

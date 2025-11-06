@@ -7,9 +7,6 @@ import extro.services.Audio as AudioService
 import extro.services.World as WorldService
 from extro.shared.Vector2 import Vector2
 
-if TYPE_CHECKING:
-    from extro.internal.systems.Transform import Transform
-
 pyray.init_audio_device()
 
 AUDIO_DROPOFF_DISTANCE: float = 1000.0
@@ -32,7 +29,7 @@ def update():
             continue
 
         if source._behavior == AudioService.AudioSourceBehaviorType.SPATIAL:
-            transform: "Transform | None" = ComponentManager.transforms.get(instance_id)
+            transform = ComponentManager.transforms.get(instance_id)
 
             if transform:
                 initial_volume: float = source._volume

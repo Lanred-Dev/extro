@@ -10,12 +10,8 @@ if TYPE_CHECKING:
 
 DEFAULT_COLLISION_GROUP: str = "default"
 
-_id_map: "dict[str, CollisionGroupID]" = {
-    DEFAULT_COLLISION_GROUP: IdentityService.generate_ordered_numeric_id()
-}
-_collision_matrix: "dict[CollisionGroupID, dict[CollisionGroupID, bool]]" = {
-    _id_map[DEFAULT_COLLISION_GROUP]: {}
-}
+_id_map: "dict[str, CollisionGroupID]" = {}
+_collision_matrix: "dict[CollisionGroupID, dict[CollisionGroupID, bool]]" = {}
 
 
 def create_group(collision_group: str) -> CollisionGroupID | None:
@@ -34,9 +30,6 @@ def create_group(collision_group: str) -> CollisionGroupID | None:
 
     # Need to set default collidability with existing groups
     for other_id in _collision_matrix:
-        if other_id == id:
-            continue
-
         _collision_matrix[id][other_id] = True
         _collision_matrix[other_id][id] = True
 
@@ -91,6 +84,8 @@ def name_to_id(collision_group: str) -> CollisionGroupID:
     """Convert a collision group name to its corresponding ID."""
     return _id_map.get(collision_group, _id_map[DEFAULT_COLLISION_GROUP])
 
+
+create_group(DEFAULT_COLLISION_GROUP)
 
 __all__ = [
     "DEFAULT_COLLISION_GROUP",

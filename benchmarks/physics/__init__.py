@@ -46,7 +46,7 @@ for index in range(NUMBER_OF_INSTANCES):
     scene.add(rect)
     physics_body.apply_force(
         extro.Vector2(10, 300 if index % 2 == 0 else -300),
-        extro.Vector2(random.random(), random.random()),
+        extro.Vector2(1, 0),
     )
 
 extro.Engine.start()

@@ -35,10 +35,10 @@ class Transform(Component):
     _rotation: float
     _scale: Vector2
     _anchor: Vector2
-    _position_offset: tuple[float, float]
-    _bounding: tuple[float, float, float, float]
-    _actual_position: tuple[float, float]
-    _actual_size: tuple[float, float]
+    _position_offset: list[float]
+    _bounding: list[float]
+    _actual_position: list[float]
+    _actual_size: list[float]
     _parent: "InstanceManager.InstanceID | None"
     _children: "list[InstanceManager.InstanceID]"
 
@@ -60,10 +60,10 @@ class Transform(Component):
         self._rotation = rotation
         self._scale = scale
         self._anchor = anchor
-        self._position_offset = (0, 0)
-        self._bounding = (0, 0, 0, 0)
-        self._actual_position = (0, 0)
-        self._actual_size = (0, 0)
+        self._position_offset = [0.0, 0.0]
+        self._bounding = [0.0, 0.0, 0.0, 0.0]
+        self._actual_position = [0.0, 0.0]
+        self._actual_size = [0.0, 0.0]
 
         self.on_update = Signal()
 
@@ -138,7 +138,7 @@ class Transform(Component):
         self.add_flag(TransformSystem.TransformDirtyFlags.SIZE)
 
     @property
-    def bounding(self) -> tuple[float, float, float, float]:
+    def bounding(self) -> list[float]:
         return self._bounding
 
     @property

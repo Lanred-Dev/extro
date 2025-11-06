@@ -7,7 +7,7 @@ TEXT_COLOR: RGBAColor = RGBAColor(255, 255, 255)
 BACKGROUND_COLOR: RGBAColor = RGBAColor(0, 0, 0, 225)
 
 is_enabled: bool = True
-_updates: dict[str, list[float]] = {}
+captures: dict[str, list[float]] = {}
 
 
 def _trim_list(list: list, max_length: int) -> list:
@@ -21,30 +21,30 @@ def _get_average_of_list(list: list) -> float:
     return sum(list) / len(list)
 
 
-def _add_update(system_name: str, duration: float):
+def capture(system: str, duration: float):
     if not is_enabled:
         return
 
-    if system_name not in _updates:
-        _updates[system_name] = []
+    if system not in captures:
+        captures[system] = []
 
-    _updates[system_name].append(duration)
-    _updates[system_name] = _trim_list(_updates[system_name], 100)
+    captures[system].append(duration)
+    captures[system] = _trim_list(captures[system], 100)
 
 
 def get_averages() -> dict[str, float]:
     stats = {
-        name: _get_average_of_list(durations) for name, durations in _updates.items()
+        name: _get_average_of_list(durations) for name, durations in captures.items()
     }
     stats["total"] = sum(stats.values())
     return stats
 
 
 def get_average_for_system(system_name: str) -> float:
-    if system_name not in _updates:
+    if system_name not in captures:
         return 0.0
 
-    return _get_average_of_list(_updates[system_name])
+    return _get_average_of_list(captures[system_name])
 
 
 def get_fps() -> float:
@@ -93,7 +93,7 @@ def _draw():
 
 __all__ = [
     "is_enabled",
-    "_add_update",
+    "capture",
     "_draw",
     "get_averages",
     "get_average_for_system",

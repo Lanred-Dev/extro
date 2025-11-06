@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 def run_system(update: "AnyFunction", system_name: str, *args: Any) -> Any:
     started = time.time()
     result = update(*args)
-    Profiler._add_update(system_name, time.time() - started)
+    Profiler.capture(system_name, time.time() - started)
     return result
 
 
@@ -32,15 +32,14 @@ def start():
         run_system(TimingSystem.update, "timing")
         run_system(InputSystem.update, "input")
         run_system(TransformSystem.update, "transform")
-        run_system(
-            UISystem.update, "ui"
-        )  # If any transform changes happen because of UI events, they will be applied next frame
 
         collisions_data: "CollisionSystem.CollisionsData" = run_system(
             CollisionSystem.update, "collision"
         )
         run_system(PhysicsSystem.update, "physics", collisions_data)
 
+        # If any transform changes happen because of UI events, they will be applied next frame
+        run_system(UISystem.update, "ui")
         run_system(AnimationSystem.update, "animation")
         run_system(RenderSystem.render, "render")
         run_system(AudioSystem.update, "audio")

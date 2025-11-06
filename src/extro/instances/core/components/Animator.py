@@ -4,7 +4,6 @@ import pyray
 from extro.instances.core.components.Component import Component
 from extro.shared.Vector2 import Vector2
 import extro.internal.ComponentManager as ComponentManager
-import extro.internal.systems.Animation as AnimationSystem
 
 if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager

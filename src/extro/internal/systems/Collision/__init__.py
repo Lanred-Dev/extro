@@ -74,6 +74,16 @@ def update() -> "CollisionsData":
                 ):
                     continue
 
+                # Prevent duplicate collision pairs, eg (A, B) and (B, A)
+                collision: "Collision" = (
+                    (instance1_id, instance2_id)
+                    if instance1_id < instance2_id
+                    else (instance2_id, instance1_id)
+                )
+
+                if collision in collisions:
+                    continue
+
                 (
                     does_collide,
                     normal,
@@ -90,15 +100,6 @@ def update() -> "CollisionsData":
                 )
 
                 if not does_collide:
-                    continue
-
-                # Prevent duplicate collision pairs, ex (A, B) and (B, A)
-                if instance1_id < instance2_id:
-                    collision = (instance1_id, instance2_id)
-                else:
-                    collision = (instance2_id, instance1_id)
-
-                if collision in collisions:
                     continue
 
                 collisions.add(collision)

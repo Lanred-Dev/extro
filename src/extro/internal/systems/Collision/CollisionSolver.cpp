@@ -35,7 +35,7 @@ std::tuple<float, float> projectPolygon(nanobind::tuple axis, nanobind::list ver
     return std::make_tuple(min, max);
 }
 
-nanobind::list computeVertices(float sizeX, float sizeY, float positionX, float positionY, float rotation)
+nanobind::tuple recomputeCollisionMask(float sizeX, float sizeY, float positionX, float positionY, float rotation)
 {
     rotation = rotation * (atan(1.0) * 4) / 180;
     float halfWidth = sizeX / 2;
@@ -53,11 +53,6 @@ nanobind::list computeVertices(float sizeX, float sizeY, float positionX, float 
         vertices.append(nanobind::make_tuple(positionX + vertex_x * cos_rotation - vertex_y * sin_rotation, positionY + vertex_x * sin_rotation + vertex_y * cos_rotation));
     }
 
-    return vertices;
-}
-
-nanobind::list computeAxes(nanobind::list vertices)
-{
     nanobind::list axes = nanobind::list();
 
     for (size_t index = 0; index < vertices.size(); index++)
@@ -76,7 +71,7 @@ nanobind::list computeAxes(nanobind::list vertices)
         axes.append(nanobind::make_tuple(axisY, -axisX));
     }
 
-    return axes;
+    return nanobind::make_tuple(vertices, axes);
 }
 
 nanobind::tuple doesCollide(nanobind::list instance1Vertices, nanobind::list instance1Axes, nanobind::list instance1Position, nanobind::list instance2Vertices, nanobind::list instance2Axes, nanobind::list instance2Position)
@@ -138,9 +133,8 @@ nanobind::tuple doesCollide(nanobind::list instance1Vertices, nanobind::list ins
     return nanobind::make_tuple(true, nanobind::make_tuple(smallestAxisX, smallestAxisY), minOverlap, collisionNormal, contactPoint);
 }
 
-NB_MODULE(CollisionMask, m)
+NB_MODULE(CollisionSolver, m)
 {
-    m.def("compute_vertices", &computeVertices, "size_x"_a, "size_y"_a, "position_x"_a, "position_y"_a, "rotation"_a);
-    m.def("compute_axes", &computeAxes, "vertices"_a);
+    m.def("recompute_collision_mask", &recomputeCollisionMask, "size_x"_a, "size_y"_a, "position_x"_a, "position_y"_a, "rotation"_a);
     m.def("does_collide", &doesCollide, "instance1_vertices"_a, "instance1_axes"_a, "instance1_position"_a, "instance2_vertices"_a, "instance2_axes"_a, "instance2_position"_a);
 }

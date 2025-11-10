@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import extro.internal.InstanceManager as InstanceManager
 import extro.services.CollisionGroup as CollisionGroupService
-import extro.internal.systems.Collision.CollisionMask as CollisionMask
+import extro.internal.systems.Collision.CollisionSolver as CollisionSolver
 import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
@@ -25,14 +25,15 @@ old_collisions: "list[Collision]" = []
 
 
 def on_transform_change(collider: "Collider", transform: "Transform"):
-    collider._vertices = CollisionMask.compute_vertices(
+    vertices, axes = CollisionSolver.recompute_collision_mask(
         transform._actual_size[0],
         transform._actual_size[1],
         transform._actual_position[0],
         transform._actual_position[1],
         transform.rotation,
     )
-    collider._axes = CollisionMask.compute_axes(collider._vertices)
+    collider._vertices = vertices
+    collider._axes = axes
 
 
 def update() -> "CollisionsData":
@@ -90,7 +91,7 @@ def update() -> "CollisionsData":
                     penetration,
                     collision_normal,
                     contact_point,
-                ) = CollisionMask.does_collide(
+                ) = CollisionSolver.does_collide(
                     instance1_collider._vertices,
                     instance1_collider._axes,
                     ComponentManager.transforms[instance1_id]._actual_position,
@@ -109,14 +110,6 @@ def update() -> "CollisionsData":
                     contact_point,
                 )
 
-                if collision not in old_collisions and collision in collisions:
-                    instance1_collider.on_collision.fire(
-                        instance1_collider, normal, penetration
-                    )
-                    instance2_collider.on_collision.fire(
-                        instance2_collider, normal, penetration
-                    )
-
     # Fire collision end events
     for collision in old_collisions:
         if collision in collisions:
@@ -126,5 +119,16 @@ def update() -> "CollisionsData":
         instance2_id = collision[1]
         ComponentManager.colliders[instance1_id].on_collision_end.fire(instance2_id)
         ComponentManager.colliders[instance2_id].on_collision_end.fire(instance1_id)
+
+    # Fire new collision events
+    for collision in collisions:
+        if collision in old_collisions:
+            continue
+
+        instance1_id = collision[0]
+        instance2_id = collision[1]
+        data = collisions_data[collision]
+        ComponentManager.colliders[instance1_id].on_collision.fire(instance2_id, *data)
+        ComponentManager.colliders[instance2_id].on_collision.fire(instance1_id, *data)
 
     return collisions_data

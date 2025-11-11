@@ -57,11 +57,11 @@ def update():
                 and hierarchy
                 and hierarchy._parent is not None
             ):
-                _, _, parent_width, parent_height = ComponentManager.transforms[
+                parent_bounding = ComponentManager.transforms[
                     hierarchy._parent
                 ]._bounding
-                new_x *= parent_width
-                new_y *= parent_height
+                new_x *= parent_bounding[2]
+                new_y *= parent_bounding[3]
 
             transform._actual_size[0] = new_x
             transform._actual_size[1] = new_y
@@ -81,11 +81,15 @@ def update():
                 case Coord.CoordType.RELATIVE if (
                     hierarchy and hierarchy._parent is not None
                 ):
-                    parent_x, parent_y, parent_width, parent_height = (
-                        ComponentManager.transforms[hierarchy._parent]._bounding
+                    parent_bounding = ComponentManager.transforms[
+                        hierarchy._parent
+                    ]._bounding
+                    new_x = parent_bounding[0] + (
+                        parent_bounding[2] * transform._position.x
                     )
-                    new_x = parent_x + (parent_width * transform._position.x)
-                    new_y = parent_y + (parent_height * transform._position.y)
+                    new_y = parent_bounding[1] + (
+                        parent_bounding[3] * transform._position.y
+                    )
                 case _:
                     new_x = transform._position.absolute_x
                     new_y = transform._position.absolute_y

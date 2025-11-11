@@ -1,6 +1,5 @@
 import benchmarks.benchmarker as benchmarker
 import extro
-import random
 
 extro.Services.WorldService.set_tile_size(6)
 extro.Window.set_title("Physics Benchmark")

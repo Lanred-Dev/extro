@@ -15,8 +15,6 @@ class Collider(Component):
     __slots__ = Component.__slots__ + (
         "is_collidable",
         "_collision_group",
-        "_axes",
-        "_vertices",
         "on_collision",
         "on_collision_end",
     )
@@ -25,8 +23,6 @@ class Collider(Component):
 
     is_collidable: bool
     _collision_group: "CollisionGroupService.CollisionGroupID"
-    _axes: "list[Vector2]"
-    _vertices: "list[Vector2]"
 
     on_collision: Signal
     on_collision_end: Signal

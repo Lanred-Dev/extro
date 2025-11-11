@@ -21,94 +21,60 @@ if TYPE_CHECKING:
 CELL_SIZE: int = 60
 
 collisions: "set[Collision]" = set()
-old_collisions: "list[Collision]" = []
 
 
 def on_transform_change(collider: "Collider", transform: "Transform"):
-    vertices, axes = CollisionSolver.recompute_collision_mask(
+    CollisionSolver.recompute_collision_mask(
+        collider._owner,
         transform._actual_size[0],
         transform._actual_size[1],
         transform._actual_position[0],
         transform._actual_position[1],
         transform.rotation,
     )
-    collider._vertices = vertices
-    collider._axes = axes
 
 
 def update() -> "CollisionsData":
     global collisions
-    grid: "dict[GridCell, list[InstanceManager.InstanceID]]" = defaultdict(list)
-
-    for instance_id, collider in ComponentManager.colliders.items():
-        if not collider.is_collidable:
-            continue
-
-        transform = ComponentManager.transforms[instance_id]
-        cell_x: int = int(transform._actual_position[0] // CELL_SIZE)
-        cell_y: int = int(transform._actual_position[1] // CELL_SIZE)
-        max_x: int = int(
-            (transform._actual_position[0] + transform._actual_size[0]) // CELL_SIZE
-        )
-        max_y: int = int(
-            (transform._actual_position[1] + transform._actual_size[1]) // CELL_SIZE
-        )
-
-        for x in range(cell_x, max_x + 1):
-            for y in range(cell_y, max_y + 1):
-                grid[(x, y)].append(instance_id)
 
     old_collisions = list(collisions)
     collisions.clear()
     collisions_data: "CollisionsData" = {}
 
-    for cell_instances in grid.values():
-        for instance1_index, instance1_id in enumerate(cell_instances):
-            instance1_collider = ComponentManager.colliders[instance1_id]
+    new_collisions = CollisionSolver.check_collisions(
+        [
+            instance_id
+            for instance_id, collider in ComponentManager.colliders.items()
+            if collider.is_collidable
+        ]
+    )
 
-            for instance2_id in cell_instances[instance1_index + 1 :]:
-                instance2_collider = ComponentManager.colliders[instance2_id]
+    for collision, penetration, normal, contact_point in new_collisions:
+        instance1_id = collision[0]
+        instance2_id = collision[1]
+        instance1_collider = ComponentManager.colliders[instance1_id]
+        instance2_collider = ComponentManager.colliders[instance2_id]
 
-                if not CollisionGroupService.is_collidable(
-                    instance1_collider._collision_group,
-                    instance2_collider._collision_group,
-                ):
-                    continue
+        if not CollisionGroupService.is_collidable(
+            instance1_collider._collision_group,
+            instance2_collider._collision_group,
+        ):
+            continue
 
-                # Prevent duplicate collision pairs, eg (A, B) and (B, A)
-                collision: "Collision" = (
-                    (instance1_id, instance2_id)
-                    if instance1_id < instance2_id
-                    else (instance2_id, instance1_id)
-                )
+        collisions.add(collision)
+        collisions_data[collision] = (
+            penetration,
+            normal,
+            contact_point,
+        )
 
-                if collision in collisions:
-                    continue
-
-                (
-                    does_collide,
-                    normal,
-                    penetration,
-                    collision_normal,
-                    contact_point,
-                ) = CollisionSolver.does_collide(
-                    instance1_collider._vertices,
-                    instance1_collider._axes,
-                    ComponentManager.transforms[instance1_id]._actual_position,
-                    instance2_collider._vertices,
-                    instance2_collider._axes,
-                    ComponentManager.transforms[instance2_id]._actual_position,
-                )
-
-                if not does_collide:
-                    continue
-
-                collisions.add(collision)
-                collisions_data[collision] = (
-                    penetration,
-                    collision_normal,
-                    contact_point,
-                )
+        if collision not in old_collisions:
+            instance1_collider.on_collision.fire(
+                instance2_id, penetration, normal, contact_point
+            )
+            instance2_collider.on_collision.fire(
+                instance1_id, penetration, normal, contact_point
+            )
 
     # Fire collision end events
     for collision in old_collisions:
@@ -119,16 +85,5 @@ def update() -> "CollisionsData":
         instance2_id = collision[1]
         ComponentManager.colliders[instance1_id].on_collision_end.fire(instance2_id)
         ComponentManager.colliders[instance2_id].on_collision_end.fire(instance1_id)
-
-    # Fire new collision events
-    for collision in collisions:
-        if collision in old_collisions:
-            continue
-
-        instance1_id = collision[0]
-        instance2_id = collision[1]
-        data = collisions_data[collision]
-        ComponentManager.colliders[instance1_id].on_collision.fire(instance2_id, *data)
-        ComponentManager.colliders[instance2_id].on_collision.fire(instance1_id, *data)
 
     return collisions_data

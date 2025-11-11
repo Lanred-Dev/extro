@@ -7,7 +7,6 @@ from extro.instances.core.components.Component import Component
 import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
-    from extro.shared.Vector2 import Vector2
     import extro.internal.InstanceManager as InstanceManager
 
 

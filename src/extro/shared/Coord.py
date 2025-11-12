@@ -33,6 +33,9 @@ class Coord(Vector2):
     def to_tuple(self) -> tuple[float, float]:
         return (self._absolute_x, self._absolute_y)
 
+    def copy(self) -> "Coord":
+        return Coord(self._x, self._y, self._type)
+
     def _set_using_normalized(self, new_x: float, new_y: float):
         self._x = new_x
         self._y = new_y

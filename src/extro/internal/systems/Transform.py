@@ -1,9 +1,14 @@
 from enum import Enum, auto, IntFlag
+from typing import TYPE_CHECKING
 
 import extro.Window as Window
 from extro.shared.Coord import Coord
-import extro.internal.systems.Collision as CollisionSystem
 import extro.internal.ComponentManager as ComponentManager
+
+if TYPE_CHECKING:
+    import extro.internal.InstanceManager as InstanceManager
+
+    TransformUpdatesData = dict[InstanceManager.InstanceID, list[float]]
 
 
 class TransformUpdateType(Enum):
@@ -18,8 +23,9 @@ class TransformDirtyFlags(IntFlag):
     ROTATION = auto()
 
 
-def update():
+def update() -> "TransformUpdatesData":
     transforms = ComponentManager.transforms.items()
+    update_data: "TransformUpdatesData" = {}
 
     # Do an initial pass to calculate if any children need updating due to parent changes
     for instance_id, transform in transforms:
@@ -72,6 +78,7 @@ def update():
                 transform._position_offset[1] = new_y / 2
 
             recompute_position = True
+            transform.on_update.fire(TransformUpdateType.SIZE)
 
         if recompute_position:
             new_x: float = 0
@@ -96,27 +103,27 @@ def update():
 
             width, height = transform._actual_size
             offset_x, offset_y = transform._position_offset
-            transform._actual_position[0] = (
-                new_x - (width * transform._anchor.x) + offset_x
-            )
-            transform._actual_position[1] = (
-                new_y - (height * transform._anchor.y) + offset_y
-            )
+            x = new_x - (width * transform._anchor.x) + offset_x
+            y = new_y - (height * transform._anchor.y) + offset_y
+            transform._actual_position[0] = x
+            transform._actual_position[1] = y
 
             width, height = transform._actual_size
             x, y = transform._actual_position
-            transform._bounding[0] = x - transform._position_offset[0]
-            transform._bounding[1] = y - transform._position_offset[1]
+            transform._bounding[0] = x
+            transform._bounding[1] = y
             transform._bounding[2] = width
             transform._bounding[3] = height
 
             transform.on_update.fire(TransformUpdateType.POSITION)
 
-        transform.clear_flags()
+        if transform.has_flag(TransformDirtyFlags.ROTATION):
+            transform.on_update.fire(TransformUpdateType.ROTATION)
 
-        collider = ComponentManager.colliders.get(instance_id)
-        if collider:
-            CollisionSystem.on_transform_change(collider, transform)
+        transform.clear_flags()
+        update_data[instance_id] = [*transform._bounding, transform._rotation]
+
+    return update_data
 
 
 def recalculate_normalized_coords():

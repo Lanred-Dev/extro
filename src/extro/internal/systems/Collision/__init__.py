@@ -1,40 +1,25 @@
 from typing import TYPE_CHECKING
-from collections import defaultdict
 
-import extro.internal.InstanceManager as InstanceManager
 import extro.services.CollisionGroup as CollisionGroupService
 import extro.internal.systems.Collision.CollisionSolver as CollisionSolver
 import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
-    from extro.instances.core.components.Collider import Collider
-    from extro.instances.core.components.Transform import Transform
+    import extro.internal.InstanceManager as InstanceManager
+    import extro.internal.systems.Transform as TransformSystem
+    from extro.shared.Vector2 import Vector2
 
-    Collision = tuple[int, int]
-    GridCell = tuple[int, int]
+    Collision = tuple[InstanceManager.InstanceID, InstanceManager.InstanceID]
 
-    CollisionsData = dict[
-        Collision, tuple[float, tuple[float, float], tuple[float, float]]
-    ]
+    CollisionsData = dict[Collision, tuple[float, "Vector2", "Vector2"]]
 
-
-CELL_SIZE: int = 60
 
 collisions: "set[Collision]" = set()
 
 
-def on_transform_change(collider: "Collider", transform: "Transform"):
-    CollisionSolver.recompute_collision_mask(
-        collider._owner,
-        transform._actual_size[0],
-        transform._actual_size[1],
-        transform._actual_position[0],
-        transform._actual_position[1],
-        transform.rotation,
-    )
-
-
-def update() -> "CollisionsData":
+def update(
+    transforms_update_data: "TransformSystem.TransformUpdatesData",
+) -> "CollisionsData":
     global collisions
 
     old_collisions = list(collisions)
@@ -43,9 +28,13 @@ def update() -> "CollisionsData":
 
     new_collisions = CollisionSolver.check_collisions(
         [
-            instance_id
+            [
+                instance_id,
+                collider.is_collidable,
+                instance_id in transforms_update_data,
+                transforms_update_data.get(instance_id, []),
+            ]
             for instance_id, collider in ComponentManager.colliders.items()
-            if collider.is_collidable
         ]
     )
 

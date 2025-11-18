@@ -5,6 +5,8 @@ import extro.services.CollisionGroup as CollisionGroupService
 import extro.Console as Console
 from extro.instances.core.components.Component import Component
 import extro.internal.ComponentManager as ComponentManager
+import extro.internal.systems.Collision.CollisionSolver as CollisionSolver
+from extro.shared.Vector2 import Vector2
 
 if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
@@ -40,10 +42,20 @@ class Collider(Component):
         self.on_collision = Signal()
         self.on_collision_end = Signal()
 
+        transform = ComponentManager.transforms[owner]
+        CollisionSolver.create_collision_mask(
+            owner,
+            Vector2(transform.size.absolute_x, transform.size.absolute_y),
+            Vector2(transform.position.absolute_x, transform.position.absolute_y),
+            transform.rotation,
+        )
+
     def destroy(self):
         super().destroy()
+
         self.on_collision.destroy()
         self.on_collision_end.destroy()
+        CollisionSolver.destroy_collision_mask(self._owner)
 
     @property
     def collision_group(self) -> str:

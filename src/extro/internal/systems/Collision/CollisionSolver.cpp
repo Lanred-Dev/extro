@@ -3,25 +3,74 @@
 #include <nanobind/stl/vector.h>
 #include <vector>
 #include <cmath>
-#include <set>
 #include <unordered_map>
+#include <set>
+#include "../../../shared/Vector2.hpp"
 
 using namespace nanobind::literals;
 
-struct SimpleVector2
-{
-    float x;
-    float y;
-};
+const int CELL_SIZE = 60;
+const Vector2 ZERO_VECTOR = Vector2(0.0f, 0.0f);
 
 struct CollisionMask
 {
-    SimpleVector2 position;
-    SimpleVector2 size;
+    Vector2 position;
+    Vector2 size;
     float rotation;
-    std::vector<SimpleVector2> vertices;
-    std::vector<SimpleVector2> axes;
+    std::vector<Vector2> vertices;
+    std::vector<Vector2> axes;
+
+    void recompute()
+    {
+        float rotationRad = rotation * (atan(1.0) * 4) / 180;
+        float halfWidth = size.x / 2.0f;
+        float halfHeight = size.y / 2.0f;
+        std::vector<Vector2> localVertices = {Vector2{-halfWidth, -halfHeight}, Vector2{halfWidth, -halfHeight}, Vector2{halfWidth, halfHeight}, Vector2{-halfWidth, halfHeight}};
+        float cosRotation = std::cos(rotationRad);
+        float sinRotation = std::sin(rotationRad);
+
+        vertices.clear();
+
+        for (auto &localVertex : localVertices)
+            vertices.push_back(Vector2{position.x + localVertex.x * cosRotation - localVertex.y * sinRotation, position.y + localVertex.x * sinRotation + localVertex.y * cosRotation});
+
+        axes.clear();
+
+        for (size_t index = 0; index < vertices.size(); index++)
+        {
+            Vector2 &vertex1 = vertices[index];
+            Vector2 &vertex2 = vertices[(index + 1) % vertices.size()];
+            float axisX = vertex2.x - vertex1.x;
+            float axisY = vertex2.y - vertex1.y;
+            float axisLength = std::hypot(axisX, axisY);
+
+            if (axisLength == 0)
+                continue;
+
+            axisX /= axisLength;
+            axisY /= axisLength;
+            axes.push_back(Vector2{axisY, -axisX});
+        }
+    }
 };
+
+std::unordered_map<int, CollisionMask *> collisionMasks;
+
+void createCollisionMask(int instanceID, Vector2 size, Vector2 position, float rotation)
+{
+    CollisionMask *collisionMask = new CollisionMask();
+    collisionMask->size = size;
+    collisionMask->position = position;
+    collisionMask->rotation = rotation;
+    collisionMask->recompute();
+    collisionMasks[instanceID] = collisionMask;
+}
+
+void destroyCollisionMask(int instanceID)
+{
+    delete collisionMasks[instanceID];
+    collisionMasks.erase(instanceID);
+}
 
 struct PairHash
 {
@@ -31,24 +80,15 @@ struct PairHash
     }
 };
 
-const int CELL_SIZE = 60;
-
-std::unordered_map<int, CollisionMask> collisionMasks;
-
-float dot(const float ax, const float ay, const float bx, const float by)
-{
-    return ax * bx + ay * by;
-}
-
-std::pair<float, float> projectPolygon(SimpleVector2 axis, std::vector<SimpleVector2> vertices)
+std::pair<float, float> &projectPolygon(const Vector2 &axis, const std::vector<Vector2> &vertices)
 {
     int length = vertices.size();
     std::vector<float> dots(length, 0.0f);
 
     for (int index = 0; index < length; ++index)
     {
-        SimpleVector2 &vertex = vertices[index];
-        dots[index] = dot(vertex.x, vertex.y, axis.x, axis.y);
+        const Vector2 &vertex = vertices[index];
+        dots[index] = vertex.dot(axis);
     }
 
     float min = dots[0];
@@ -63,73 +103,33 @@ std::pair<float, float> projectPolygon(SimpleVector2 axis, std::vector<SimpleVec
             max = dots[index];
     }
 
-    return {min, max};
+    return *(new std::pair<float, float>(min, max));
 }
 
-void recomputeCollisionMask(int instanceID, float width, float height, float positionX, float positionY, float rotation)
+std::tuple<bool, float, Vector2, Vector2> doesCollide(const int instance1ID, const int instance2ID)
 {
-    rotation = rotation * (atan(1.0) * 4) / 180;
-    float halfWidth = width / 2;
-    float halfHeight = height / 2;
-    std::vector<SimpleVector2> localVertices = {SimpleVector2{-halfWidth, -halfHeight}, SimpleVector2{halfWidth, -halfHeight}, SimpleVector2{halfWidth, halfHeight}, SimpleVector2{-halfWidth, halfHeight}};
-    float cos_rotation = std::cos(rotation);
-    float sin_rotation = std::sin(rotation);
+    CollisionMask *instance1Mask = collisionMasks[instance1ID];
+    CollisionMask *instance2Mask = collisionMasks[instance2ID];
 
-    std::vector<SimpleVector2> vertices;
+    std::vector<Vector2 *> axes;
 
-    for (int index = 0; index < 4; index++)
-    {
-        SimpleVector2 &localVertex = localVertices[index];
-        vertices.push_back(SimpleVector2{positionX + localVertex.x * cos_rotation - localVertex.y * sin_rotation, positionY + localVertex.x * sin_rotation + localVertex.y * cos_rotation});
-    }
+    for (auto &axis : instance1Mask->axes)
+        axes.push_back(&axis);
 
-    std::vector<SimpleVector2> axes;
-
-    for (size_t index = 0; index < vertices.size(); index++)
-    {
-        SimpleVector2 &vertex1 = vertices[index];
-        SimpleVector2 &vertex2 = vertices[(index + 1) % vertices.size()];
-        float axisX = vertex2.x - vertex1.x;
-        float axisY = vertex2.y - vertex1.y;
-        float axisLength = std::hypot(axisX, axisY);
-
-        if (axisLength == 0)
-            continue;
-
-        axisX /= axisLength;
-        axisY /= axisLength;
-        axes.push_back(SimpleVector2{axisY, -axisX});
-    }
-
-    collisionMasks[instanceID] = CollisionMask{SimpleVector2{positionX, positionY}, SimpleVector2{width, height}, rotation, vertices, axes};
-}
-
-std::tuple<bool, float, std::pair<float, float>, std::pair<float, float>> doesCollide(int instance1ID, int instance2ID)
-{
-    CollisionMask &instance1Mask = collisionMasks[instance1ID];
-    CollisionMask &instance2Mask = collisionMasks[instance2ID];
-
-    // Combine the axes from both polygons
-    std::vector<SimpleVector2> axes;
-
-    for (size_t index = 0; index < instance1Mask.axes.size(); ++index)
-        axes.push_back(instance1Mask.axes[index]);
-
-    for (size_t index = 0; index < instance2Mask.axes.size(); ++index)
-        axes.push_back(instance2Mask.axes[index]);
+    for (auto &axis : instance2Mask->axes)
+        axes.push_back(&axis);
 
     float minOverlap = 1e9;
-    SimpleVector2 smallestAxis;
+    Vector2 smallestAxis;
 
-    for (int index = 0; index < axes.size(); index++)
+    for (const auto *axis : axes)
     {
-        SimpleVector2 &axis = axes[index];
-        auto [projection1X, projection1Y] = projectPolygon(axis, instance1Mask.vertices);
-        auto [projection2X, projection2Y] = projectPolygon(axis, instance2Mask.vertices);
+        auto &[projection1X, projection1Y] = projectPolygon(*axis, instance1Mask->vertices);
+        auto &[projection2X, projection2Y] = projectPolygon(*axis, instance2Mask->vertices);
 
         if (!(projection1X <= projection2Y && projection2X <= projection1Y))
         {
-            return std::make_tuple(false, 0.0f, std::make_pair(0.0f, 0.0f), std::make_pair(0.0f, 0.0f));
+            return std::make_tuple(false, 0.0f, ZERO_VECTOR.copy(), ZERO_VECTOR.copy());
         }
 
         float overlap = std::min(projection1Y, projection2Y) - std::max(projection1X, projection2X);
@@ -137,45 +137,61 @@ std::tuple<bool, float, std::pair<float, float>, std::pair<float, float>> doesCo
         if (overlap < minOverlap)
         {
             minOverlap = overlap;
-            smallestAxis = axis;
+            smallestAxis = axis->copy();
         }
     }
 
-    float distanceX = instance2Mask.position.x - instance1Mask.position.x;
-    float distanceY = instance2Mask.position.y - instance1Mask.position.y;
+    Vector2 distance = instance2Mask->position - instance1Mask->position;
 
-    if (dot(distanceX, distanceY, smallestAxis.x, smallestAxis.y) < 0)
+    if (distance.dot(smallestAxis) < 0)
     {
         smallestAxis.x = -smallestAxis.x;
         smallestAxis.y = -smallestAxis.y;
     }
 
     float normalLength = std::sqrt(smallestAxis.x * smallestAxis.x + smallestAxis.y * smallestAxis.y);
-    std::pair<float, float> normal = {smallestAxis.x / normalLength, smallestAxis.y / normalLength};
+    Vector2 normal = {smallestAxis.x / normalLength, smallestAxis.y / normalLength};
 
-    float contactX = instance1Mask.position.x + smallestAxis.x * (minOverlap / 2);
-    float contactY = instance1Mask.position.y + smallestAxis.y * (minOverlap / 2);
-    std::pair<float, float> contactPoint = {contactX, contactY};
+    float contactX = instance1Mask->position.x + smallestAxis.x * (minOverlap / 2);
+    float contactY = instance1Mask->position.y + smallestAxis.y * (minOverlap / 2);
+    Vector2 contactPoint = {contactX, contactY};
 
     return std::make_tuple(true, minOverlap, normal, contactPoint);
 }
 
-nanobind::list checkCollisions(nanobind::list validCollisionMasks)
+nanobind::list checkCollisions(const nanobind::list collisionMasksData)
 {
     std::set<std::pair<int, int>> checkedPairs;
     nanobind::list collisions;
     std::unordered_map<std::pair<int, int>, std::vector<int>, PairHash> grid;
 
-    for (const auto &[id, mask] : collisionMasks)
+    for (const auto &data : collisionMasksData)
     {
-        int cellX = static_cast<int>(std::floor(mask.position.x / CELL_SIZE));
-        int cellY = static_cast<int>(std::floor(mask.position.y / CELL_SIZE));
-        int maxX = static_cast<int>(std::floor((mask.position.x + mask.size.x) / CELL_SIZE));
-        int maxY = static_cast<int>(std::floor((mask.position.y + mask.size.y) / CELL_SIZE));
+        int instanceID = nanobind::cast<int>(data[0]);
+        CollisionMask *collisionMask = collisionMasks[instanceID];
+
+        if (nanobind::cast<bool>(data[2]))
+        {
+            nanobind::list transformUpdates = data[3];
+            collisionMask->position.x = nanobind::cast<float>(transformUpdates[0]);
+            collisionMask->position.y = nanobind::cast<float>(transformUpdates[1]);
+            collisionMask->size.x = nanobind::cast<float>(transformUpdates[2]);
+            collisionMask->size.y = nanobind::cast<float>(transformUpdates[3]);
+            collisionMask->rotation = nanobind::cast<float>(transformUpdates[4]);
+            collisionMask->recompute();
+        }
+
+        if (nanobind::cast<bool>(data[1]) == false)
+            continue;
+
+        int cellX = static_cast<int>(std::floor(collisionMask->position.x / CELL_SIZE));
+        int cellY = static_cast<int>(std::floor(collisionMask->position.y / CELL_SIZE));
+        int maxX = static_cast<int>(std::floor((collisionMask->position.x + collisionMask->size.x) / CELL_SIZE));
+        int maxY = static_cast<int>(std::floor((collisionMask->position.y + collisionMask->size.y) / CELL_SIZE));
 
         for (int x = cellX; x <= maxX; ++x)
             for (int y = cellY; y <= maxY; ++y)
-                grid[{x, y}].push_back(id);
+                grid[{x, y}].push_back(instanceID);
     }
 
     for (auto &cell : grid)
@@ -209,6 +225,7 @@ nanobind::list checkCollisions(nanobind::list validCollisionMasks)
 
 NB_MODULE(CollisionSolver, m)
 {
-    m.def("recompute_collision_mask", &recomputeCollisionMask, "instance_id"_a, "size_x"_a, "size_y"_a, "position_x"_a, "position_y"_a, "rotation"_a);
+    m.def("create_collision_mask", &createCollisionMask, "instance_id"_a, "size"_a, "position"_a, "rotation"_a);
+    m.def("destroy_collision_mask", &destroyCollisionMask, "instance_id"_a);
     m.def("check_collisions", &checkCollisions);
 }

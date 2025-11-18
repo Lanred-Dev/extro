@@ -58,7 +58,7 @@ class PhysicsBody(Component):
         super().destroy()
         self._forces.clear()
 
-    def apply_force(self, force: Vector2, point: Vector2 = Vector2(0.5, 0.5)):
+    def add_force(self, force: Vector2, point: Vector2 = Vector2(0.5, 0.5)):
         if force.magnitude() == 0:
             Console.log(
                 "Applying a force with a magnitude of 0 has no effect",

@@ -31,11 +31,15 @@ def start():
         # The order matters, aka dont change it :)
         run_system(TimingSystem.update, "timing")
         run_system(InputSystem.update, "input")
-        run_system(TransformSystem.update, "transform")
+
+        transforms_update_data: "TransformSystem.TransformUpdatesData" = run_system(
+            TransformSystem.update, "transform"
+        )
 
         collisions_data: "CollisionSystem.CollisionsData" = run_system(
-            CollisionSystem.update, "collision"
+            CollisionSystem.update, "collision", transforms_update_data
         )
+
         run_system(PhysicsSystem.update, "physics", collisions_data)
 
         # If any transform changes happen because of UI events, they will be applied next frame

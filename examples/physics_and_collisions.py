@@ -22,7 +22,7 @@ collider1 = extro.Instances.Core.Components.Collider(
 )
 rect1.add_component(collider1)
 scene.add(rect1)
-physics_body1.apply_force(extro.Vector2(100, 100), extro.Vector2(1, 0))
+physics_body1.add_force(extro.Vector2(100, 100), extro.Vector2(1, 0))
 
 rect2 = extro.Instances.World.Rectangle(
     position=extro.Coord(300, 300, extro.Coord.CoordType.ABSOLUTE),
@@ -41,6 +41,6 @@ collider2 = extro.Instances.Core.Components.Collider(
 )
 rect2.add_component(collider2)
 scene.add(rect2)
-physics_body2.apply_force(extro.Vector2(-200, -200))
+physics_body2.add_force(extro.Vector2(-200, -200))
 
 extro.Engine.start()

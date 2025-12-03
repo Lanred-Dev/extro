@@ -61,8 +61,7 @@ def update(collisions_data: "CollisionSystem.CollisionsData"):
                     acting_force += force
 
                     if point != ZERO_VECTOR:
-                        torque: float = force.x * point.y - force.y * point.x
-                        acting_rotational_force += torque
+                        acting_rotational_force += force.x * point.y - force.y * point.x
 
         transform = ComponentManager.transforms[instance_id]
 
@@ -70,11 +69,9 @@ def update(collisions_data: "CollisionSystem.CollisionsData"):
             acting_force * physics_body._inverse_mass * TimingService.delta
         )
 
-        velocity_magnitude: float = physics_body.velocity.magnitude()
-        if 0 < velocity_magnitude <= FORCE_MAGNITUDE_THRESHOLD:
+        if abs(physics_body.velocity.magnitude()) <= FORCE_MAGNITUDE_THRESHOLD:
             physics_body.velocity = Vector2(0, 0)
-            continue
-        elif velocity_magnitude > FORCE_MAGNITUDE_THRESHOLD:
+        else:
             physics_body.velocity *= decay
             vector: Vector2 = physics_body.velocity * TimingService.delta
             transform.position.absolute_x += vector.x

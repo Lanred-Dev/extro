@@ -7,7 +7,7 @@ using namespace nanobind::literals;
 
 const float IMPULSE_EPSILON = 0.001f;
 const float MOMENT_OF_INERTIA_CONSTANT = 1.0f / 12.0f;
-const float IMPULSE_SCALER = 1.5f;
+float IMPULSE_SCALER = 1.7f;
 const Vector2 ZERO_VECTOR = Vector2(0.0f, 0.0f);
 const float DEGREES_TO_RAD = (atan(1.0f) * 4.0f) / 180.0f;
 const float RAD_TO_DEGREES = 1.0f / DEGREES_TO_RAD;
@@ -59,7 +59,13 @@ nanobind::tuple solveImpulse(Vector2 normal, Vector2 contactPoint, float restitu
     return nanobind::make_tuple(true, instance1Velocity, instance1RotationalVelocity, instance2Velocity, instance2RotationalVelocity);
 }
 
+void setImpulseScaler(float scaler)
+{
+    IMPULSE_SCALER = scaler;
+}
+
 NB_MODULE(PhysicsSolver, m)
 {
     m.def("solve_impulse", &solveImpulse, "normal"_a, "contact_point"_a, "restitution"_a, "total_inverse_mass"_a, "instance1_bounding"_a, "instance1_velocity"_a, "is_instance1_dynamic"_a, "instance1_rotational_velocity"_a, "instance1_mass"_a, "instance2_bounding"_a, "instance2_velocity"_a, "is_instance2_dynamic"_a, "instance2_rotational_velocity"_a, "instance2_mass"_a);
+    m.def("set_impulse_scaler", &setImpulseScaler, "scaler"_a);
 }

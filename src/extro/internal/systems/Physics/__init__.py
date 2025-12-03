@@ -98,7 +98,7 @@ def resolve_collisions(
 ):
     for (instance1_id, instance2_id), (
         penetration,
-        collision_normal,
+        normal,
         contact_point,
     ) in collisions_data.items():
         if penetration <= PENETRATION_SLOP:
@@ -132,19 +132,16 @@ def resolve_collisions(
         instance2_transform = ComponentManager.transforms[instance2_id]
 
         penetration *= PENETRATION_CORRECTION
-        correction_x: float = collision_normal[0] * penetration
-        correction_y: float = collision_normal[1] * penetration
+        correction: Vector2 = normal * penetration
 
         (
             did_resolve,
-            instance1_velocity_x,
-            instance1_velocity_y,
+            instance1_velocity,
             instance1_rotational_velocity,
-            instance2_velocity_x,
-            instance2_velocity_y,
+            instance2_velocity,
             instance2_rotational_velocity,
         ) = PhysicsSolver.solve_impulse(
-            collision_normal,
+            normal,
             contact_point,
             min(
                 instance1_physics_body.restitution,
@@ -152,12 +149,12 @@ def resolve_collisions(
             ),
             total_inverse_mass,
             instance1_transform._bounding,
-            (instance1_physics_body.velocity.x, instance1_physics_body.velocity.y),
+            instance1_physics_body.velocity,
             is_instance1_dynamic,
             instance1_physics_body.rotational_velocity,
             instance1_physics_body._mass,
             instance2_transform._bounding,
-            (instance2_physics_body.velocity.x, instance2_physics_body.velocity.y),
+            instance2_physics_body.velocity,
             is_instance2_dynamic,
             instance2_physics_body.rotational_velocity,
             instance2_physics_body._mass,
@@ -167,13 +164,13 @@ def resolve_collisions(
             mass_correction: float = (
                 instance1_physics_body._inverse_mass / total_inverse_mass
             )
-            instance1_transform._position.absolute_x -= correction_x * mass_correction
-            instance1_transform._position.absolute_y -= correction_y * mass_correction
+            instance1_transform._position.absolute_x -= correction.x * mass_correction
+            instance1_transform._position.absolute_y -= correction.y * mass_correction
             instance1_transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
 
             if did_resolve:
-                instance1_physics_body.velocity.x = instance1_velocity_x
-                instance1_physics_body.velocity.y = instance1_velocity_y
+                instance1_physics_body.velocity.x = instance1_velocity.x
+                instance1_physics_body.velocity.y = instance1_velocity.y
                 instance1_physics_body.rotational_velocity = (
                     instance1_rotational_velocity
                 )
@@ -182,13 +179,13 @@ def resolve_collisions(
             mass_correction: float = (
                 instance2_physics_body._inverse_mass / total_inverse_mass
             )
-            instance2_transform._position.absolute_x += correction_x * mass_correction
-            instance2_transform._position.absolute_y += correction_y * mass_correction
+            instance2_transform._position.absolute_x += correction.x * mass_correction
+            instance2_transform._position.absolute_y += correction.y * mass_correction
             instance2_transform.add_flag(TransformSystem.TransformDirtyFlags.POSITION)
 
             if did_resolve:
-                instance2_physics_body.velocity.x = instance2_velocity_x
-                instance2_physics_body.velocity.y = instance2_velocity_y
+                instance2_physics_body.velocity.x = instance2_velocity.x
+                instance2_physics_body.velocity.y = instance2_velocity.y
                 instance2_physics_body.rotational_velocity = (
                     instance2_rotational_velocity
                 )

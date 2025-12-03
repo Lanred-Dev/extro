@@ -80,7 +80,7 @@ struct PairHash
     }
 };
 
-std::pair<float, float> &projectPolygon(const Vector2 &axis, const std::vector<Vector2> &vertices)
+std::pair<float, float> projectPolygon(const Vector2 &axis, const std::vector<Vector2> &vertices)
 {
     int length = vertices.size();
     std::vector<float> dots(length, 0.0f);
@@ -103,7 +103,7 @@ std::pair<float, float> &projectPolygon(const Vector2 &axis, const std::vector<V
             max = dots[index];
     }
 
-    return *(new std::pair<float, float>(min, max));
+    return {min, max};
 }
 
 std::tuple<bool, float, Vector2, Vector2> doesCollide(const int instance1ID, const int instance2ID)
@@ -124,12 +124,12 @@ std::tuple<bool, float, Vector2, Vector2> doesCollide(const int instance1ID, con
 
     for (const auto *axis : axes)
     {
-        auto &[projection1X, projection1Y] = projectPolygon(*axis, instance1Mask->vertices);
-        auto &[projection2X, projection2Y] = projectPolygon(*axis, instance2Mask->vertices);
+        auto [projection1X, projection1Y] = projectPolygon(*axis, instance1Mask->vertices);
+        auto [projection2X, projection2Y] = projectPolygon(*axis, instance2Mask->vertices);
 
         if (!(projection1X <= projection2Y && projection2X <= projection1Y))
         {
-            return std::make_tuple(false, 0.0f, ZERO_VECTOR.copy(), ZERO_VECTOR.copy());
+            return std::make_tuple(false, 0.0f, ZERO_VECTOR, ZERO_VECTOR);
         }
 
         float overlap = std::min(projection1Y, projection2Y) - std::max(projection1X, projection2X);
@@ -150,11 +150,8 @@ std::tuple<bool, float, Vector2, Vector2> doesCollide(const int instance1ID, con
     }
 
     float normalLength = std::sqrt(smallestAxis.x * smallestAxis.x + smallestAxis.y * smallestAxis.y);
-    Vector2 normal = {smallestAxis.x / normalLength, smallestAxis.y / normalLength};
-
-    float contactX = instance1Mask->position.x + smallestAxis.x * (minOverlap / 2);
-    float contactY = instance1Mask->position.y + smallestAxis.y * (minOverlap / 2);
-    Vector2 contactPoint = {contactX, contactY};
+    Vector2 normal = smallestAxis / normalLength;
+    Vector2 contactPoint = instance1Mask->position + smallestAxis * (minOverlap / 2);
 
     return std::make_tuple(true, minOverlap, normal, contactPoint);
 }

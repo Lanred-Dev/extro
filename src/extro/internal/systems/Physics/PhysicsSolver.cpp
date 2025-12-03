@@ -5,7 +5,7 @@
 
 using namespace nanobind::literals;
 
-const float IMPULSE_EPSILON = 0.001f;
+const float IMPULSE_EPSILON = 0.01f;
 const float MOMENT_OF_INERTIA_CONSTANT = 1.0f / 12.0f;
 float IMPULSE_SCALER = 1.7f;
 const Vector2 ZERO_VECTOR = Vector2(0.0f, 0.0f);

@@ -46,17 +46,17 @@ nanobind::tuple solveImpulse(Vector2 normal, Vector2 contactPoint, float restitu
     {
         instance1Velocity.x -= impulse.x / instance1Mass;
         instance1Velocity.y -= impulse.y / instance1Mass;
-        instance1RotationalVelocity -= (impulseMagnitude * instance1AngularImpulse) / instance1Inertia;
+        instance1RotationalVelocityRad -= (impulseMagnitude * instance1AngularImpulse) / instance1Inertia;
     }
 
     if (isInstance2Dynamic)
     {
         instance2Velocity.x += impulse.x / instance2Mass;
         instance2Velocity.y += impulse.y / instance2Mass;
-        instance2RotationalVelocity += (impulseMagnitude * instance2AngularImpulse) / instance2Inertia;
+        instance2RotationalVelocityRad += (impulseMagnitude * instance2AngularImpulse) / instance2Inertia;
     }
 
-    return nanobind::make_tuple(true, instance1Velocity, instance1RotationalVelocity, instance2Velocity, instance2RotationalVelocity);
+    return nanobind::make_tuple(true, instance1Velocity, instance1RotationalVelocityRad * RAD_TO_DEGREES, instance2Velocity, instance2RotationalVelocityRad * RAD_TO_DEGREES);
 }
 
 void setImpulseScaler(float scaler)

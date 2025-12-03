@@ -106,9 +106,12 @@ If you want to build the C++ extensions separately from the `.whl`, you can do s
 pip install nanobind
 ```
 
-2. Then build using CMake:
+2. Then build:
 
 ```bash
+sh build.sh
+
+# or to build manually:
 cmake -S . -B build
 cmake --build build --config Release
 ```

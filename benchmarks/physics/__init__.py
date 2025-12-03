@@ -43,7 +43,7 @@ for index in range(NUMBER_OF_INSTANCES):
     )
     rect.add_component(collider)
     scene.add(rect)
-    physics_body.apply_force(
+    physics_body.add_force(
         extro.Vector2(10, 300 if index % 2 == 0 else -300),
         extro.Vector2(1, 0),
     )

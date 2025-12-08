@@ -52,9 +52,6 @@ def _trim_logs():
 
 def log(text: str, type: LogType = LogType.DEBUG):
     """Print a message to the console."""
-    if not is_enabled:
-        return
-
     global logs
 
     [priority, _, _] = type.value

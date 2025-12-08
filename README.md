@@ -30,7 +30,10 @@ Benchmarks can be found [here](./benchmarks/README.md).
 
 \* Required only if building from source
 
-> **Note:** extro has only been tested on **Windows 11**. Other platforms may work but are currently unverified.
+### Tested Platforms
+
+- Windows 10/11 (x64)
+- MacOS Tahoe (M series chip)
 
 ### Installation
 

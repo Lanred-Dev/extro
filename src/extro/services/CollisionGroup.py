@@ -14,7 +14,7 @@ _id_map: "dict[str, CollisionGroupID]" = {}
 _collision_matrix: "dict[CollisionGroupID, dict[CollisionGroupID, bool]]" = {}
 
 
-def create_group(collision_group: str) -> CollisionGroupID | None:
+def create_group(collision_group: str) -> "CollisionGroupID | None":
     """Create a new collision group. By default, unless specified otherwise in `set_collidable`, all collision groups are collidable with each other."""
     if collision_group in _collision_matrix:
         Console.log(

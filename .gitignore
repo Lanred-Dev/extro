@@ -1,6 +1,7 @@
 .venv
 __pycache__
 ext
+**/*.so
 **/*.pyd
 build
 src/extro.egg-info

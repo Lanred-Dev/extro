@@ -45,6 +45,7 @@ function(add_nanobind_module MODULE_NAME CPP_PATH)
         COMMAND ${CMAKE_COMMAND} -E echo "Generating .pyi stub for ${MODULE_NAME}"
         COMMAND ${Python_EXECUTABLE} -c 
             "import sys; sys.path.append('${CPP_DIR_ABS}'); from nanobind import stubgen; stubgen.main(['-m', '${MODULE_NAME}', '-o', '${CPP_DIR_ABS}/${MODULE_NAME}.pyi'])"
+        VERBATIM
     )
 
     get_filename_component(PKG_REL_DIR "${CPP_PATH}" DIRECTORY)

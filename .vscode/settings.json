@@ -4,6 +4,7 @@
     "**/__pycache__": true,
     "**/*.pyd": true,
     "**/*.pyi": true,
+    "**/*.so": true,
     "src/extro.egg-info": true
   },
   "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",

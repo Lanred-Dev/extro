@@ -53,7 +53,6 @@ def update() -> "TransformUpdatesData":
         hierarchy = ComponentManager.hierarchies.get(instance_id)
         recompute_position: bool = transform.has_flag(TransformDirtyFlags.POSITION)
 
-        # if/else because size change requires position to be recalculated
         if transform.has_flag(TransformDirtyFlags.SIZE):
             new_x = transform._size.absolute_x * transform._scale.x
             new_y = transform._size.absolute_y * transform._scale.y
@@ -105,13 +104,11 @@ def update() -> "TransformUpdatesData":
             offset_x, offset_y = transform._position_offset
             x = new_x - (width * transform._anchor.x) + offset_x
             y = new_y - (height * transform._anchor.y) + offset_y
+
             transform._actual_position[0] = x
             transform._actual_position[1] = y
-
-            width, height = transform._actual_size
-            x, y = transform._actual_position
-            transform._bounding[0] = x
-            transform._bounding[1] = y
+            transform._bounding[0] = x - offset_x
+            transform._bounding[1] = y - offset_y
             transform._bounding[2] = width
             transform._bounding[3] = height
 

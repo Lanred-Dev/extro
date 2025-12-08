@@ -1,5 +1,5 @@
 """
-The sprite in this examples is from https://opengameart.org/content/cat-fighter-sprite-sheet
+The sprite in this example is from https://opengameart.org/content/cat-fighter-sprite-sheet
 """
 
 import extro

@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from extro.shared.Vector2 import Vector2
 
     Collision = tuple[InstanceManager.InstanceID, InstanceManager.InstanceID]
-
     CollisionsData = dict[Collision, tuple[float, "Vector2", "Vector2"]]
 
 

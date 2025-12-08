@@ -118,7 +118,11 @@ def update() -> "TransformUpdatesData":
             transform.on_update.fire(TransformUpdateType.ROTATION)
 
         transform.clear_flags()
-        update_data[instance_id] = [*transform._bounding, transform._rotation]
+        update_data[instance_id] = [
+            *transform._actual_position,
+            *transform._actual_size,
+            transform._rotation,
+        ]
 
     return update_data
 

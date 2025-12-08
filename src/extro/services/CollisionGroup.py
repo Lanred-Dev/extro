@@ -60,7 +60,7 @@ def set_collidable(collision_group1: str, collision_group2: str, collidable: boo
 
 
 def is_collidable(
-    collision_group1: CollisionGroupID, collision_group2: CollisionGroupID
+    collision_group1: "CollisionGroupID", collision_group2: "CollisionGroupID"
 ) -> bool:
     """Check if two collision groups are collidable with each other."""
     return _collision_matrix[collision_group1][collision_group2]
@@ -71,7 +71,7 @@ def is_group(group: str) -> bool:
     return group in _id_map
 
 
-def id_to_name(collision_group: CollisionGroupID) -> str:
+def id_to_name(collision_group: "CollisionGroupID") -> str:
     """Convert a collision group ID to its corresponding name."""
     for name, id in _id_map.items():
         if id == collision_group:
@@ -80,7 +80,7 @@ def id_to_name(collision_group: CollisionGroupID) -> str:
     return ""
 
 
-def name_to_id(collision_group: str) -> CollisionGroupID:
+def name_to_id(collision_group: str) -> "CollisionGroupID":
     """Convert a collision group name to its corresponding ID."""
     return _id_map.get(collision_group, _id_map[DEFAULT_COLLISION_GROUP])
 

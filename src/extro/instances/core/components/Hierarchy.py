@@ -20,14 +20,14 @@ class Hierarchy(Component):
 
     _key = "hierarchy"
 
-    _owner: InstanceManager.InstanceID
-    _parent: InstanceManager.InstanceID | None
-    _children: list[InstanceManager.InstanceID]
-    _render_target: InstanceManager.InstanceID | None
+    _owner: "InstanceManager.InstanceID"
+    _parent: "InstanceManager.InstanceID | None"
+    _children: "list[InstanceManager.InstanceID]"
+    _render_target: "InstanceManager.InstanceID | None"
 
     def __init__(
         self,
-        owner: InstanceManager.InstanceID,
+        owner: "InstanceManager.InstanceID",
         parent: Instance | None = None,
     ):
         super().__init__(owner, ComponentManager.ComponentType.HIERARCHY)
@@ -48,7 +48,7 @@ class Hierarchy(Component):
             render_target.remove(InstanceManager.instances[self._owner])
 
     @property
-    def parent(self) -> InstanceManager.InstanceID | None:
+    def parent(self) -> "InstanceManager.InstanceID | None":
         return self._parent
 
     @parent.setter

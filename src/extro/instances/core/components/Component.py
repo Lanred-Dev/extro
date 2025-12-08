@@ -10,12 +10,12 @@ class Component(BitMask):
     )
 
     _key: str  # Key should be overridden in subclasses
-    _owner: InstanceManager.InstanceID
+    _owner: "InstanceManager.InstanceID"
     _type: ComponentManager.ComponentType
 
     def __init__(
         self,
-        owner: InstanceManager.InstanceID,
+        owner: "InstanceManager.InstanceID",
         type: ComponentManager.ComponentType,
     ):
         super().__init__()

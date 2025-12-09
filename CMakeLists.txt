@@ -10,7 +10,7 @@ else()
   set(DEV_MODULE Development.Module)
 endif()
 
-find_package(Python 3.13 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+find_package(Python COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)

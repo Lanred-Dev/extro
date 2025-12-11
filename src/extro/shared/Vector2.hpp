@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <cmath>
 
 struct Vector2

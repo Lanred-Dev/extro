@@ -47,9 +47,9 @@ class Text(UIInstance):
         pyray.draw_text_pro(
             self.font(),
             self.text,
-            self.transform._actual_position,
+            self.transform._actual_position.to_tuple(),
             self.transform._position_offset,
-            self.transform._rotation,
+            self.transform.rotation,
             self._font_size,
             self.character_spacing,
             self.drawable.color.list,

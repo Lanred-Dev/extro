@@ -13,8 +13,8 @@ class Frame(UIInstance):
 
     def draw(self):
         pyray.draw_rectangle_pro(
-            (*self.transform._actual_position, *self.transform._actual_size),
+            self.transform._bounding,
             self.transform._position_offset,
-            self.transform._rotation,
+            self.transform.rotation,
             self.drawable.color.list,
         )

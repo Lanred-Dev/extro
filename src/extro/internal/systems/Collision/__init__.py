@@ -6,38 +6,32 @@ import extro.internal.ComponentManager as ComponentManager
 
 if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
-    import extro.internal.systems.Transform as TransformSystem
     from extro.shared.Vector2 import Vector2
+    import extro.internal.systems.Transform as TransformSystem
 
     Collision = tuple[InstanceManager.InstanceID, InstanceManager.InstanceID]
-    CollisionsData = dict[Collision, tuple[float, "Vector2", "Vector2"]]
+    CollisionsData = list[tuple[Collision, float, "Vector2", "Vector2"]]
 
 
 collisions: "set[Collision]" = set()
 
 
-def update(
-    transforms_update_data: "TransformSystem.TransformUpdatesData",
-) -> "CollisionsData":
+def update(transform_updates: "TransformSystem.TransformUpdates") -> "CollisionsData":
     global collisions
 
     old_collisions = list(collisions)
     collisions.clear()
-    collisions_data: "CollisionsData" = {}
 
-    new_collisions = CollisionSolver.check_collisions(
-        [
-            [
-                instance_id,
-                collider.is_collidable,
-                instance_id in transforms_update_data,
-                transforms_update_data.get(instance_id, []),
-            ]
+    collisions_data = CollisionSolver.check_collisions(
+        {
+            instance_id: collider.is_collidable
             for instance_id, collider in ComponentManager.colliders.items()
-        ]
+            if collider.is_collidable
+        },
+        transform_updates
     )
 
-    for collision, penetration, normal, contact_point in new_collisions:
+    for collision, *data in collisions_data:
         instance1_id = collision[0]
         instance2_id = collision[1]
         instance1_collider = ComponentManager.colliders[instance1_id]
@@ -47,22 +41,14 @@ def update(
             instance1_collider._collision_group,
             instance2_collider._collision_group,
         ):
+            collisions_data.remove((collision, *data))
             continue
 
         collisions.add(collision)
-        collisions_data[collision] = (
-            penetration,
-            normal,
-            contact_point,
-        )
 
         if collision not in old_collisions:
-            instance1_collider.on_collision.fire(
-                instance2_id, penetration, normal, contact_point
-            )
-            instance2_collider.on_collision.fire(
-                instance1_id, penetration, normal, contact_point
-            )
+            instance1_collider.on_collision.fire(instance2_id, *data)
+            instance2_collider.on_collision.fire(instance1_id, *data)
 
     # Fire collision end events
     for collision in old_collisions:

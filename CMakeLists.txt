@@ -59,5 +59,6 @@ endfunction()
 
 add_nanobind_module(Vector2 src/extro/shared/Vector2.cpp src/extro/shared/Vector2.hpp)
 add_nanobind_module(RGBAColor src/extro/shared/RGBAColor.cpp)
-add_nanobind_module(CollisionSolver src/extro/internal/systems/Collision/CollisionSolver.cpp src/extro/shared/Vector2.hpp)
+add_nanobind_module(Angle src/extro/shared/Angle.cpp src/extro/shared/Angle.hpp)
+add_nanobind_module(CollisionSolver src/extro/internal/systems/Collision/CollisionSolver.cpp src/extro/shared/Vector2.hpp src/extro/shared/Angle.hpp)
 add_nanobind_module(PhysicsSolver src/extro/internal/systems/Physics/PhysicsSolver.cpp src/extro/shared/Vector2.hpp)

@@ -45,9 +45,9 @@ class Collider(Component):
         transform = ComponentManager.transforms[owner]
         CollisionSolver.create_collision_mask(
             owner,
-            Vector2(transform.size.absolute_x, transform.size.absolute_y),
-            Vector2(transform.position.absolute_x, transform.position.absolute_y),
-            transform.rotation,
+            transform._actual_size,
+            transform._actual_position,
+            transform._rotation,
         )
 
     def destroy(self):

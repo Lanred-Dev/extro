@@ -1,38 +1,74 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/pair.h>
 #include <nanobind/stl/vector.h>
+#include <nanobind/stl/shared_ptr.h>
 #include <vector>
 #include <cmath>
 #include <unordered_map>
 #include <set>
+#include <memory>
 #include "../../../shared/Vector2.hpp"
+#include "../../../shared/Angle.hpp"
 
 using namespace nanobind::literals;
 
+struct PairHash
+{
+    size_t operator()(const std::pair<int, int> &pair) const noexcept
+    {
+        return std::hash<int>{}(pair.first) ^ (std::hash<int>{}(pair.second) << 1);
+    }
+};
+
 const int CELL_SIZE = 60;
 const Vector2 ZERO_VECTOR = Vector2(0.0f, 0.0f);
+std::unordered_map<std::pair<int, int>, std::vector<int>, PairHash> collisionGrid;
 
 struct CollisionMask
 {
-    Vector2 position;
-    Vector2 size;
-    float rotation;
+    int id;
+    std::shared_ptr<Vector2> position;
+    std::shared_ptr<Vector2> size;
+    std::shared_ptr<Angle> rotation;
     std::vector<Vector2> vertices;
     std::vector<Vector2> axes;
+    std::vector<std::pair<int, int>> occupiedCells;
+
+    void removeFromGrid()
+    {
+        for (const auto &cellPair : occupiedCells)
+        {
+            auto &instances = collisionGrid[cellPair];
+            auto it = std::find(instances.begin(), instances.end(), id);
+
+            if (it != instances.end())
+            {
+                *it = instances.back();
+                instances.pop_back();
+            }
+        }
+
+        occupiedCells.clear();
+    }
 
     void recompute()
     {
-        float rotationRad = rotation * (atan(1.0) * 4) / 180;
-        float halfWidth = size.x / 2.0f;
-        float halfHeight = size.y / 2.0f;
-        std::vector<Vector2> localVertices = {Vector2{-halfWidth, -halfHeight}, Vector2{halfWidth, -halfHeight}, Vector2{halfWidth, halfHeight}, Vector2{-halfWidth, halfHeight}};
-        float cosRotation = std::cos(rotationRad);
-        float sinRotation = std::sin(rotationRad);
+        // Its possible for size to be zero if the instance was just created
+        if (size->x <= 0.0f || size->y <= 0.0f)
+        {
+            axes.clear();
+            vertices.clear();
+            return;
+        }
+
+        std::vector<Vector2> localVertices = {Vector2{0, 0}, Vector2{size->x, 0}, Vector2{size->x, size->y}, Vector2{0, size->y}};
+        float cosRotation = std::cos(rotation->radians);
+        float sinRotation = std::sin(rotation->radians);
 
         vertices.clear();
 
         for (auto &localVertex : localVertices)
-            vertices.push_back(Vector2{position.x + localVertex.x * cosRotation - localVertex.y * sinRotation, position.y + localVertex.x * sinRotation + localVertex.y * cosRotation});
+            vertices.push_back(Vector2{position->x + localVertex.x * cosRotation - localVertex.y * sinRotation, position->y + localVertex.x * sinRotation + localVertex.y * cosRotation});
 
         axes.clear();
 
@@ -51,34 +87,44 @@ struct CollisionMask
             axisY /= axisLength;
             axes.push_back(Vector2{axisY, -axisX});
         }
+
+        removeFromGrid();
+
+        // Determine its placement in the grid
+        int cellX = static_cast<int>(std::floor(position->x / CELL_SIZE));
+        int cellY = static_cast<int>(std::floor(position->y / CELL_SIZE));
+        int maxX = static_cast<int>(std::floor((position->x + size->x) / CELL_SIZE));
+        int maxY = static_cast<int>(std::floor((position->y + size->y) / CELL_SIZE));
+
+        for (int x = cellX; x <= maxX; ++x)
+            for (int y = cellY; y <= maxY; ++y)
+            {
+                std::pair<int, int> cell = {x, y};
+                occupiedCells.push_back(cell);
+                collisionGrid[cell].push_back(id);
+            }
     }
 };
 
 std::unordered_map<int, CollisionMask *> collisionMasks;
 
-void createCollisionMask(int instanceID, Vector2 size, Vector2 position, float rotation)
+void createCollisionMask(int id, std::shared_ptr<Vector2> size, std::shared_ptr<Vector2> position, std::shared_ptr<Angle> rotation)
 {
     CollisionMask *collisionMask = new CollisionMask();
+    collisionMask->id = id;
     collisionMask->size = size;
     collisionMask->position = position;
     collisionMask->rotation = rotation;
     collisionMask->recompute();
-    collisionMasks[instanceID] = collisionMask;
+    collisionMasks[id] = collisionMask;
 }
 
-void destroyCollisionMask(int instanceID)
+void destroyCollisionMask(int id)
 {
-    delete collisionMasks[instanceID];
-    collisionMasks.erase(instanceID);
+    collisionMasks[id]->removeFromGrid();
+    delete collisionMasks[id];
+    collisionMasks.erase(id);
 }
-
-struct PairHash
-{
-    size_t operator()(const std::pair<int, int> &pair) const noexcept
-    {
-        return std::hash<int>{}(pair.first) ^ (std::hash<int>{}(pair.second) << 1);
-    }
-};
 
 std::pair<float, float> projectPolygon(const Vector2 &axis, const std::vector<Vector2> &vertices)
 {
@@ -106,42 +152,40 @@ std::pair<float, float> projectPolygon(const Vector2 &axis, const std::vector<Ve
     return {min, max};
 }
 
-std::tuple<bool, float, Vector2, Vector2> doesCollide(const int instance1ID, const int instance2ID)
+void computeCollisionData(nanobind::list *collisions, std::pair<int, int> pair, const CollisionMask *instance1Mask, const CollisionMask *instance2Mask)
 {
-    CollisionMask *instance1Mask = collisionMasks[instance1ID];
-    CollisionMask *instance2Mask = collisionMasks[instance2ID];
+    std::vector<Vector2> axes;
 
-    std::vector<Vector2 *> axes;
+    for (const auto &axis : instance1Mask->axes)
+        axes.push_back(axis);
 
-    for (auto &axis : instance1Mask->axes)
-        axes.push_back(&axis);
+    for (const auto &axis : instance2Mask->axes)
+        axes.push_back(axis);
 
-    for (auto &axis : instance2Mask->axes)
-        axes.push_back(&axis);
+    if (axes.empty())
+        return;
 
     float minOverlap = 1e9;
     Vector2 smallestAxis;
 
-    for (const auto *axis : axes)
+    for (const auto &axis : axes)
     {
-        auto [projection1X, projection1Y] = projectPolygon(*axis, instance1Mask->vertices);
-        auto [projection2X, projection2Y] = projectPolygon(*axis, instance2Mask->vertices);
+        auto [projection1X, projection1Y] = projectPolygon(axis, instance1Mask->vertices);
+        auto [projection2X, projection2Y] = projectPolygon(axis, instance2Mask->vertices);
 
         if (!(projection1X <= projection2Y && projection2X <= projection1Y))
-        {
-            return std::make_tuple(false, 0.0f, ZERO_VECTOR, ZERO_VECTOR);
-        }
+            return;
 
         float overlap = std::min(projection1Y, projection2Y) - std::max(projection1X, projection2X);
 
         if (overlap < minOverlap)
         {
             minOverlap = overlap;
-            smallestAxis = axis->copy();
+            smallestAxis = axis.copy();
         }
     }
 
-    Vector2 distance = instance2Mask->position - instance1Mask->position;
+    Vector2 distance = *instance2Mask->position - *instance1Mask->position;
 
     if (distance.dot(smallestAxis) < 0)
     {
@@ -149,70 +193,63 @@ std::tuple<bool, float, Vector2, Vector2> doesCollide(const int instance1ID, con
         smallestAxis.y = -smallestAxis.y;
     }
 
-    float normalLength = std::sqrt(smallestAxis.x * smallestAxis.x + smallestAxis.y * smallestAxis.y);
-    Vector2 normal = smallestAxis / normalLength;
-    Vector2 contactPoint = instance1Mask->position + smallestAxis * (minOverlap / 2);
+    Vector2 normal = smallestAxis;
+    Vector2 contactPoint = *instance1Mask->position + smallestAxis * (minOverlap / 2);
 
-    return std::make_tuple(true, minOverlap, normal, contactPoint);
+    collisions->append(nanobind::make_tuple(pair, minOverlap, normal, contactPoint));
 }
 
-nanobind::list checkCollisions(const nanobind::list collisionMasksData)
+nanobind::list checkCollisions(const nanobind::dict validCollisionMasks, const nanobind::list updatedCollisionMasks)
 {
-    std::set<std::pair<int, int>> checkedPairs;
-    nanobind::list collisions;
-    std::unordered_map<std::pair<int, int>, std::vector<int>, PairHash> grid;
-
-    for (const auto &data : collisionMasksData)
+    for (auto instanceID : updatedCollisionMasks)
     {
-        int instanceID = nanobind::cast<int>(data[0]);
-        CollisionMask *collisionMask = collisionMasks[instanceID];
-
-        if (nanobind::cast<bool>(data[2]))
-        {
-            nanobind::list transformUpdates = data[3];
-            collisionMask->position.x = nanobind::cast<float>(transformUpdates[0]);
-            collisionMask->position.y = nanobind::cast<float>(transformUpdates[1]);
-            collisionMask->size.x = nanobind::cast<float>(transformUpdates[2]);
-            collisionMask->size.y = nanobind::cast<float>(transformUpdates[3]);
-            collisionMask->rotation = nanobind::cast<float>(transformUpdates[4]);
-            collisionMask->recompute();
-        }
-
-        if (nanobind::cast<bool>(data[1]) == false)
-            continue;
-
-        int cellX = static_cast<int>(std::floor(collisionMask->position.x / CELL_SIZE));
-        int cellY = static_cast<int>(std::floor(collisionMask->position.y / CELL_SIZE));
-        int maxX = static_cast<int>(std::floor((collisionMask->position.x + collisionMask->size.x) / CELL_SIZE));
-        int maxY = static_cast<int>(std::floor((collisionMask->position.y + collisionMask->size.y) / CELL_SIZE));
-
-        for (int x = cellX; x <= maxX; ++x)
-            for (int y = cellY; y <= maxY; ++y)
-                grid[{x, y}].push_back(instanceID);
+        CollisionMask *collisionMask = collisionMasks[nanobind::cast<int>(instanceID)];
+        collisionMask->recompute();
     }
 
-    for (auto &cell : grid)
+    std::set<std::pair<int, int>> checkedPairs;
+    nanobind::list collisions;
+
+    for (auto it = collisionGrid.begin(); it != collisionGrid.end();)
     {
-        std::vector<int> &instances = cell.second;
-
-        for (size_t index1 = 0; index1 < instances.size(); ++index1)
+        if (it->second.empty())
         {
-            for (size_t index2 = index1 + 1; index2 < instances.size(); ++index2)
+            it = collisionGrid.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    for (auto data : updatedCollisionMasks)
+    {
+        int activeInstanceID = nanobind::cast<int>(data);
+        CollisionMask *activeCollisionMask = collisionMasks[activeInstanceID];
+
+        for (const auto &cellCoord : activeCollisionMask->occupiedCells)
+        {
+            if (collisionGrid.find(cellCoord) == collisionGrid.end())
+                continue;
+
+            auto &neighbors = collisionGrid[cellCoord];
+
+            for (int neighborInstanceID : neighbors)
             {
-                int instance1ID = instances[index1];
-                int instance2ID = instances[index2];
-                std::pair<int, int> collision = {instance1ID, instance2ID};
-
-                if (checkedPairs.find(collision) != checkedPairs.end())
+                if (activeInstanceID == neighborInstanceID || !validCollisionMasks.contains(neighborInstanceID))
                     continue;
 
-                checkedPairs.insert(collision);
-                auto [collides, penetration, normal, contactPoint] = doesCollide(instance1ID, instance2ID);
+                int id1 = std::min(activeInstanceID, neighborInstanceID);
+                int id2 = std::max(activeInstanceID, neighborInstanceID);
+                std::pair<int, int> pair = {id1, id2};
 
-                if (!collides)
+                if (checkedPairs.count(pair))
                     continue;
 
-                collisions.append(nanobind::make_tuple(collision, penetration, normal, contactPoint));
+                checkedPairs.insert(pair);
+
+                CollisionMask *neighborCollisionMask = collisionMasks[neighborInstanceID];
+                computeCollisionData(&collisions, pair, activeCollisionMask, neighborCollisionMask);
             }
         }
     }
@@ -222,7 +259,7 @@ nanobind::list checkCollisions(const nanobind::list collisionMasksData)
 
 NB_MODULE(CollisionSolver, m)
 {
-    m.def("create_collision_mask", &createCollisionMask, "instance_id"_a, "size"_a, "position"_a, "rotation"_a);
-    m.def("destroy_collision_mask", &destroyCollisionMask, "instance_id"_a);
-    m.def("check_collisions", &checkCollisions);
+    m.def("create_collision_mask", &createCollisionMask, "id"_a, "size"_a, "position"_a, "rotation"_a);
+    m.def("destroy_collision_mask", &destroyCollisionMask, "id"_a);
+    m.def("check_collisions", &checkCollisions, "valid_collision_masks"_a, "updated_collision_masks"_a);
 }

@@ -4,6 +4,7 @@ from extro.utils.Signal import Signal
 from extro.instances.core.components.Component import Component
 from extro.shared.Vector2 import Vector2
 from extro.shared.Coord import Coord
+import extro.shared.Angle as Angle
 import extro.Console as Console
 import extro.internal.systems.Transform as TransformSystem
 import extro.internal.ComponentManager as ComponentManager
@@ -32,13 +33,13 @@ class Transform(Component):
 
     _position: Coord
     _size: Coord
-    _rotation: float
+    _rotation: Angle.Angle
     _scale: Vector2
     _anchor: Vector2
     _position_offset: list[float]
     _bounding: list[float]
-    _actual_position: list[float]
-    _actual_size: list[float]
+    _actual_position: Vector2
+    _actual_size: Vector2
     _parent: "InstanceManager.InstanceID | None"
     _children: "list[InstanceManager.InstanceID]"
 
@@ -57,13 +58,13 @@ class Transform(Component):
 
         self._position = position
         self._size = size
-        self._rotation = rotation
+        self._rotation = Angle.from_degrees(rotation)
         self._scale = scale
         self._anchor = anchor
         self._position_offset = [0.0, 0.0]
         self._bounding = [0.0, 0.0, 0.0, 0.0]
-        self._actual_position = [0.0, 0.0]
-        self._actual_size = [0.0, 0.0]
+        self._actual_position = Vector2(0, 0)
+        self._actual_size = Vector2(0, 0)
 
         self.on_update = Signal()
 
@@ -143,9 +144,9 @@ class Transform(Component):
 
     @property
     def rotation(self) -> float:
-        return self._rotation
+        return self._rotation.degrees
 
     @rotation.setter
     def rotation(self, rotation: float):
-        self._rotation = rotation
+        self._rotation.degrees = rotation
         self.add_flag(TransformSystem.TransformDirtyFlags.ROTATION)

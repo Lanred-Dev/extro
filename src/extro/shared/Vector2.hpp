@@ -24,6 +24,11 @@ struct Vector2
         return x * other.x + y * other.y;
     }
 
+    float cross(const Vector2 &other) const
+    {
+        return x * other.y - y * other.x;
+    }
+
     Vector2 operator+(const Vector2 &other) const
     {
         return Vector2(x + other.x, y + other.y);

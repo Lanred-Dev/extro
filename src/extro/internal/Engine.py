@@ -12,6 +12,7 @@ import extro.internal.systems.UI as UISystem
 import extro.internal.systems.Collision as CollisionSystem
 import extro.internal.systems.Physics as PhysicsSystem
 import extro.internal.systems.Timing as TimingSystem
+import extro.internal.InstanceManager as InstanceManager
 import extro.Window as Window
 import extro.Profiler as Profiler
 
@@ -32,12 +33,12 @@ def start():
         run_system(TimingSystem.update, "timing")
         run_system(InputSystem.update, "input")
 
-        transforms_update_data: "TransformSystem.TransformUpdatesData" = run_system(
+        transform_updates: "TransformSystem.TransformUpdates" = run_system(
             TransformSystem.update, "transform"
         )
 
         collisions_data: "CollisionSystem.CollisionsData" = run_system(
-            CollisionSystem.update, "collision", transforms_update_data
+            CollisionSystem.update, "collision", transform_updates
         )
 
         run_system(PhysicsSystem.update, "physics", collisions_data)
@@ -52,6 +53,10 @@ def start():
 
 
 def quit():
+    # Destroy all instances to prevent memory leaks
+    for instance in list(InstanceManager.instances.values()):
+        instance.destroy()
+
     AudioSystem.quit()
     Window.close()
     sys.exit()

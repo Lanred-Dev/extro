@@ -32,7 +32,7 @@ def update(collisions_data: "CollisionSystem.CollisionsData"):
 
     for instance_id in list(ComponentManager.physics_bodies.keys()):
         physics_body = ComponentManager.physics_bodies[instance_id]
-        has_flags: bool = physics_body.is_empty()
+        has_flags: bool = not physics_body.is_empty()
 
         if physics_body.has_flag(PhysicsBodyDirtyFlags.MASS):
             physics_body._inverse_mass = (

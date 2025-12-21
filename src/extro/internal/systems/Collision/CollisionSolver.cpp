@@ -23,6 +23,7 @@ struct PairHash
 const int CELL_SIZE = 60;
 const Vector2 ZERO_VECTOR = Vector2(0.0f, 0.0f);
 std::unordered_map<std::pair<int, int>, std::vector<int>, PairHash> collisionGrid;
+bool checkGridForCleanup = false;
 
 struct CollisionMask
 {
@@ -49,6 +50,7 @@ struct CollisionMask
         }
 
         occupiedCells.clear();
+        checkGridForCleanup = true;
     }
 
     void recompute()
@@ -201,31 +203,37 @@ void computeCollisionData(nanobind::list *collisions, std::pair<int, int> pair, 
 
 nanobind::list checkCollisions(const nanobind::dict validCollisionMasks, const nanobind::list updatedCollisionMasks)
 {
-    for (auto instanceID : updatedCollisionMasks)
-    {
-        CollisionMask *collisionMask = collisionMasks[nanobind::cast<int>(instanceID)];
-        collisionMask->recompute();
-    }
-
     std::set<std::pair<int, int>> checkedPairs;
     nanobind::list collisions;
 
-    for (auto it = collisionGrid.begin(); it != collisionGrid.end();)
+    if (checkGridForCleanup)
     {
-        if (it->second.empty())
+        checkGridForCleanup = false;
+
+        for (auto it = collisionGrid.begin(); it != collisionGrid.end();)
         {
-            it = collisionGrid.erase(it);
-        }
-        else
-        {
-            ++it;
+            if (it->second.empty())
+            {
+                it = collisionGrid.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
         }
     }
 
     for (auto data : updatedCollisionMasks)
     {
         int activeInstanceID = nanobind::cast<int>(data);
-        CollisionMask *activeCollisionMask = collisionMasks[activeInstanceID];
+
+        auto it = collisionMasks.find(activeInstanceID);
+
+        if (it == collisionMasks.end())
+            continue;
+
+        CollisionMask *activeCollisionMask = it->second;
+        activeCollisionMask->recompute();
 
         for (const auto &cellCoord : activeCollisionMask->occupiedCells)
         {

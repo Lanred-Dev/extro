@@ -12,7 +12,7 @@ using namespace nanobind::literals;
 const float IMPULSE_EPSILON = 0.01f;
 const float MOMENT_OF_INERTIA_CONSTANT = 1.0f / 12.0f;
 float IMPULSE_SCALER = 1.0f;
-const float PENETRATION_CORRECTION = 1.0f;
+const float PENETRATION_CORRECTION = 0.8f;
 const float PENETRATION_SLOP = 0.05f;
 const Vector2 ZERO_VECTOR = Vector2(0.0f, 0.0f);
 
@@ -134,6 +134,13 @@ nanobind::list resolveCollisions(nanobind::list collisions)
         nanobind::tuple collisionPair = data[0];
         int instance1ID = nanobind::cast<int>(collisionPair[0]);
         int instance2ID = nanobind::cast<int>(collisionPair[1]);
+
+        if (physicsBodies.find(instance1ID) == physicsBodies.end() ||
+            physicsBodies.find(instance2ID) == physicsBodies.end())
+        {
+            continue;
+        }
+
         PhysicsBody *instance1PhysicsBody = physicsBodies[instance1ID];
         PhysicsBody *instance2PhysicsBody = physicsBodies[instance2ID];
 

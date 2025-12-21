@@ -86,8 +86,8 @@ void solveImpulse(Vector2 *normal, Vector2 *contactPoint, PhysicsBody *instance1
     if (velocityAlongNormal > -IMPULSE_EPSILON)
         return;
 
-    float instance1AngularImpulse = instance1LevelArm.dot(*normal);
-    float instance2AngularImpulse = instance2LevelArm.dot(*normal);
+    float instance1AngularImpulse = instance1LevelArm.cross(*normal);
+    float instance2AngularImpulse = instance2LevelArm.cross(*normal);
     float impulseMagnitude = ((-(1 + std::min(instance1PhysicsBody->restitution, instance2PhysicsBody->restitution)) * velocityAlongNormal) / ((instance1PhysicsBody->inverseMass + instance2PhysicsBody->inverseMass) + (instance1AngularImpulse * instance1AngularImpulse) * instance1PhysicsBody->inverseInertia + (instance2AngularImpulse * instance2AngularImpulse) * instance2PhysicsBody->inverseInertia)) * IMPULSE_SCALER;
 
     Vector2 impulse = (*normal) * impulseMagnitude;

@@ -1,7 +1,7 @@
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("Text Input")
+extro.Window.set_title("Text Input Example")
 
 layer = extro.Instances.UI.Layer()
 

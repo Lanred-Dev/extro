@@ -1,7 +1,7 @@
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("The cube moves... but with the camera")
+extro.Window.set_title("Camera Movement Example")
 
 SPEED: float = 100.0
 

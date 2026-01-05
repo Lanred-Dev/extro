@@ -5,7 +5,7 @@ The sprite in this example is from https://opengameart.org/content/cat-fighter-s
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("Animated Sprite")
+extro.Window.set_title("Animated Sprite Example")
 
 scene = extro.Instances.World.Scene()
 sprite = extro.Instances.World.AnimatedSprite(

@@ -2,7 +2,7 @@ import math
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("Its so wavy!")
+extro.Window.set_title("Sine Wave Example")
 
 scene = extro.Instances.World.Scene()
 

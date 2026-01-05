@@ -1,7 +1,7 @@
 import extro
 
 extro.Services.RenderService.set_fps(144)
-extro.Window.set_title("They bounce off each other!")
+extro.Window.set_title("Physics and Collisions Example")
 
 scene = extro.Instances.World.Scene()
 

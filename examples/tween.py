@@ -1,7 +1,7 @@
 import extro
 
 extro.Services.RenderService.set_fps(60)
-extro.Window.set_title("Tweening... its so smooth")
+extro.Window.set_title("Tween Example")
 
 scene = extro.Instances.World.Scene()
 

@@ -1,6 +1,6 @@
 # extro
 
-A 2D game engine for Python that uses Pyray (Raylib) as its backend.
+A opinionated 2D game engine for Python.
 
 ### Features
 
@@ -87,7 +87,7 @@ python -m venv .venv
 4. Install dependencies:
 
 ```bash
-pip install raylib
+pip install .[dev]
 ```
 
 ### Building the wheel

@@ -2,41 +2,19 @@
   "configurations": [
     {
       "name": "Win32",
-      "includePath": [
-        "${workspaceFolder}/**",
-        "${workspaceFolder}/src",
-        "${workspaceFolder}/.venv/Include",
-        "${workspaceFolder}/.venv/Lib/site-packages/nanobind/include",
-        "C:/Python*/include",
-        "C:/Users/*/AppData/Local/Programs/Python/Python*/include"
-      ],
-      "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
-      "windowsSdkVersion": "10.0.19041.0",
       "compilerPath": "cl.exe",
       "cStandard": "c17",
-      "cppStandard": "c++17",
-      "intelliSenseMode": "windows-msvc-x64"
+      "cppStandard": "c++23",
+      "intelliSenseMode": "windows-msvc-x64",
+      "configurationProvider": "ms-vscode.cmake-tools"
     },
     {
       "name": "Mac",
-      "includePath": [
-        "${workspaceFolder}/**",
-        "${workspaceFolder}/src",
-        "${workspaceFolder}/.venv/include",
-        "${workspaceFolder}/.venv/lib/python*/site-packages/nanobind/include",
-        "/opt/homebrew/opt/python@3.*/Frameworks/Python.framework/Headers",
-        "/usr/local/opt/python@3.*/Frameworks/Python.framework/Headers",
-        "/Library/Frameworks/Python.framework/Versions/Current/Headers"
-      ],
-      "defines": [],
-      "macFrameworkPath": [
-        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks",
-        "/Library/Frameworks"
-      ],
       "compilerPath": "/usr/bin/clang",
       "cStandard": "c17",
-      "cppStandard": "c++17",
-      "intelliSenseMode": "macos-clang-arm64"
+      "cppStandard": "c++23",
+      "intelliSenseMode": "macos-clang-arm64",
+      "configurationProvider": "ms-vscode.cmake-tools"
     }
   ],
   "version": 4

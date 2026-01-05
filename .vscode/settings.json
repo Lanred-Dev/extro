@@ -14,6 +14,9 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
+  "cmake.configureSettings": {
+    "Python_EXECUTABLE": "${workspaceFolder}/.venv/Scripts/python.exe"
+  },
   "files.associations": {
     "algorithm": "cpp",
     "array": "cpp",

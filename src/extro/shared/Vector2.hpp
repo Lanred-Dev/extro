@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <cmath>
 
 struct Vector2
@@ -23,6 +22,11 @@ struct Vector2
     float dot(const Vector2 &other) const
     {
         return x * other.x + y * other.y;
+    }
+
+    float cross(const Vector2 &other) const
+    {
+        return x * other.y - y * other.x;
     }
 
     Vector2 operator+(const Vector2 &other) const

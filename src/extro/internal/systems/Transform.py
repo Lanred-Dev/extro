@@ -8,7 +8,7 @@ import extro.internal.ComponentManager as ComponentManager
 if TYPE_CHECKING:
     import extro.internal.InstanceManager as InstanceManager
 
-    TransformUpdatesData = dict[InstanceManager.InstanceID, list[float]]
+    TransformUpdates = list[InstanceManager.InstanceID]
 
 
 class TransformUpdateType(Enum):
@@ -23,9 +23,9 @@ class TransformDirtyFlags(IntFlag):
     ROTATION = auto()
 
 
-def update() -> "TransformUpdatesData":
+def update():
     transforms = ComponentManager.transforms.items()
-    update_data: "TransformUpdatesData" = {}
+    updates: "TransformUpdates" = []
 
     # Do an initial pass to calculate if any children need updating due to parent changes
     for instance_id, transform in transforms:
@@ -50,6 +50,8 @@ def update() -> "TransformUpdatesData":
         if transform.is_empty():
             continue
 
+        updates.append(instance_id)
+
         hierarchy = ComponentManager.hierarchies.get(instance_id)
         recompute_position: bool = transform.has_flag(TransformDirtyFlags.POSITION)
 
@@ -68,13 +70,8 @@ def update() -> "TransformUpdatesData":
                 new_x *= parent_bounding[2]
                 new_y *= parent_bounding[3]
 
-            transform._actual_size[0] = new_x
-            transform._actual_size[1] = new_y
-
-            # If the instance has a `Drawable` component the transform needs to be offset by half (because the render origin is in the center)
-            if ComponentManager.drawables.get(instance_id):
-                transform._position_offset[0] = new_x / 2
-                transform._position_offset[1] = new_y / 2
+            transform._actual_size.x = new_x
+            transform._actual_size.y = new_y
 
             recompute_position = True
             transform.on_update.fire(TransformUpdateType.SIZE)
@@ -91,24 +88,25 @@ def update() -> "TransformUpdatesData":
                         hierarchy._parent
                     ]._bounding
                     new_x = parent_bounding[0] + (
-                        parent_bounding[2] * transform._position.x
+                        parent_bounding[2] * transform._position.absolute_x
                     )
                     new_y = parent_bounding[1] + (
-                        parent_bounding[3] * transform._position.y
+                        parent_bounding[3] * transform._position.absolute_y
                     )
                 case _:
-                    new_x = transform._position.absolute_x
-                    new_y = transform._position.absolute_y
+                    new_x, new_y = (
+                        transform._position.absolute_x,
+                        transform._position.absolute_y,
+                    )
 
             width, height = transform._actual_size
-            offset_x, offset_y = transform._position_offset
-            x = new_x - (width * transform._anchor.x) + offset_x
-            y = new_y - (height * transform._anchor.y) + offset_y
+            new_x -= width * transform._anchor.x
+            new_y -= height * transform._anchor.y
 
-            transform._actual_position[0] = x
-            transform._actual_position[1] = y
-            transform._bounding[0] = x - offset_x
-            transform._bounding[1] = y - offset_y
+            transform._actual_position.x = new_x + transform._position_offset[0]
+            transform._actual_position.y = new_y + transform._position_offset[1]
+            transform._bounding[0] = new_x
+            transform._bounding[1] = new_y
             transform._bounding[2] = width
             transform._bounding[3] = height
 
@@ -118,13 +116,8 @@ def update() -> "TransformUpdatesData":
             transform.on_update.fire(TransformUpdateType.ROTATION)
 
         transform.clear_flags()
-        update_data[instance_id] = [
-            *transform._actual_position,
-            *transform._actual_size,
-            transform._rotation,
-        ]
 
-    return update_data
+    return updates
 
 
 def recalculate_normalized_coords():

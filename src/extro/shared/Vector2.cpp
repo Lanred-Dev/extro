@@ -18,9 +18,18 @@ NB_MODULE(Vector2, m)
                       { vector.y = newY; })
          .def("magnitude", &Vector2::magnitude)
          .def("dot", &Vector2::dot, "other"_a)
+         .def("cross", &Vector2::cross, "other"_a)
          .def("to_tuple", [](const Vector2 &vector)
               { return nanobind::make_tuple(vector.x, vector.y); })
          .def("copy", &Vector2::copy)
+         .def("__len__", [](const Vector2 &)
+              { return 2; })
+         .def("__getitem__", [](const Vector2 &vector, size_t index)
+              {
+            if (index == 0) return vector.x;
+            if (index == 1) return vector.y;
+            
+            throw nanobind::index_error(); })
          .def(nanobind::self + nanobind::self)
          .def(nanobind::self - nanobind::self)
          .def(nanobind::self * float())

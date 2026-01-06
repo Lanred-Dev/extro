@@ -43,7 +43,7 @@ You can install extro directly from the latest release on GitHub:
 pip install https://github.com/Lanred-Dev/extro/releases/download/<tag>/<file>.whl
 ```
 
-> Replace `<tag>` and `<file>` with the version and filename from the [latest release](https://github.com/Lanred-Dev/extro/releases).
+> Replace `<tag>` and `<file>` with the version and filename from the [release](https://github.com/Lanred-Dev/extro/releases) you want to use.
 
 For example:
 

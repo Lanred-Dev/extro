@@ -22,6 +22,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
 find_package(nanobind CONFIG REQUIRED)
 
+# This functions builds a cpp module and places it, along with its typing files, where it belongs.
 function(add_nanobind_module MODULE_NAME CPP_PATH)
     nanobind_add_module(${MODULE_NAME} STABLE_ABI ${CPP_PATH})
 

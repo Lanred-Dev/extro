@@ -2,10 +2,6 @@
 Public facing API for the extro game engine.
 """
 
-import pyray
-
-pyray.set_trace_log_level(pyray.TraceLogLevel.LOG_NONE)
-
 import extro.Console as Console
 import extro.Profiler as Profiler
 import extro.Window as Window

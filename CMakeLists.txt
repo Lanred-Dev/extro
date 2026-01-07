@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.15...3.27)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(extro LANGUAGES CXX)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(libs/glfw)
 
 if (CMAKE_VERSION VERSION_LESS 3.18)
   set(DEV_MODULE Development)
@@ -24,7 +31,7 @@ find_package(nanobind CONFIG REQUIRED)
 
 # This functions builds a cpp module and places it, along with its typing files, where it belongs.
 function(add_nanobind_module MODULE_NAME CPP_PATH)
-    nanobind_add_module(${MODULE_NAME} STABLE_ABI ${CPP_PATH})
+    nanobind_add_module(${MODULE_NAME} STABLE_ABI ${CPP_PATH} ${ARGN})
 
     get_filename_component(CPP_DIR_REL "${CPP_PATH}" DIRECTORY)
     
@@ -58,8 +65,17 @@ function(add_nanobind_module MODULE_NAME CPP_PATH)
         RUNTIME DESTINATION "extro/${PKG_REL_DIR}")
 endfunction()
 
-add_nanobind_module(Vector2 src/extro/shared/Vector2.cpp src/extro/shared/Vector2.hpp)
-add_nanobind_module(RGBAColor src/extro/shared/RGBAColor.cpp)
-add_nanobind_module(Angle src/extro/shared/Angle.cpp src/extro/shared/Angle.hpp)
-add_nanobind_module(CollisionSolver src/extro/internal/systems/Collision/CollisionSolver.cpp src/extro/shared/Vector2.hpp src/extro/shared/Angle.hpp)
-add_nanobind_module(PhysicsSolver src/extro/internal/systems/Physics/PhysicsSolver.cpp src/extro/shared/Vector2.hpp)
+add_nanobind_module(bindings 
+    src/extro/bindings.cpp
+    src/extro/internal/sokol_implementation.cpp
+    src/extro/Window.cpp
+    src/extro/shared/Vector2.cpp
+    src/extro/shared/Color.cpp
+    src/extro/shared/Angle.cpp
+)
+target_include_directories(bindings PUBLIC 
+    "${PROJECT_SOURCE_DIR}/libs/glfw/include"
+    "${PROJECT_SOURCE_DIR}/libs/sokol"
+    "${PROJECT_SOURCE_DIR}/src/extro"
+)
+target_link_libraries(bindings PRIVATE glfw sokol)

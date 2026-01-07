@@ -8,6 +8,8 @@
     "src/extro.egg-info": true
   },
   "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+  "cmake.copyCompileCommands": "${workspaceFolder}/build/compile_commands.json",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },

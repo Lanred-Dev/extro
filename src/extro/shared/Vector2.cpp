@@ -1,61 +1,60 @@
-#include <nanobind/nanobind.h>
-#include <nanobind/operators.h>
 #include <string>
+#include <nanobind/operators.h>
 #include "Vector2.hpp"
 
 using namespace nanobind::literals;
 
-NB_MODULE(Vector2, m)
+void createVector2Module(nanobind::module_ &m)
 {
      nanobind::class_<Vector2>(m, "Vector2")
-         .def(nanobind::init<>())
-         .def(nanobind::init<float, float>(), "x"_a, "y"_a)
-         .def_prop_rw("x", [](Vector2 &vector)
-                      { return vector.x; }, [](Vector2 &vector, float newX)
-                      { vector.x = newX; })
-         .def_prop_rw("y", [](Vector2 &vector)
-                      { return vector.y; }, [](Vector2 &vector, float newY)
-                      { vector.y = newY; })
-         .def("magnitude", &Vector2::magnitude)
-         .def("dot", &Vector2::dot, "other"_a)
-         .def("cross", &Vector2::cross, "other"_a)
-         .def("to_tuple", [](const Vector2 &vector)
-              { return nanobind::make_tuple(vector.x, vector.y); })
-         .def("copy", &Vector2::copy)
-         .def("__len__", [](const Vector2 &)
-              { return 2; })
-         .def("__getitem__", [](const Vector2 &vector, size_t index)
-              {
+        .def(nanobind::init<>())
+            .def(nanobind::init<float, float>(), "x"_a, "y"_a)
+            .def_prop_rw("x", [](Vector2 &vector)
+                         { return vector.x; }, [](Vector2 &vector, float newX)
+                         { vector.x = newX; })
+            .def_prop_rw("y", [](Vector2 &vector)
+                         { return vector.y; }, [](Vector2 &vector, float newY)
+                         { vector.y = newY; })
+            .def("magnitude", &Vector2::magnitude)
+            .def("dot", &Vector2::dot, "other"_a)
+            .def("cross", &Vector2::cross, "other"_a)
+            .def("to_tuple", [](const Vector2 &vector)
+                 { return nanobind::make_tuple(vector.x, vector.y); })
+            .def("copy", &Vector2::copy)
+            .def("__len__", [](const Vector2 &)
+                 { return 2; })
+            .def("__getitem__", [](const Vector2 &vector, size_t index)
+                 {
             if (index == 0) return vector.x;
             if (index == 1) return vector.y;
             
             throw nanobind::index_error(); })
-         .def(nanobind::self + nanobind::self)
-         .def(nanobind::self - nanobind::self)
-         .def(nanobind::self * float())
-         .def(nanobind::self * nanobind::self)
-         .def(nanobind::self / float())
-         .def(nanobind::self / nanobind::self)
-         .def(nanobind::self += nanobind::self)
-         .def(nanobind::self -= nanobind::self)
-         .def(nanobind::self *= float())
-         .def(nanobind::self /= float())
-         .def("__eq__", [](const Vector2 &self, nanobind::object other)
-              {
+            .def(nanobind::self + nanobind::self)
+            .def(nanobind::self - nanobind::self)
+            .def(nanobind::self * float())
+            .def(nanobind::self * nanobind::self)
+            .def(nanobind::self / float())
+            .def(nanobind::self / nanobind::self)
+            .def(nanobind::self += nanobind::self)
+            .def(nanobind::self -= nanobind::self)
+            .def(nanobind::self *= float())
+            .def(nanobind::self /= float())
+            .def("__eq__", [](const Vector2 &self, nanobind::object other)
+                 {
                 if (!nanobind::isinstance<Vector2>(other)) return false;
                 return self == nanobind::cast<Vector2>(other); })
-         .def("__ne__", [](const Vector2 &self, nanobind::object other)
-              {
+            .def("__ne__", [](const Vector2 &self, nanobind::object other)
+                 {
                 if (!nanobind::isinstance<Vector2>(other)) return true;
                 return self != nanobind::cast<Vector2>(other); })
-         .def(nanobind::self < nanobind::self)
-         .def(nanobind::self <= nanobind::self)
-         .def(nanobind::self > nanobind::self)
-         .def(nanobind::self >= nanobind::self)
-         .def("__neg__", [](const Vector2 &self)
-              { return -self; })
-         .def("__repr__", [](const Vector2 &vector)
-              { return nanobind::str(std::string("Vector2(x=" + std::to_string(vector.x) +
-                                                 " y=" + std::to_string(vector.y) + ")")
-                                         .c_str()); });
+            .def(nanobind::self < nanobind::self)
+            .def(nanobind::self <= nanobind::self)
+            .def(nanobind::self > nanobind::self)
+            .def(nanobind::self >= nanobind::self)
+            .def("__neg__", [](const Vector2 &self)
+                 { return -self; })
+            .def("__repr__", [](const Vector2 &vector)
+                 { return nanobind::str(std::string("Vector2(x=" + std::to_string(vector.x) +
+                                                    " y=" + std::to_string(vector.y) + ")")
+                                            .c_str()); });
 }

@@ -91,6 +91,7 @@ class RenderTarget(Instance):
         if hierarchy and instance._id not in self._instances.instances:
             hierarchy._render_target = None
 
+    # A RenderTarget is an Instance, but it cannot have components
     def add_component(self, component: Any):
         Console.log("`RenderTarget` cannot have components", Console.LogType.ERROR)
         return

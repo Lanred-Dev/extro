@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nanobind/nanobind.h>
 #include <cmath>
 
 const float DEGREES_TO_RAD = (atan(1.0f) * 4.0f) / 180.0f;
@@ -119,3 +120,5 @@ struct Angle
         return radians >= other.radians;
     }
 };
+
+void createAngleModule(nanobind::module_ &m);

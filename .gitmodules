@@ -1,6 +1,9 @@
-[submodule "extern/sokol"]
-	path = extern/sokol
-	url = https://github.com/floooh/sokol
-[submodule "extern/glfw"]
-	path = extern/glfw
-	url = https://github.com/glfw/glfw
+[submodule "vendor/sokol"]
+	path = vendor/sokol
+	url = https://github.com/floooh/sokol.git
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "vendor/sokol_gp"]
+	path = vendor/sokol_gp
+	url = https://github.com/edubart/sokol_gp.git

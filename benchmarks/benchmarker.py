@@ -1,3 +1,10 @@
+# This module is only supported on Windows based platforms.
+import sys
+
+if not sys.platform.startswith("win"):
+    raise ImportError("This module is only supported on Windows based platforms.")
+
+
 # The order of these imports DOES matter. Loading extro first can cause a big hang betwen the first and second frame.
 import time
 import matplotlib.pyplot as pyplot

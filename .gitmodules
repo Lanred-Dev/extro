@@ -6,4 +6,7 @@
 	url = https://github.com/glfw/glfw.git
 [submodule "vendor/sokol_gp"]
 	path = vendor/sokol_gp
-	url = https://github.com/Lanred-Dev/sokol_gp
+	url = https://github.com/Lanred-Dev/sokol_gp.git
+[submodule "vendor/nanobind"]
+	path = vendor/nanobind
+	url = https://github.com/wjakob/nanobind

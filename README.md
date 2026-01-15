@@ -24,7 +24,7 @@ Benchmarks can be found [here](./benchmarks/README.md).
 
 ### Requirements
 
-- Python 3.14.0 (or newer)
+- Python 3.13.0 (or newer)
 - CMake 3.15 (or newer) \*
 - C++23 (or newer) compiler \*
 

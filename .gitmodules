@@ -6,4 +6,4 @@
 	url = https://github.com/glfw/glfw.git
 [submodule "vendor/sokol_gp"]
 	path = vendor/sokol_gp
-	url = https://github.com/edubart/sokol_gp.git
+	url = https://github.com/Lanred-Dev/sokol_gp

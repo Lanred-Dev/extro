@@ -1,11 +1,14 @@
-#include <nanobind/nanobind.h>
 #include "Window.hpp"
-#include "sokol_gfx.h"
-#include "sokol_glue.h"
+#include "internal/systems/Render/Renderer.hpp"
 
 using namespace nanobind::literals;
 
-bool Window::initialize(Vector2 size, const char *title, bool vSync)
+GLFWwindow *window = nullptr;
+bool vSyncEnabled = false;
+Vector2 size = Vector2(800, 600);
+const char *title = "extro";
+
+bool Window::initialize(Vector2 newSize, const char *newTitle, bool newVSyncEnabled)
 {
     if (!glfwInit())
         return false;
@@ -16,31 +19,33 @@ bool Window::initialize(Vector2 size, const char *title, bool vSync)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    this->size = size;
-    this->title = title;
-    this->vSyncEnabled = vSync;
+    size = newSize;
+    title = newTitle;
     window = glfwCreateWindow((int)size.x, (int)size.y, title, nullptr, nullptr);
 
     if (!window)
     {
-        glfwTerminate();
+        Window::terminate();
+        return false;
+    }
+
+    bool rendererInitialized = Renderer::initialize();
+
+    if (!rendererInitialized)
+    {
+        Window::terminate();
         return false;
     }
 
     glfwMakeContextCurrent(window);
-    setVSync(vSync);
-
-    sg_setup(sg_desc{
-        .environment = sglue_environment(),
-    });
+    setVSync(vSyncEnabled);
 
     return true;
 }
 
 void Window::terminate()
 {
-    if (sg_isvalid())
-        sg_shutdown();
+    Renderer::terminate();
 
     if (window)
     {
@@ -73,27 +78,63 @@ void Window::setVSync(bool enabled)
         glfwSwapInterval(0);
 }
 
-bool Window::render()
+nanobind::tuple Window::render()
 {
     bool shouldClose = glfwWindowShouldClose(window);
 
     // If the window should close dont worry about rendering and return early telling the engine to close
     if (shouldClose)
-        return true;
-    
+        return nanobind::make_tuple(true, 0.0);
+
+    double delta = Renderer::render();
+
     glfwSwapBuffers(window);
     glfwPollEvents();
 
-    return false;
+    return nanobind::make_tuple(false, delta);
+}
+
+Vector2 *Window::getSize()
+{
+    return &size;
+}
+
+const char *Window::getTitle()
+{
+    return title;
+}
+
+bool Window::isVSyncEnabled()
+{
+    return vSyncEnabled;
 }
 
 void createWindowModule(nanobind::module_ &m)
 {
-    nanobind::class_<Window>(m, "Window")
-        .def(nanobind::init<>())
-        .def("initialize", &Window::initialize, "width"_a, "height"_a, "title"_a)
+    nanobind::module_ mWindow = m.def_submodule("Window");
+    mWindow.doc() = R"(
+    Core window bindings for extro.
+
+    This module provides functions to initialize and manage the application window,
+    including setting the title, size, and VSync options. It uses GLFW under the hood for window management.
+
+    Methods:
+        - initialize(size: Vector2, title: str, vSyncEnabled: bool) -> bool
+            Initializes the window with the specified size, title, and VSync option.
+            Returns True if initialization was successful, False otherwise.
+        - terminate() -> None
+            Terminates the window and cleans up resources.
+        - set_title(title: str) -> None
+            Sets the window title to the specified string.
+        - set_size(size: Vector2) -> None
+            Sets the window size to the specified Vector2 dimensions.
+        - render() -> tuple[bool, double]
+            Renders the current frame. Returns True if the window should close, False otherwise.
+    )";
+    mWindow
+        .def("initialize", &Window::initialize, "size"_a, "title"_a, "vSyncEnabled"_a)
         .def("terminate", &Window::terminate)
         .def("set_title", &Window::setTitle, "title"_a)
-        .def("set_size", &Window::setSize, "width"_a, "height"_a)
+        .def("set_size", &Window::setSize, "size"_a)
         .def("render", &Window::render);
 }

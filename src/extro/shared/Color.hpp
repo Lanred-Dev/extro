@@ -1,7 +1,6 @@
 #pragma once
 
-#include <nanobind/nanobind.h>
-#include <string>
+#include "nanobind/nanobind.h"
 
 struct Color
 {

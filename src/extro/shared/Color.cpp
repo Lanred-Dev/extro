@@ -5,7 +5,21 @@ using namespace nanobind::literals;
 
 void createColorModule(nanobind::module_ &m)
 {
-    nanobind::class_<Color>(m, "Color")
+    nanobind::class_ cColor = nanobind::class_<Color>(m, "Color");
+    cColor.doc() = R"(
+    Class representing a color with red, green, blue, and alpha components.
+
+    Attributes:
+         - r (int):
+            Red component (0-255).
+         - g (int):
+            Green component (0-255).
+         - b (int):
+            Blue component (0-255).
+         - a (int):
+            Alpha component (0-255), defaults to 255 (opaque).
+    )";
+    cColor
         .def(nanobind::init<>())
         .def(nanobind::init<uint8_t, uint8_t, uint8_t, uint8_t>(), "r"_a, "g"_a, "b"_a, "a"_a = 255)
         .def_prop_rw("r", [](Color &color)

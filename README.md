@@ -1,3 +1,7 @@
+# IMPORTANT
+
+extro is currently being rewritten entirely in cpp and soon will no longer support python (at least for the time being). While this is being done no activity may be viewable from this repo but work is being done!
+
 # extro
 
 A opinionated 2D game engine for Python.

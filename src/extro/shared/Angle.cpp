@@ -1,9 +1,11 @@
+#include <nanobind/nanobind.h>
+#include <nanobind/operators.h>
 #include <string>
 #include "Angle.hpp"
 
 using namespace nanobind::literals;
 
-void createAngleModule(nanobind::module_ &m)
+NB_MODULE(Angle, m)
 {
     m.def("from_degrees", [](float degrees)
           {

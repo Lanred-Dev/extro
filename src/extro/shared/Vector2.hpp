@@ -1,6 +1,5 @@
 #pragma once
 
-#include <nanobind/nanobind.h>
 #include <cmath>
 
 struct Vector2
@@ -123,5 +122,3 @@ struct Vector2
         return magnitude() >= other.magnitude();
     }
 };
-
-void createVector2Module(nanobind::module_ &m);

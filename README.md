@@ -112,9 +112,6 @@ pip install nanobind
 2. Then build:
 
 ```bash
-sh build.sh
-
-# or to build manually:
 cmake -S . -B build
 cmake --build build --config Release
 ```

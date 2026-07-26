@@ -1,6 +1,6 @@
 # Benchmarking
 
-> Note: The benchmark is ONLY compatible with windows platforms.
+> Note: The provided `benchmarker.py` module is ONLY compatible with Windows based platforms.
 
 These benchmarks are designed to stress-test the engine and measure its performance across various scenarios. Each benchmark targets a specific subsystem of the engine. The results of each benchmark can found in the corresponding benchmark folder.
 
@@ -41,7 +41,7 @@ import benchmarks.benchmarker as benchmarker
 2. Start tracking by calling `benchmarker.start_tracking()` with the desired output path and benchmark duration:
 
 ```python
-benchmarker.start_tracking("./path/to/benchmark", 15)  # duration in seconds
+benchmarker.start_tracking("./path/to/benchmark", duration)  # duration in seconds
 ```
 
 3. Import and run your project as usual. The benchmarker will automatically stop after the specified duration, generate a report, and exit the engine:

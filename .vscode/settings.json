@@ -14,6 +14,7 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
+  "python.analysis.typeCheckingMode": "strict",
   "cmake.configureSettings": {
     "Python_EXECUTABLE": "${workspaceFolder}/.venv/Scripts/python.exe"
   },

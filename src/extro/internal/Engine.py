@@ -3,6 +3,8 @@ import pyray
 import time
 from typing import Callable, Any, TYPE_CHECKING
 
+pyray.set_trace_log_level(pyray.TraceLogLevel.LOG_NONE)
+
 import extro.internal.systems.Render as RenderSystem
 import extro.internal.systems.Input as InputSystem
 import extro.internal.systems.Transform as TransformSystem

@@ -2,10 +2,10 @@
 Public facing API for the extro game engine.
 """
 
+import extro.internal.Engine as Engine
 import extro.Console as Console
 import extro.Profiler as Profiler
 import extro.Window as Window
-import extro.internal.Engine as Engine
 import extro.assets.__assets__ as Assets
 from extro.shared.__shared__ import Vector2, RGBAColor, types, Coord
 import extro.utils.__utils__ as Utils
